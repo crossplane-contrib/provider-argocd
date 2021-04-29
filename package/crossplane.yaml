@@ -1,0 +1,31 @@
+apiVersion: meta.pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-argocd
+  annotations:
+    company: Crossplane
+    maintainer: Crossplane Maintainers <info@crossplane.io>
+    source: github.com/crossplane-contrib/provider-argocd
+    license: Apache-2.0
+    descriptionShort: |
+      The argocd Crossplane provider enables resources management for argocd.
+
+    description: |
+      The argocd Crossplane provider adds support for
+      managing argocd resources in Kubernetes.
+
+    readme: |
+      `provider-argocd` is the Crossplane infrastructure provider for
+      [argocd](https://argocd.com/).
+
+      Available resources and their fields can be found in the [CRD
+      Docs](https://doc.crds.dev/github.com/crossplane-contrib/provider-argocd).
+
+      If you encounter an issue please reach out on
+      [slack.crossplane.io](https://slack.crossplane.io) and create an issue in
+      the [crossplane-contrib/provider-argocd](https://github.com/crossplane-contrib/provider-argocd)
+      repo.
+
+spec:
+  controller:
+    image: crossplane/provider-argocd-controller:VERSION
