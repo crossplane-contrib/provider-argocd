@@ -1,0 +1,16 @@
+---
+apiVersion: repositories.argocd.crossplane.io/v1alpha1
+kind: Repository
+metadata:
+  name: example-project.git
+spec:
+  forProvider:
+    repo: https://gitlab.com/example-group/example-project.git
+    type: git
+    username: example-user
+    passwordRef:
+      name: example-project.git
+      namespace: crossplane-system
+      key: token
+  providerConfigRef:
+    name: argocd-provider

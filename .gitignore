@@ -1,0 +1,13 @@
+/.cache
+/.work
+/_output
+cover.out
+/vendor
+/.vendor-new
+
+# asdf loca go version
+.tool-versions
+
+# ignore IDE folders
+.vscode/
+.idea/
