@@ -16,20 +16,45 @@ following new functionality:
 
 ## Getting Started and Documentation
 
-### Optional: start a local argocd server
+Follow these steps to get started with `provider-argocd`.
+
+### Optional: Start a Local ArgoCD Server
+
+    kind create cluster
+
+    kubectl create ns argocd
+
+    kubectl apply -n argocd --force -f https://raw.githubusercontent.com/argoproj/argo-cd/release-2.0/manifests/install.yaml
+
+
+### Optional: Create a new user
+
+Follow the steps in the [officiial documentation](https://argoproj.github.io/argo-cd/operator-manual/user-management/) to create a new user `provider-argcod`.
+
+### Create an API Token
+
+*Note:* The following steps require the [kubectl-view-secret](https://github.com/elsesiy/kubectl-view-secret) plugin and [jq](https://stedolan.github.io/jq/) to be installed.
+
+Get the admin passwort via `kubectl`
 ```bash
-kind create cluster
-kubectl create ns argocd
-kubectl apply -n argocd --force -f https://raw.githubusercontent.com/argoproj/argo-cd/release-2.0/manifests/install.yaml
+ARGOCD_ADMIN_SECRET=$(kubectl view-secret argocd-initial-admin-secret -n argocd -q)
 ```
-Install the [kubectl-view-secret](https://github.com/elsesiy/kubectl-view-secret) plugin and [jq](https://stedolan.github.io/jq/) and create a token with the admin password:
+
+Port forward the argocd api to the host:
 ```bash
-# grab the initial admin password
-ARGOCD_SECRET=$(kubectl view-secret argocd-initial-admin-secret -n argocd -q)
-# port forward the argocd api to the host:
 kubectl -n argocd port-forward svc/argocd-server 8443:443
-# create a JWT for the admin user at the argocd api
-ARGOCD_TOKEN=$(curl -s -X POST -k -H "Content-Type: application/json" --data '{"username":"admin","password":"'$ARGOCD_SECRET'"}' https://localhost:8443/api/v1/session | jq -r .token)
+```
+
+Create a session JWT for the admin user at the ArgoCD API. *Note:* You cannot use this token directly, because it will expire.
+```bash
+ARGOCD_ADMIN_TOKEN=$(curl -s -X POST -k -H "Content-Type: application/json" --data '{"username":"admin","password":"'$ARGOCD_ADMIN_SECRET'"}' https://localhost:8443/api/v1/session | jq -r .token)
+```
+
+Create an API token without expiration that can be used by `provider-argocd`
+```bash
+ARGOCD_PROVIDER_USER="provider-argocd"
+
+ARGOCD_TOKEN=$(curl -s -X POST -k -H "Authorization: Bearer $ARGOCD_ADMIN_TOKEN" -H "Content-Type: application/json" https://localhost:8443/api/v1/account/$ARGOCD_PROVIDER_USER/token | jq -r .token)
 ```
 
 ### Setup crossplane provider-argocd
