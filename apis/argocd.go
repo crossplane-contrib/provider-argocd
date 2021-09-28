@@ -20,6 +20,7 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
+	projectsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1"
 	repositoriesv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
 	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/v1alpha1"
 )
@@ -29,6 +30,7 @@ func init() {
 	AddToSchemes = append(AddToSchemes,
 		v1alpha1.SchemeBuilder.AddToScheme,
 		repositoriesv1alpha1.SchemeBuilder.AddToScheme,
+		projectsv1alpha1.SchemeBuilder.AddToScheme,
 	)
 }
 

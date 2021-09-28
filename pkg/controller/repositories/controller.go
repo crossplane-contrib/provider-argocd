@@ -138,7 +138,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}, nil
 }
 
-func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
+func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) { // nolint:gocyclo
 	cr, ok := mg.(*v1alpha1.Repository)
 	if !ok {
 		return managed.ExternalCreation{}, errors.New(errNotRepository)
@@ -194,7 +194,7 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	}, errors.Wrap(nil, errKubeUpdateFailed)
 }
 
-func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
+func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) { // nolint:gocyclo
 	cr, ok := mg.(*v1alpha1.Repository)
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotRepository)
@@ -301,7 +301,7 @@ func generateRepositoryObservation(r *argocdv1alpha1.Repository) v1alpha1.Reposi
 	return o
 }
 
-func generateCreateRepositoryOptions(p *v1alpha1.RepositoryParameters) *repository.RepoCreateRequest {
+func generateCreateRepositoryOptions(p *v1alpha1.RepositoryParameters) *repository.RepoCreateRequest { // nolint:gocyclo
 	repo := &argocdv1alpha1.Repository{
 		Repo: p.Repo,
 	}
@@ -379,7 +379,7 @@ func generateUpdateRepositoryOptions(p *v1alpha1.RepositoryParameters) *reposito
 	return o
 }
 
-func isRepositoryUpToDate(p *v1alpha1.RepositoryParameters, r *argocdv1alpha1.Repository) bool {
+func isRepositoryUpToDate(p *v1alpha1.RepositoryParameters, r *argocdv1alpha1.Repository) bool { // nolint:gocyclo
 
 	if !cmp.Equal(p.Username, clients.StringToPtr(r.Username)) {
 		return false

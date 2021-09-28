@@ -1,0 +1,9 @@
+---
+apiVersion: projects.argocd.crossplane.io/v1alpha1
+kind: Project
+metadata:
+  name: example-project
+spec:
+  forProvider: {}
+  providerConfigRef:
+    name: argocd-provider
