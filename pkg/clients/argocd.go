@@ -114,6 +114,30 @@ func StringToPtr(s string) *string {
 	return &s
 }
 
+// StringValue converts a *string to string
+func StringValue(ptr *string) string {
+	if ptr != nil {
+		return *ptr
+	}
+	return ""
+}
+
+// Int64Value converts a *int64 to int64
+func Int64Value(ptr *int64) int64 {
+	if ptr != nil {
+		return *ptr
+	}
+	return 0
+}
+
+// BoolValue converts a *bool to bool
+func BoolValue(ptr *bool) bool {
+	if ptr != nil {
+		return *ptr
+	}
+	return false
+}
+
 // IsBoolEqualToBoolPtr compares a *bool with bool
 func IsBoolEqualToBoolPtr(bp *bool, b bool) bool {
 	if bp != nil {

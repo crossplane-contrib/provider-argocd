@@ -7,6 +7,7 @@ metadata:
 spec:
   serverAddr: argocd-server.argocd.svc:443
   insecure: true
+  plainText: false
   credentials:
     source: Secret
     secretRef:
