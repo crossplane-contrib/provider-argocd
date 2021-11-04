@@ -213,15 +213,18 @@ jobs:
           key: ${{ runner.os }}-pkg-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-pkg-
+
       - name: Vendor Dependencies
         run: make vendor vendor.check
 
       - name: Build Helm Chart
+        timeout-minutes: 10
         run: make -j2 build
         env:
           # We're using docker buildx, which doesn't actually load the images it
           # builds by default. Specifying --load does so.
           BUILD_ARGS: "--load"
+          RUNNING_IN_CI: true
 
       - name: Run E2E Tests
         run: make e2e USE_HELM3=true
@@ -279,10 +282,12 @@ jobs:
 
       - name: Build Artifacts
         run: make -j2 build.all
+        timeout-minutes: 10
         env:
           # We're using docker buildx, which doesn't actually load the images it
           # builds by default. Specifying --load does so.
           BUILD_ARGS: "--load"
+          RUNNING_IN_CI: true
 
       - name: Publish Artifacts to GitHub
         uses: actions/upload-artifact@v2
