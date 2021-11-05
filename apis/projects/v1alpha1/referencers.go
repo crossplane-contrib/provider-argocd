@@ -24,6 +24,7 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/reference"
 
+	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
 	repositoriesv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
 )
 
@@ -45,5 +46,27 @@ func (mg *Project) ResolveReferences(ctx context.Context, c client.Reader) error
 	mg.Spec.ForProvider.SourceRepos = rsp.ResolvedValues
 	mg.Spec.ForProvider.SourceReposRefs = rsp.ResolvedReferences
 
+	for i := range mg.Spec.ForProvider.Destinations {
+		rsp, err := r.Resolve(ctx, reference.ResolutionRequest{
+			CurrentValue: ptrToString(mg.Spec.ForProvider.Destinations[i].Server),
+			Reference:    mg.Spec.ForProvider.Destinations[i].ServerRef,
+			Selector:     mg.Spec.ForProvider.Destinations[i].ServerSelector,
+			To:           reference.To{Managed: &clusterv1alpha1.Cluster{}, List: &clusterv1alpha1.ClusterList{}},
+			Extract:      reference.ExternalName(),
+		})
+		if err != nil {
+			return errors.Wrap(err, "spec.forProvider.Destinations")
+		}
+		mg.Spec.ForProvider.Destinations[i].Server = &rsp.ResolvedValue
+		mg.Spec.ForProvider.Destinations[i].ServerRef = rsp.ResolvedReference
+	}
+
 	return nil
+}
+
+func ptrToString(s *string) string {
+	if s != nil {
+		return *s
+	}
+	return ""
 }

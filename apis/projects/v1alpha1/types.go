@@ -73,8 +73,17 @@ type ProjectParameters struct {
 // ApplicationDestination holds information about the application's destination
 type ApplicationDestination struct {
 	// Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.Cluster
+	// +crossplane:generate:reference:refFieldName=ServerRef
+	// +crossplane:generate:reference:selectorFieldName=ServerSelector
 	// +optional
 	Server *string `json:"server,omitempty"`
+	// ServerRef is a reference to an Cluster used to set Server
+	// +optional
+	ServerRef *xpv1.Reference `json:"serverRef,omitempty"`
+	// SourceReposSelector selects references to Repositories used to set SourceRepos
+	// +optional
+	ServerSelector *xpv1.Selector `json:"serverSelector,omitempty"`
 	// Namespace specifies the target namespace for the application's resources.
 	// The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
 	// +optional
