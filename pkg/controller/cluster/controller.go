@@ -1,0 +1,454 @@
+/*
+Copyright 2021 The Crossplane Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package cluster
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
+	argocdcluster "github.com/argoproj/argo-cd/v2/pkg/apiclient/cluster"
+	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	"github.com/google/go-cmp/cmp"
+	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/pkg/event"
+	"github.com/crossplane/crossplane-runtime/pkg/logging"
+	"github.com/crossplane/crossplane-runtime/pkg/meta"
+	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
+	"github.com/crossplane/crossplane-runtime/pkg/resource"
+
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
+)
+
+const (
+	errNotCluster      = "managed resource is not a Argocd Cluster custom resource"
+	errGetFailed       = "cannot get Argocd Cluster"
+	errCreateFailed    = "cannot create Argocd Cluster"
+	errUpdateFailed    = "cannot update Argocd Cluster"
+	errDeleteFailed    = "cannot delete Argocd Cluster"
+	errGetSecretFailed = "cannot get Kubernetes secret"
+	errFmtKeyNotFound  = "key %s is not found in referenced Kubernetes secret"
+)
+
+// SetupCluster adds a controller that reconciles cluster.
+func SetupCluster(mgr ctrl.Manager, l logging.Logger) error {
+	name := managed.ControllerName(v1alpha1.ClusterKind)
+
+	return ctrl.NewControllerManagedBy(mgr).
+		Named(name).
+		For(&v1alpha1.Cluster{}).
+		Complete(managed.NewReconciler(mgr,
+			resource.ManagedKind(v1alpha1.ClusterGroupVersionKind),
+			managed.WithExternalConnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: cluster.NewClusterServiceClient}),
+			managed.WithInitializers(managed.NewDefaultProviderConfig(mgr.GetClient())),
+			managed.WithLogger(l.WithValues("controller", name)),
+			managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))
+}
+
+type connector struct {
+	kube              client.Client
+	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) argocdcluster.ClusterServiceClient
+}
+
+func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
+	cr, ok := mg.(*v1alpha1.Cluster)
+	if !ok {
+		return nil, errors.New(errNotCluster)
+	}
+	cfg, err := clients.GetConfig(ctx, c.kube, cr)
+	if err != nil {
+		return nil, err
+	}
+	return &external{kube: c.kube, client: c.newArgocdClientFn(cfg)}, nil
+}
+
+type external struct {
+	kube   client.Client
+	client cluster.ServiceClient
+}
+
+func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+	cr, ok := mg.(*v1alpha1.Cluster)
+	if !ok {
+		return managed.ExternalObservation{}, errors.New(errNotCluster)
+	}
+
+	if meta.GetExternalName(cr) == "" {
+		return managed.ExternalObservation{
+			ResourceExists: false,
+		}, nil
+	}
+
+	clusterQuery := argocdcluster.ClusterQuery{
+		Name:   meta.GetExternalName(cr),
+		Server: cr.Spec.ForProvider.Server,
+	}
+
+	observedCluster, err := e.client.Get(ctx, &clusterQuery)
+	if cluster.IsErrorClusterNotFound(err) ||
+		(meta.WasDeleted(mg) && meta.GetExternalName(cr) != observedCluster.Name) {
+		// ArgoCD Cluster resource ignores the name field. This detects the deletion of the default cluster resource.
+		return managed.ExternalObservation{}, nil
+	}
+	if err != nil {
+		return managed.ExternalObservation{}, errors.Wrap(err, errGetFailed)
+	}
+
+	current := cr.Spec.ForProvider.DeepCopy()
+	lateInitializeCluster(&cr.Spec.ForProvider, observedCluster)
+
+	cr.Status.AtProvider = generateClusterObservation(observedCluster)
+	cr.Status.SetConditions(xpv1.Available())
+
+	return managed.ExternalObservation{
+		ResourceExists:          true,
+		ResourceUpToDate:        isClusterUpToDate(&cr.Spec.ForProvider, observedCluster),
+		ResourceLateInitialized: !cmp.Equal(current, &cr.Spec.ForProvider),
+	}, nil
+}
+
+func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
+	cr, ok := mg.(*v1alpha1.Cluster)
+	if !ok {
+		return managed.ExternalCreation{}, errors.New(errNotCluster)
+	}
+
+	clusterCreateRequest, err := e.generateCreateClusterOptions(ctx, cr)
+	if err != nil {
+		return managed.ExternalCreation{}, err
+	}
+
+	resp, err := e.client.Create(ctx, clusterCreateRequest)
+	if err != nil {
+		return managed.ExternalCreation{}, errors.Wrap(err, errCreateFailed)
+	}
+
+	meta.SetExternalName(cr, resp.Name)
+
+	return managed.ExternalCreation{
+		ExternalNameAssigned: true,
+	}, nil
+}
+
+func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
+	cr, ok := mg.(*v1alpha1.Cluster)
+	if !ok {
+		return managed.ExternalUpdate{}, errors.New(errNotCluster)
+	}
+
+	clusterUpdateRequest, err := e.generateUpdateClusterOptions(ctx, cr)
+	if err != nil {
+		return managed.ExternalUpdate{}, err
+	}
+
+	_, err = e.client.Update(ctx, clusterUpdateRequest)
+
+	return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateFailed)
+}
+
+func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
+	cr, ok := mg.(*v1alpha1.Cluster)
+	if !ok {
+		return errors.New(errNotCluster)
+	}
+	clusterQuery := argocdcluster.ClusterQuery{
+		Server: cr.Spec.ForProvider.Server,
+		Name:   meta.GetExternalName(cr),
+	}
+
+	_, err := e.client.Delete(ctx, &clusterQuery)
+
+	return errors.Wrap(err, errDeleteFailed)
+}
+
+func lateInitializeCluster(p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) { // nolint:gocyclo // checking all parameters can't be reduced
+	if r == nil {
+		return
+	}
+
+	if p.Namespaces == nil {
+		p.Namespaces = r.Namespaces
+	}
+
+	if p.Shard == nil {
+		p.Shard = r.Shard
+	}
+}
+
+func generateClusterObservation(r *argocdv1alpha1.Cluster) v1alpha1.ClusterObservation {
+	if r == nil {
+		return v1alpha1.ClusterObservation{}
+	}
+
+	o := v1alpha1.ClusterObservation{
+		ClusterInfo: v1alpha1.ClusterInfo{
+			ConnectionState: (*v1alpha1.ConnectionState)(&r.Info.ConnectionState),
+			ServerVersion:   &r.Info.ServerVersion,
+			CacheInfo: &v1alpha1.ClusterCacheInfo{
+				ResourcesCount:    &r.Info.CacheInfo.ResourcesCount,
+				APIsCount:         &r.Info.CacheInfo.APIsCount,
+				LastCacheSyncTime: r.Info.CacheInfo.LastCacheSyncTime,
+			},
+			ApplicationsCount: r.Info.ApplicationsCount,
+		},
+	}
+
+	return o
+}
+
+func (e *external) generateCreateClusterOptions(ctx context.Context, p *v1alpha1.Cluster) (*argocdcluster.ClusterCreateRequest, error) {
+	argoCluster, err := e.convertClusterTypes(ctx, &p.Spec.ForProvider)
+
+	clusterCreateRequest := &argocdcluster.ClusterCreateRequest{
+		Cluster: &argoCluster,
+		Upsert:  false,
+	}
+
+	return clusterCreateRequest, err
+}
+
+func (e *external) convertClusterTypes(ctx context.Context, p *v1alpha1.ClusterParameters) (argocdv1alpha1.Cluster, error) { // nolint:gocyclo // checking all parameters can't be reduced
+	argoCluster := argocdv1alpha1.Cluster{
+		Server: p.Server,
+		Name:   p.Name,
+		Config: argocdv1alpha1.ClusterConfig{
+			TLSClientConfig: argocdv1alpha1.TLSClientConfig{
+				Insecure: p.Config.TLSClientConfig.Insecure,
+			},
+		},
+	}
+
+	if p.Config.Username != nil {
+		argoCluster.Config.Username = *p.Config.Username
+	}
+
+	if p.Config.TLSClientConfig.ServerName != nil {
+		argoCluster.Config.TLSClientConfig.ServerName = *p.Config.TLSClientConfig.ServerName
+	}
+
+	if p.Config.AWSAuthConfig != nil {
+		argoCluster.Config.AWSAuthConfig = &argocdv1alpha1.AWSAuthConfig{}
+
+		if p.Config.AWSAuthConfig.ClusterName != nil {
+			argoCluster.Config.AWSAuthConfig.ClusterName = *p.Config.AWSAuthConfig.ClusterName
+		}
+
+		if p.Config.AWSAuthConfig.RoleARN != nil {
+			argoCluster.Config.AWSAuthConfig.RoleARN = *p.Config.AWSAuthConfig.RoleARN
+		}
+	}
+
+	if p.Config.ExecProviderConfig != nil {
+		argoCluster.Config.ExecProviderConfig = &argocdv1alpha1.ExecProviderConfig{}
+
+		if p.Config.ExecProviderConfig.Command != nil {
+			argoCluster.Config.ExecProviderConfig.Command = *p.Config.ExecProviderConfig.Command
+		}
+
+		if p.Config.ExecProviderConfig.Args != nil {
+			argoCluster.Config.ExecProviderConfig.Args = p.Config.ExecProviderConfig.Args
+		}
+
+		if p.Config.ExecProviderConfig.Env != nil {
+			argoCluster.Config.ExecProviderConfig.Env = p.Config.ExecProviderConfig.Env
+		}
+
+		if p.Config.ExecProviderConfig.APIVersion != nil {
+			argoCluster.Config.ExecProviderConfig.APIVersion = *p.Config.ExecProviderConfig.APIVersion
+		}
+
+		if p.Config.ExecProviderConfig.InstallHint != nil {
+			argoCluster.Config.ExecProviderConfig.InstallHint = *p.Config.ExecProviderConfig.InstallHint
+		}
+	}
+
+	if p.Namespaces != nil {
+		argoCluster.Namespaces = p.Namespaces
+	}
+
+	if p.Shard != nil {
+		argoCluster.Shard = p.Shard
+	}
+
+	err := e.resolveReferences(ctx, p, &argoCluster)
+
+	return argoCluster, err
+}
+
+func (e *external) generateUpdateClusterOptions(ctx context.Context, p *v1alpha1.Cluster) (*argocdcluster.ClusterUpdateRequest, error) {
+	clusterSpec, err := e.convertClusterTypes(ctx, &p.Spec.ForProvider)
+
+	o := &argocdcluster.ClusterUpdateRequest{
+		Cluster: &clusterSpec,
+	}
+	return o, err
+}
+
+func isClusterUpToDate(p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) bool { // nolint:gocyclo // checking all parameters can't be reduced
+	switch {
+	case !isEqualConfig(&p.Config, &r.Config),
+		!cmp.Equal(p.Namespaces, r.Namespaces),
+		!cmp.Equal(p.Shard, r.Shard):
+		return false
+	}
+	return true
+}
+
+func isEqualConfig(p *v1alpha1.ClusterConfig, r *argocdv1alpha1.ClusterConfig) bool {
+	if p == nil && r == nil {
+		return true
+	}
+
+	if p == nil || r == nil {
+		return false
+	}
+	switch {
+	case p.Username != nil && *p.Username != r.Username,
+		!isEqualTLSConfig(&p.TLSClientConfig, &r.TLSClientConfig),
+		!isEqualAWSAuthConfig(p.AWSAuthConfig, r.AWSAuthConfig),
+		!isEqualExecProviderConfig(p.ExecProviderConfig, r.ExecProviderConfig):
+		return false
+	}
+	return true
+}
+
+func isEqualTLSConfig(p *v1alpha1.TLSClientConfig, r *argocdv1alpha1.TLSClientConfig) bool {
+	if p == nil && r == nil {
+		return true
+	}
+
+	if p == nil || r == nil {
+		return false
+	}
+	switch {
+	case p.Insecure != r.Insecure,
+		p.ServerName != nil && *p.ServerName != r.ServerName:
+		return false
+	}
+	return true
+}
+
+func isEqualAWSAuthConfig(p *v1alpha1.AWSAuthConfig, r *argocdv1alpha1.AWSAuthConfig) bool {
+	if p == nil && r == nil {
+		return true
+	}
+
+	if p == nil || r == nil {
+		return false
+	}
+	switch {
+	case p.ClusterName != nil && *p.ClusterName != r.ClusterName,
+		p.RoleARN != nil && *p.RoleARN != r.RoleARN:
+		return false
+	}
+	return true
+}
+
+func isEqualExecProviderConfig(p *v1alpha1.ExecProviderConfig, r *argocdv1alpha1.ExecProviderConfig) bool {
+	if p == nil && r == nil {
+		return true
+	}
+
+	if p == nil || r == nil {
+		return false
+	}
+	switch {
+	case p.Command != nil && *p.Command != r.Command,
+		!cmp.Equal(p.Args, r.Args),
+		p.Env != nil && !cmp.Equal(p.Env, r.Env),
+		p.APIVersion != nil && *p.APIVersion != r.APIVersion,
+		p.InstallHint != nil && *p.InstallHint != r.InstallHint:
+		return false
+	}
+	return true
+}
+
+func (e *external) resolveReferences(ctx context.Context, cr *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) error { // nolint:gocyclo // checking all parameters can't be reduced
+	if cr.Config.PasswordSecretRef != nil {
+		payload, err := e.getPayload(ctx, cr.Config.PasswordSecretRef)
+		if err != nil {
+			return err
+		}
+		s := string(payload)
+		r.Config.Password = s
+	}
+
+	if cr.Config.BearerTokenSecretRef != nil {
+		payload, err := e.getPayload(ctx, cr.Config.BearerTokenSecretRef)
+		if err != nil {
+			return err
+		}
+		s := string(payload)
+		r.Config.BearerToken = s
+	}
+
+	if cr.Config.TLSClientConfig.CertDataSecretRef != nil {
+		payload, err := e.getPayload(ctx, cr.Config.TLSClientConfig.CertDataSecretRef)
+		if err != nil {
+			return err
+		}
+		r.Config.TLSClientConfig.CertData = payload
+	}
+
+	if cr.Config.TLSClientConfig.KeyDataSecretRef != nil {
+		payload, err := e.getPayload(ctx, cr.Config.TLSClientConfig.KeyDataSecretRef)
+		if err != nil {
+			return err
+		}
+		r.Config.TLSClientConfig.KeyData = payload
+	}
+
+	if cr.Config.TLSClientConfig.CADataSecretRef != nil {
+		payload, err := e.getPayload(ctx, cr.Config.TLSClientConfig.CADataSecretRef)
+		if err != nil {
+			return err
+		}
+		r.Config.TLSClientConfig.CAData = payload
+		cr.Config.TLSClientConfig.CAData = payload
+	}
+	return nil
+}
+
+// fetch kubernetes secret payload
+func (e *external) getPayload(ctx context.Context, ref *v1alpha1.SecretReference) ([]byte, error) {
+
+	nn := types.NamespacedName{
+		Name:      ref.Name,
+		Namespace: ref.Namespace,
+	}
+	sc := &corev1.Secret{}
+	if err := e.kube.Get(ctx, nn, sc); err != nil {
+		return nil, errors.Wrap(err, errGetSecretFailed)
+	}
+	if ref.Key != "" {
+		val, ok := sc.Data[ref.Key]
+		if !ok {
+			return nil, errors.New(fmt.Sprintf(errFmtKeyNotFound, ref.Key))
+		}
+		return val, nil
+	}
+
+	return nil, nil
+}

@@ -34,6 +34,16 @@ func (in *ApplicationDestination) DeepCopyInto(out *ApplicationDestination) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ServerRef != nil {
+		in, out := &in.ServerRef, &out.ServerRef
+		*out = new(v1.Reference)
+		**out = **in
+	}
+	if in.ServerSelector != nil {
+		in, out := &in.ServerSelector, &out.ServerSelector
+		*out = new(v1.Selector)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Namespace != nil {
 		in, out := &in.Namespace, &out.Namespace
 		*out = new(string)
