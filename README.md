@@ -29,7 +29,7 @@ Follow these steps to get started with `provider-argocd`.
 
 ### Optional: Create a new user
 
-Follow the steps in the [officiial documentation](https://argoproj.github.io/argo-cd/operator-manual/user-management/) to create a new user `provider-argcod`.
+Follow the steps in the [official documentation](https://argoproj.github.io/argo-cd/operator-manual/user-management/) to create a new user `provider-argcod`.
 
 ### Create an API Token
 
