@@ -25,11 +25,20 @@ Follow these steps to get started with `provider-argocd`.
     kubectl create ns argocd
 
     kubectl apply -n argocd --force -f https://raw.githubusercontent.com/argoproj/argo-cd/release-2.0/manifests/install.yaml
+    
+    helm upgrade --install crossplane crossplane-stable/crossplane --namespace crossplane-system --create-namespace --wait
 
 
 ### Optional: Create a new user
 
 Follow the steps in the [official documentation](https://argoproj.github.io/argo-cd/operator-manual/user-management/) to create a new user `provider-argcod`.
+
+> _**To test** you can create one user by patching your argocd-configmap and argocd-rbac definition file_
+> 
+> _**Be careful:** this command allows all users, to do everything. So never do this in production_
+
+    kubectl patch configmap/argocd-rbac-cm -n argocd --type merge -p '{"data":{"policy.default":"role:admin"}}'
+    kubectl patch configmap/argocd-cm -n argocd --type merge -p '{"data":{"accounts.provider-argocd":"apiKey, login"}}'
 
 ### Create an API Token
 
@@ -63,6 +72,10 @@ Create a kubernetes secret from the JWT so `provider-argocd` is able to connect 
 ```bash
 kubectl create secret generic argocd-credentials -n crossplane-system --from-literal=authToken="$ARGOCD_TOKEN"
 ```
+
+Install provider-argocd:
+
+`kubectl crossplane install provider crossplane/provider-argo:v0.1.0`
 
 Configure a `ProviderConfig` with `serverAddr` pointing to an argocd instance:
 ```yaml
