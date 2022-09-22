@@ -561,7 +561,7 @@ func isEqualSignatureKeys(p []v1alpha1.SignatureKey, r []argocdv1alpha1.Signatur
 }
 
 func isEqualSyncWindows(p v1alpha1.SyncWindows, r argocdv1alpha1.SyncWindows) bool { // nolint:gocyclo // checking all parameters can't be reduced
-	if (p == nil || len(p) == 0) && r == nil {
+	if len(p) == 0 && r == nil {
 		return true
 	}
 	if p == nil || r == nil || len(p) != len(r) {
