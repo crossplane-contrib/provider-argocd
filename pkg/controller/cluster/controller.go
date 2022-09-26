@@ -292,6 +292,18 @@ func (e *external) convertClusterTypes(ctx context.Context, p *v1alpha1.ClusterP
 		argoCluster.Shard = p.Shard
 	}
 
+	if p.Project != nil {
+		argoCluster.Project = *p.Project
+	}
+
+	if p.Labels != nil {
+		argoCluster.Labels = p.Labels
+	}
+
+	if p.Annotations != nil {
+		argoCluster.Annotations = p.Annotations
+	}
+
 	err := e.resolveReferences(ctx, p, &argoCluster)
 
 	return argoCluster, err
@@ -307,10 +319,15 @@ func (e *external) generateUpdateClusterOptions(ctx context.Context, p *v1alpha1
 }
 
 func isClusterUpToDate(p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) bool { // nolint:gocyclo // checking all parameters can't be reduced
+	if (p.Project != nil && !cmp.Equal(*p.Project, r.Project)) || (p.Project == nil && r.Project != "") {
+		return false
+	}
 	switch {
 	case !isEqualConfig(&p.Config, &r.Config),
 		!cmp.Equal(p.Namespaces, r.Namespaces),
-		!cmp.Equal(p.Shard, r.Shard):
+		!cmp.Equal(p.Shard, r.Shard),
+		!cmp.Equal(p.Labels, r.Labels),
+		!cmp.Equal(p.Annotations, r.Annotations):
 		return false
 	}
 	return true
