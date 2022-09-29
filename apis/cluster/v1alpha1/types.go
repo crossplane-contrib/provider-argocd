@@ -36,6 +36,15 @@ type ClusterParameters struct {
 	// Shard contains optional shard number. Calculated on the fly by the application controller if not specified.
 	// +optional
 	Shard *int64 `json:"shard,omitempty"`
+	// Reference between project and cluster that allow you automatically to be added as item inside Destinations project entity
+	// +optional
+	Project *string `json:"project,omitempty"`
+	// Labels for cluster secret metadata
+	// +optional
+	Labels map[string]string `json:"labels,omitempty"`
+	// Annotations for cluster secret metadata
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // ClusterConfig holds cluster information for connecting to a cluster

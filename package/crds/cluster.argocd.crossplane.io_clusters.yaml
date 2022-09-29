@@ -33,13 +33,18 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A Cluster is a managed resource that represents an ArgoCD Git Cluster
+        description: A Cluster is a managed resource that represents an ArgoCD Git
+          Cluster
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
             type: object
@@ -47,16 +52,26 @@ spec:
             description: A ClusterSpec defines the desired state of an ArgoCD Cluster.
             properties:
               deletionPolicy:
-                description: DeletionPolicy specifies what will happen to the underlying external when this managed resource is deleted - either "Delete" or "Orphan" the external resource. The "Delete" policy is the default when no policy is specified.
+                default: Delete
+                description: DeletionPolicy specifies what will happen to the underlying
+                  external when this managed resource is deleted - either "Delete"
+                  or "Orphan" the external resource.
                 enum:
                 - Orphan
                 - Delete
                 type: string
               forProvider:
-                description: ClusterParameters define the desired state of an ArgoCD Cluster
+                description: ClusterParameters define the desired state of an ArgoCD
+                  Cluster
                 properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: Annotations for cluster secret metadata
+                    type: object
                   config:
-                    description: Config holds cluster information for connecting to a cluster
+                    description: Config holds cluster information for connecting to
+                      a cluster
                     properties:
                       awsAuthConfig:
                         description: AWSAuthConfig contains IAM authentication configuration
@@ -65,11 +80,15 @@ spec:
                             description: ClusterName contains AWS cluster name
                             type: string
                           roleARN:
-                            description: RoleARN contains optional role ARN. If set then AWS IAM Authenticator assume a role to perform cluster operations instead of the default AWS credential provider chain.
+                            description: RoleARN contains optional role ARN. If set
+                              then AWS IAM Authenticator assume a role to perform
+                              cluster operations instead of the default AWS credential
+                              provider chain.
                             type: string
                         type: object
                       bearerTokenSecretRef:
-                        description: BearerTokenSecretRef contains a reference to a kubernetes secret containing the BearerToken
+                        description: BearerTokenSecretRef contains a reference to
+                          a kubernetes secret containing the BearerToken
                         properties:
                           key:
                             description: Key whose value will be used.
@@ -86,13 +105,15 @@ spec:
                         - namespace
                         type: object
                       execProviderConfig:
-                        description: ExecProviderConfig contains configuration for an exec provider
+                        description: ExecProviderConfig contains configuration for
+                          an exec provider
                         properties:
                           apiVersion:
                             description: Preferred input version of the ExecInfo
                             type: string
                           args:
-                            description: Arguments to pass to the command when executing it
+                            description: Arguments to pass to the command when executing
+                              it
                             items:
                               type: string
                             type: array
@@ -102,14 +123,17 @@ spec:
                           env:
                             additionalProperties:
                               type: string
-                            description: Env defines additional environment variables to expose to the process
+                            description: Env defines additional environment variables
+                              to expose to the process
                             type: object
                           installHint:
-                            description: This text is shown to the user when the executable doesn't seem to be present
+                            description: This text is shown to the user when the executable
+                              doesn't seem to be present
                             type: string
                         type: object
                       passwordSecretRef:
-                        description: PasswordSecretRef contains a reference to a kubernetes secret containing the Password
+                        description: PasswordSecretRef contains a reference to a kubernetes
+                          secret containing the Password
                         properties:
                           key:
                             description: Key whose value will be used.
@@ -126,14 +150,19 @@ spec:
                         - namespace
                         type: object
                       tlsClientConfig:
-                        description: TLSClientConfig contains settings to enable transport layer security
+                        description: TLSClientConfig contains settings to enable transport
+                          layer security
                         properties:
                           caData:
-                            description: CAData holds PEM-encoded bytes (typically read from a root certificates bundle). CAData takes precedence over CAFile
+                            description: CAData holds PEM-encoded bytes (typically
+                              read from a root certificates bundle). CAData takes
+                              precedence over CAFile
                             format: byte
                             type: string
                           caDataSecretRef:
-                            description: CADataSecretRef references a secret holding PEM-encoded bytes (typically read from a root certificates bundle).
+                            description: CADataSecretRef references a secret holding
+                              PEM-encoded bytes (typically read from a root certificates
+                              bundle).
                             properties:
                               key:
                                 description: Key whose value will be used.
@@ -150,7 +179,9 @@ spec:
                             - namespace
                             type: object
                           certDataSecretRef:
-                            description: CertDataSecretRef references a secret holding PEM-encoded bytes (typically read from a client certificate file).
+                            description: CertDataSecretRef references a secret holding
+                              PEM-encoded bytes (typically read from a client certificate
+                              file).
                             properties:
                               key:
                                 description: Key whose value will be used.
@@ -167,10 +198,14 @@ spec:
                             - namespace
                             type: object
                           insecure:
-                            description: Insecure specifies that the server should be accessed without verifying the TLS certificate. For testing only.
+                            description: Insecure specifies that the server should
+                              be accessed without verifying the TLS certificate. For
+                              testing only.
                             type: boolean
                           keyDataSecretRef:
-                            description: KeyDataSecretRef references a secret holding PEM-encoded bytes (typically read from a client certificate key file).
+                            description: KeyDataSecretRef references a secret holding
+                              PEM-encoded bytes (typically read from a client certificate
+                              key file).
                             properties:
                               key:
                                 description: Key whose value will be used.
@@ -187,7 +222,10 @@ spec:
                             - namespace
                             type: object
                           serverName:
-                            description: ServerName is passed to the server for SNI and is used in the client to check server certificates against. If ServerName is empty, the hostname used to contact the server is used.
+                            description: ServerName is passed to the server for SNI
+                              and is used in the client to check server certificates
+                              against. If ServerName is empty, the hostname used to
+                              contact the server is used.
                             type: string
                         required:
                         - insecure
@@ -198,19 +236,33 @@ spec:
                     required:
                     - tlsClientConfig
                     type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: Labels for cluster secret metadata
+                    type: object
                   name:
-                    description: Name of the cluster. If omitted, will use the server address
+                    description: Name of the cluster. If omitted, will use the server
+                      address
                     type: string
                   namespaces:
-                    description: Holds list of namespaces which are accessible in that cluster. Cluster level resources will be ignored if namespace list is not empty.
+                    description: Holds list of namespaces which are accessible in
+                      that cluster. Cluster level resources will be ignored if namespace
+                      list is not empty.
                     items:
                       type: string
                     type: array
+                  project:
+                    description: Reference between project and cluster that allow
+                      you automatically to be added as item inside Destinations project
+                      entity
+                    type: string
                   server:
                     description: Server is the API server URL of the Kubernetes cluster
                     type: string
                   shard:
-                    description: Shard contains optional shard number. Calculated on the fly by the application controller if not specified.
+                    description: Shard contains optional shard number. Calculated
+                      on the fly by the application controller if not specified.
                     format: int64
                     type: integer
                 required:
@@ -219,7 +271,11 @@ spec:
                 - server
                 type: object
               providerConfigRef:
-                description: ProviderConfigReference specifies how the provider that will be used to create, observe, update, and delete this managed resource should be configured.
+                default:
+                  name: default
+                description: ProviderConfigReference specifies how the provider that
+                  will be used to create, observe, update, and delete this managed
+                  resource should be configured.
                 properties:
                   name:
                     description: Name of the referenced object.
@@ -228,7 +284,9 @@ spec:
                 - name
                 type: object
               providerRef:
-                description: 'ProviderReference specifies the provider that will be used to create, observe, update, and delete this managed resource. Deprecated: Please use ProviderConfigReference, i.e. `providerConfigRef`'
+                description: 'ProviderReference specifies the provider that will be
+                  used to create, observe, update, and delete this managed resource.
+                  Deprecated: Please use ProviderConfigReference, i.e. `providerConfigRef`'
                 properties:
                   name:
                     description: Name of the referenced object.
@@ -237,7 +295,11 @@ spec:
                 - name
                 type: object
               writeConnectionSecretToRef:
-                description: WriteConnectionSecretToReference specifies the namespace and name of a Secret to which any connection details for this managed resource should be written. Connection details frequently include the endpoint, username, and password required to connect to the managed resource.
+                description: WriteConnectionSecretToReference specifies the namespace
+                  and name of a Secret to which any connection details for this managed
+                  resource should be written. Connection details frequently include
+                  the endpoint, username, and password required to connect to the
+                  managed resource.
                 properties:
                   name:
                     description: Name of the secret.
@@ -253,46 +315,57 @@ spec:
             - forProvider
             type: object
           status:
-            description: A ClusterStatus represents the observed state of an ArgoCD Cluster.
+            description: A ClusterStatus represents the observed state of an ArgoCD
+              Cluster.
             properties:
               atProvider:
                 description: ClusterObservation represents an argocd Cluster.
                 properties:
                   connectionState:
-                    description: ClusterInfo holds information about cluster cache and state
+                    description: ClusterInfo holds information about cluster cache
+                      and state
                     properties:
                       applicationsCount:
-                        description: ApplicationsCount is the number of applications managed by Argo CD on the cluster
+                        description: ApplicationsCount is the number of applications
+                          managed by Argo CD on the cluster
                         format: int64
                         type: integer
                       cacheInfo:
-                        description: CacheInfo contains information about the cluster cache
+                        description: CacheInfo contains information about the cluster
+                          cache
                         properties:
                           apisCount:
-                            description: APIsCount holds number of observed Kubernetes API count
+                            description: APIsCount holds number of observed Kubernetes
+                              API count
                             format: int64
                             type: integer
                           lastCacheSyncTime:
-                            description: LastCacheSyncTime holds time of most recent cache synchronization
+                            description: LastCacheSyncTime holds time of most recent
+                              cache synchronization
                             format: date-time
                             type: string
                           resourcesCount:
-                            description: ResourcesCount holds number of observed Kubernetes resources
+                            description: ResourcesCount holds number of observed Kubernetes
+                              resources
                             format: int64
                             type: integer
                         type: object
                       connectionState:
-                        description: ConnectionState contains information about the connection to the cluster
+                        description: ConnectionState contains information about the
+                          connection to the cluster
                         properties:
                           attemptedAt:
-                            description: ModifiedAt contains the timestamp when this connection status has been determined
+                            description: ModifiedAt contains the timestamp when this
+                              connection status has been determined
                             format: date-time
                             type: string
                           message:
-                            description: Message contains human readable information about the connection status
+                            description: Message contains human readable information
+                              about the connection status
                             type: string
                           status:
-                            description: Status contains the current status indicator for the connection
+                            description: Status contains the current status indicator
+                              for the connection
                             type: string
                         required:
                         - attemptedAt
@@ -300,7 +373,8 @@ spec:
                         - status
                         type: object
                       serverVersion:
-                        description: ServerVersion contains information about the Kubernetes version of the cluster
+                        description: ServerVersion contains information about the
+                          Kubernetes version of the cluster
                         type: string
                     required:
                     - applicationsCount
@@ -312,20 +386,25 @@ spec:
                   description: A Condition that may apply to a resource.
                   properties:
                     lastTransitionTime:
-                      description: LastTransitionTime is the last time this condition transitioned from one status to another.
+                      description: LastTransitionTime is the last time this condition
+                        transitioned from one status to another.
                       format: date-time
                       type: string
                     message:
-                      description: A Message containing details about this condition's last transition from one status to another, if any.
+                      description: A Message containing details about this condition's
+                        last transition from one status to another, if any.
                       type: string
                     reason:
-                      description: A Reason for this condition's last transition from one status to another.
+                      description: A Reason for this condition's last transition from
+                        one status to another.
                       type: string
                     status:
-                      description: Status of this condition; is it currently True, False, or Unknown?
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
                       type: string
                     type:
-                      description: Type of this condition. At most one of each condition type may apply to a resource at any point in time.
+                      description: Type of this condition. At most one of each condition
+                        type may apply to a resource at any point in time.
                       type: string
                   required:
                   - lastTransitionTime
