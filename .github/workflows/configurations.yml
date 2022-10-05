@@ -8,7 +8,7 @@ on:
   workflow_dispatch: {}
 
 env:
-  DOCKER_USR: ${{ secrets.UPBOUND_XP_ROBOT_USR }}
+  CONTRIB_DOCKER_USR: ${{ secrets.UPBOUND_XP_ROBOT_USR }}
 
 jobs:
   getting-started-with-aws:
@@ -26,7 +26,7 @@ jobs:
         id: tagger
       - name: Login to Docker
         uses: docker/login-action@v1
-        if: env.DOCKER_USR != ''
+        if: env.CONTRIB_DOCKER_USR != ''
         with:
           registry: registry.upbound.io
           username: ${{ secrets.UPBOUND_XP_ROBOT_USR }}
@@ -55,7 +55,7 @@ jobs:
         id: tagger
       - name: Login to Docker
         uses: docker/login-action@v1
-        if: env.DOCKER_USR != ''
+        if: env.CONTRIB_DOCKER_USR != ''
         with:
           registry: registry.upbound.io
           username: ${{ secrets.UPBOUND_XP_ROBOT_USR }}
@@ -84,7 +84,7 @@ jobs:
         id: tagger
       - name: Login to Docker
         uses: docker/login-action@v1
-        if: env.DOCKER_USR != ''
+        if: env.CONTRIB_DOCKER_USR != ''
         with:
           registry: registry.upbound.io
           username: ${{ secrets.UPBOUND_XP_ROBOT_USR }}
@@ -113,7 +113,7 @@ jobs:
         id: tagger
       - name: Login to Docker
         uses: docker/login-action@v1
-        if: env.DOCKER_USR != ''
+        if: env.CONTRIB_DOCKER_USR != ''
         with:
           registry: registry.upbound.io
           username: ${{ secrets.UPBOUND_XP_ROBOT_USR }}
