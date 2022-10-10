@@ -24,14 +24,14 @@ import (
 
 // A ProviderConfigSpec defines the desired state of a ProviderConfig.
 type ProviderConfigSpec struct {
-	// ServerAddr of the argocd instance
+	// ServerAddr is the hostname or IP of the argocd instance
 	ServerAddr string `json:"serverAddr"`
 
-	// PlainText specifies whether to use http vs https
+	// PlainText specifies whether to use http vs https. Default: false.
 	// +optional
 	PlainText *bool `json:"plainText,omitempty"`
 
-	// Insecure specifies whether to disable strict tls validation
+	// Insecure specifies whether to disable strict tls validation. Default: false.
 	// +optional
 	Insecure *bool `json:"insecure,omitempty"`
 
@@ -42,7 +42,7 @@ type ProviderConfigSpec struct {
 // ProviderCredentials required to authenticate.
 type ProviderCredentials struct {
 	// Source of the provider credentials.
-	// +kubebuilder:validation:Enum=None;Secret;Environment
+	// +kubebuilder:validation:Enum=None;Secret;Environment;Filesystem
 	Source xpv1.CredentialsSource `json:"source"`
 
 	xpv1.CommonCredentialSelectors `json:",inline"`

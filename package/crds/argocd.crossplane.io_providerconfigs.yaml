@@ -96,18 +96,21 @@ spec:
                     - None
                     - Secret
                     - Environment
+                    - Filesystem
                     type: string
                 required:
                 - source
                 type: object
               insecure:
-                description: Insecure specifies whether to disable strict tls validation
+                description: 'Insecure specifies whether to disable strict tls validation.
+                  Default: false.'
                 type: boolean
               plainText:
-                description: PlainText specifies whether to use http vs https
+                description: 'PlainText specifies whether to use http vs https. Default:
+                  false.'
                 type: boolean
               serverAddr:
-                description: ServerAddr of the argocd instance
+                description: ServerAddr is the hostname or IP of the argocd instance
                 type: string
             required:
             - credentials
