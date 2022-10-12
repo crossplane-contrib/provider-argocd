@@ -24,7 +24,7 @@ Follow these steps to get started with `provider-argocd`.
 
     kubectl create ns argocd
 
-    kubectl apply -n argocd --force -f https://raw.githubusercontent.com/argoproj/argo-cd/release-2.0/manifests/install.yaml
+    kubectl apply -n argocd --force -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 
 ### Optional: Create a new user
