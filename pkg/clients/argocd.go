@@ -18,6 +18,7 @@ package clients
 
 import (
 	"context"
+	"os"
 
 	argocd "github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/google/go-cmp/cmp"
@@ -67,24 +68,50 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
 
-	switch s := pc.Spec.Credentials.Source; s { //nolint:exhaustive
+	insecure := false
+	if pc.Spec.Insecure != nil {
+		insecure = *pc.Spec.Insecure
+	}
+	plaintext := false
+	if pc.Spec.PlainText != nil {
+		plaintext = *pc.Spec.PlainText
+	}
+	authToken, err := authFromCredentials(ctx, c, pc.Spec.Credentials)
+	if err != nil {
+		return nil, err
+	}
+	return &argocd.ClientOptions{
+		ServerAddr: pc.Spec.ServerAddr,
+		Insecure:   insecure,
+		PlainText:  plaintext,
+		AuthToken:  authToken,
+	}, nil
+}
+
+func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.ProviderCredentials) (string, error) {
+	switch s := creds.Source; s { //nolint:exhaustive
 	case xpv1.CredentialsSourceSecret:
-		csr := pc.Spec.Credentials.SecretRef
+		csr := creds.SecretRef
 		if csr == nil {
-			return nil, errors.New("no credentials secret referenced")
+			return "", errors.New("no credentials secret referenced")
 		}
 		s := &corev1.Secret{}
 		if err := c.Get(ctx, types.NamespacedName{Namespace: csr.Namespace, Name: csr.Name}, s); err != nil {
-			return nil, errors.Wrap(err, "cannot get credentials secret")
+			return "", errors.Wrap(err, "cannot get credentials secret")
 		}
-		return &argocd.ClientOptions{
-			ServerAddr: pc.Spec.ServerAddr,
-			Insecure:   *pc.Spec.Insecure,
-			PlainText:  *pc.Spec.PlainText,
-			AuthToken:  string(s.Data[csr.Key]),
-		}, nil
+		return string(s.Data[csr.Key]), nil
+	case xpv1.CredentialsSourceFilesystem:
+		fs := creds.Fs
+		if fs == nil {
+			return "", errors.New("no credentials fs given")
+		}
+		token, err := os.ReadFile(fs.Path)
+		if err != nil {
+			return "", errors.Wrap(err, "cannot read credentials file")
+		}
+		return string(token), nil
 	default:
-		return nil, errors.Errorf("credentials source %s is not currently supported", s)
+		return "", errors.Errorf("credentials source %s is not currently supported", s)
 	}
 }
 
