@@ -17,3 +17,4 @@ metadata:
       [slack.crossplane.io](https://slack.crossplane.io) and create an issue in
       the [crossplane-contrib/provider-argocd](https://github.com/crossplane-contrib/provider-argocd)
       repo.
+    friendly-name.meta.crossplane.io: Provider ArgoCD
