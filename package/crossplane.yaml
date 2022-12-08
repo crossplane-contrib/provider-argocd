@@ -7,14 +7,14 @@ metadata:
     meta.crossplane.io/source: github.com/crossplane-contrib/provider-argocd
     meta.crossplane.io/license: Apache-2.0
     meta.crossplane.io/description: |
-      The argocd Crossplane provider enables resources management for argocd.
+      The argocd Crossplane provider enables resources management for Argo CD.
     meta.crossplane.io/readme: |
       `provider-argocd` is the Crossplane infrastructure provider for
-      [argocd](https://argocd.com/).
+      [Argo CD](https://argo-cd.readthedocs.io/).
       Available resources and their fields can be found in the [CRD
       Docs](https://marketplace.upbound.io/providers/crossplane-contrib/provider-argocd/latest/crds).
       If you encounter an issue please reach out on
       [slack.crossplane.io](https://slack.crossplane.io) and create an issue in
       the [crossplane-contrib/provider-argocd](https://github.com/crossplane-contrib/provider-argocd)
       repo.
-    friendly-name.meta.crossplane.io: Provider ArgoCD
+    friendly-name.meta.crossplane.io: Provider Argo CD
