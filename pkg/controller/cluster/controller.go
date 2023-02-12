@@ -112,6 +112,9 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		// ArgoCD Cluster resource ignores the name field. This detects the deletion of the default cluster resource.
 		return managed.ExternalObservation{}, nil
 	}
+	if cluster.IsErrorPermissionDenied(err) && meta.WasDeleted(mg) {
+		return managed.ExternalObservation{}, nil
+	}
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, errGetFailed)
 	}
