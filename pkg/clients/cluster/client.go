@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	errorClusterNotFound = "code = NotFound desc = cluster"
+	errorClusterNotFound  = "code = NotFound desc = cluster"
+	errorPermissionDenied = "code = PermissionDenied desc = permission denied"
 )
 
 // ServiceClient wraps the functions to connect to argocd repositories
@@ -39,4 +40,12 @@ func IsErrorClusterNotFound(err error) bool {
 		return false
 	}
 	return strings.Contains(err.Error(), errorClusterNotFound)
+}
+
+// IsErrorPermissionDenied helper function to test for errorPermissionDenied error.
+func IsErrorPermissionDenied(err error) bool {
+	if err == nil {
+		return false
+	}
+	return strings.Contains(err.Error(), errorPermissionDenied)
 }
