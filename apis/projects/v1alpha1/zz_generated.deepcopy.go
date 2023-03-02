@@ -38,7 +38,7 @@ func (in *ApplicationDestination) DeepCopyInto(out *ApplicationDestination) {
 	if in.ServerRef != nil {
 		in, out := &in.ServerRef, &out.ServerRef
 		*out = new(v1.Reference)
-		**out = **in
+		(*in).DeepCopyInto(*out)
 	}
 	if in.ServerSelector != nil {
 		in, out := &in.ServerSelector, &out.ServerSelector
@@ -263,7 +263,9 @@ func (in *ProjectParameters) DeepCopyInto(out *ProjectParameters) {
 	if in.SourceReposRefs != nil {
 		in, out := &in.SourceReposRefs, &out.SourceReposRefs
 		*out = make([]v1.Reference, len(*in))
-		copy(*out, *in)
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 	if in.SourceReposSelector != nil {
 		in, out := &in.SourceReposSelector, &out.SourceReposSelector
