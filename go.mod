@@ -3,7 +3,7 @@ module github.com/crossplane-contrib/provider-argocd
 go 1.19
 
 require (
-	github.com/argoproj/argo-cd/v2 v2.6.2
+	github.com/argoproj/argo-cd/v2 v2.6.3
 	github.com/crossplane/crossplane-runtime v0.19.0
 	github.com/crossplane/crossplane-tools v0.0.0-20220901191540-806c0b01097b
 	github.com/golang/mock v1.6.0
