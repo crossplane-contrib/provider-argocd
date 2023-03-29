@@ -21,6 +21,7 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applications"
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster"
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/config"
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/projects"
@@ -35,6 +36,7 @@ func Setup(mgr ctrl.Manager, l logging.Logger) error {
 		repositories.SetupRepository,
 		projects.SetupProject,
 		cluster.SetupCluster,
+		applications.SetupApplication,
 	} {
 		if err := setup(mgr, l); err != nil {
 			return err
