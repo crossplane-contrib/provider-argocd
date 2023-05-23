@@ -107,16 +107,17 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}
 
 	observedCluster, err := e.client.Get(ctx, &clusterQuery)
-	if cluster.IsErrorClusterNotFound(err) ||
-		(err == nil && meta.WasDeleted(mg) && meta.GetExternalName(cr) != observedCluster.Name) {
+	if err != nil {
+		switch {
+		case cluster.IsErrorClusterNotFound(err),
+			cluster.IsErrorPermissionDenied(err) && meta.WasDeleted(cr):
+			return managed.ExternalObservation{}, nil
+		}
+		return managed.ExternalObservation{}, errors.Wrap(err, errGetFailed)
+	}
+	if meta.WasDeleted(cr) && meta.GetExternalName(cr) == observedCluster.Name {
 		// ArgoCD Cluster resource ignores the name field. This detects the deletion of the default cluster resource.
 		return managed.ExternalObservation{}, nil
-	}
-	if cluster.IsErrorPermissionDenied(err) && meta.WasDeleted(mg) {
-		return managed.ExternalObservation{}, nil
-	}
-	if err != nil {
-		return managed.ExternalObservation{}, errors.Wrap(err, errGetFailed)
 	}
 
 	current := cr.Spec.ForProvider.DeepCopy()
