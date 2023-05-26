@@ -24,10 +24,12 @@ import (
 
 // ClusterParameters define the desired state of an ArgoCD Cluster
 type ClusterParameters struct {
-	// Server is the API server URL of the Kubernetes cluster
-	Server string `json:"server"`
-	// Name of the cluster. If omitted, will use the server address
-	Name string `json:"name"`
+	// Server is the API server URL of the Kubernetes cluster. Optional if using a kubeconfig
+	// +optional
+	Server *string `json:"server"`
+	// Name of the cluster. If omitted, will use the server address. Optional if using a kubeconfig
+	// +optional
+	Name *string `json:"name"`
 	// Config holds cluster information for connecting to a cluster
 	Config ClusterConfig `json:"config"`
 	// Holds list of namespaces which are accessible in that cluster. Cluster level resources will be ignored if namespace list is not empty.
@@ -59,13 +61,20 @@ type ClusterConfig struct {
 	// +optional
 	BearerTokenSecretRef *SecretReference `json:"bearerTokenSecretRef,omitempty"`
 	// TLSClientConfig contains settings to enable transport layer security
-	TLSClientConfig `json:"tlsClientConfig"`
+	// +optional
+	TLSClientConfig *TLSClientConfig `json:"tlsClientConfig"`
 	// AWSAuthConfig contains IAM authentication configuration
 	// +optional
 	AWSAuthConfig *AWSAuthConfig `json:"awsAuthConfig,omitempty"`
 	// ExecProviderConfig contains configuration for an exec provider
 	// +optional
 	ExecProviderConfig *ExecProviderConfig `json:"execProviderConfig,omitempty"`
+	// KubeconfigSecretRef contains a reference to a Kubernetes secret entry that
+	// contains a raw kubeconfig in YAML or JSON.
+	// See https://kubernetes.io/docs/reference/config-api/kubeconfig.v1/ for more
+	// info about Kubeconfigs
+	// +optional
+	KubeconfigSecretRef *SecretReference `json:"kubeconfigSecretRef,omitempty"`
 }
 
 // SecretReference holds the reference to a Kubernetes secret
@@ -78,6 +87,17 @@ type SecretReference struct {
 
 	// Key whose value will be used.
 	Key string `json:"key"`
+}
+
+// KubeconfigObservation holds the status of a referenced Kubeconfig
+type KubeconfigObservation struct {
+	Secret SecretObservation `json:"secret,omitempty"`
+}
+
+// SecretObservation observes a secret
+type SecretObservation struct {
+	// ResourceVersion tracks the meta1.ResourceVersion of an Object
+	ResourceVersion string `json:"resourceVersion,omitempty"`
 }
 
 // ClusterInfo holds information about cluster cache and state
@@ -176,6 +196,9 @@ type ClusterObservation struct {
 	// ClusterInfo holds information about cluster cache and state
 	// +optional
 	ClusterInfo ClusterInfo `json:"connectionState,omitempty"`
+	// Kubeconfig tracks changes to a Kubeconfig secret
+	// +optional
+	Kubeconfig *KubeconfigObservation `json:"kubeconfig,omitempty"`
 }
 
 // A ClusterSpec defines the desired state of an ArgoCD Cluster.
