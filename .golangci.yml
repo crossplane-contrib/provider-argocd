@@ -1,6 +1,6 @@
 run:
-  deadline: 10m
-  timeout: 10m
+  deadline: 20m
+  timeout: 20m
 
   skip-files:
   - "zz_generated\\..+\\.go$"
@@ -136,7 +136,7 @@ issues:
         - gosec
         - scopelint
         - unparam
-    
+
     # Ease some gocritic warnings on test files.
     - path: _test\.go
       text: "(unnamedResult|exitAfterDefer)"
