@@ -1757,7 +1757,6 @@ spec:
                             type: object
                           type: array
                       required:
-                      - deployedAt
                       - id
                       type: object
                     type: array

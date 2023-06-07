@@ -1282,7 +1282,7 @@ func (c *ConverterImpl) v1alpha1RevisionHistoryToV1alpha1RevisionHistory(source 
 	var v1alpha1RevisionHistory RevisionHistory
 	pString := source.Revision
 	v1alpha1RevisionHistory.Revision = &pString
-	v1alpha1RevisionHistory.DeployedAt = c.v1TimeToV1Time(source.DeployedAt)
+	v1alpha1RevisionHistory.DeployedAt = c.v1TimeToPV1Time(source.DeployedAt)
 	pInt64 := source.ID
 	v1alpha1RevisionHistory.ID = &pInt64
 	v1alpha1RevisionHistory.Source = c.v1alpha1ApplicationSourceToV1alpha1ApplicationSource(source.Source)

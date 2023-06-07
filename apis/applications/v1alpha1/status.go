@@ -42,7 +42,7 @@ type RevisionHistory struct {
 	// Revision holds the revision the sync was performed against
 	Revision *string `json:"revision,omitempty" protobuf:"bytes,2,opt,name=revision"`
 	// DeployedAt holds the time the sync operation completed
-	DeployedAt metav1.Time `json:"deployedAt" protobuf:"bytes,4,opt,name=deployedAt"`
+	DeployedAt *metav1.Time `json:"deployedAt,omitempty" protobuf:"bytes,4,opt,name=deployedAt"`
 	// ID is an auto incrementing identifier of the RevisionHistory
 	ID *int64 `json:"id" protobuf:"bytes,5,opt,name=id"`
 	// Source is a reference to the application source used for the sync operation

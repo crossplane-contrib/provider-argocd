@@ -60,7 +60,7 @@ func SetupApplication(mgr ctrl.Manager, l logging.Logger) error {
 		For(&v1alpha1.Application{}).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.ApplicationGroupVersionKind),
-			managed.WithExternalConnecter(&connector{kube: mgr.GetClient()}),
+			managed.WithExternalConnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: applications.NewApplicationServiceClient}),
 			managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
 			managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
 			managed.WithLogger(l.WithValues("controller", name)),
@@ -132,7 +132,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	return managed.ExternalObservation{
 		ResourceExists:          true,
-		ResourceUpToDate:        v1alpha1.IsApplicationUpToDate(&cr.Spec.ForProvider, app),
+		ResourceUpToDate:        IsApplicationUpToDate(&cr.Spec.ForProvider, app),
 		ResourceLateInitialized: !cmp.Equal(current, &cr.Spec.ForProvider),
 	}, nil
 }

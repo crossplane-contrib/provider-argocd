@@ -31,6 +31,7 @@ limitations under the License.
 // Generate conversion code
 //
 //go:generate go run -tags generate github.com/jmattheis/goverter/cmd/goverter -wrapErrors -output ./applications/v1alpha1/zz_generated.conversion.go -packageName v1alpha1 -packagePath=github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1 ./applications/v1alpha1
+
 package apis
 
 import (
