@@ -21,6 +21,7 @@ package v1alpha1
 import (
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // ApplicationParameters define the desired state of an ArgoCD Git Application
@@ -222,7 +223,24 @@ type ApplicationSourceKustomize struct {
 	ForceCommonLabels bool `json:"forceCommonLabels,omitempty" protobuf:"bytes,7,opt,name=forceCommonLabels"`
 	// ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
 	ForceCommonAnnotations bool `json:"forceCommonAnnotations,omitempty" protobuf:"bytes,8,opt,name=forceCommonAnnotations"`
+	// Namespace sets the namespace that Kustomize adds to all resources
+	Namespace string `json:"namespace,omitempty" protobuf:"bytes,9,opt,name=namespace"`
+	// CommonAnnotationsEnvsubst specifies whether to apply env variables substitution for annotation values
+	CommonAnnotationsEnvsubst bool `json:"commonAnnotationsEnvsubst,omitempty" protobuf:"bytes,10,opt,name=commonAnnotationsEnvsubst"`
+	// Replicas is a list of Kustomize Replicas override specifications
+	Replicas KustomizeReplicas `json:"replicas,omitempty" protobuf:"bytes,11,opt,name=replicas"`
 }
+
+// KustomizeReplica override specifications
+type KustomizeReplica struct {
+	// Name of Deployment or StatefulSet
+	Name string `json:"name" protobuf:"bytes,1,name=name"`
+	// Number of replicas
+	Count intstr.IntOrString `json:"count" protobuf:"bytes,2,name=count"`
+}
+
+// KustomizeReplicas is a list of KustomizeReplica override specifications
+type KustomizeReplicas []KustomizeReplica
 
 // KustomizeImages is a list of Kustomize images
 type KustomizeImages []KustomizeImage
@@ -346,11 +364,27 @@ type ApplicationSourcePluginParameter struct {
 	// Name is the name identifying a parameter.
 	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
 	// String_ is the value of a string type parameter.
-	String_ *string `json:"string,omitempty" protobuf:"bytes,5,opt,name=string"` //nolint:golint
+	String_ *string `json:"string,omitempty" protobuf:"bytes,5,opt,name=string"` //nolint:all
 	// Map is the value of a map type parameter.
-	Map map[string]string `json:"map,omitempty" protobuf:"bytes,3,rep,name=map"`
+	*OptionalMap `json:",omitempty" protobuf:"bytes,3,rep,name=map"`
 	// Array is the value of an array type parameter.
-	Array []string `json:"array,omitempty" protobuf:"bytes,4,rep,name=array"`
+	*OptionalArray `json:",omitempty" protobuf:"bytes,4,rep,name=array"`
+}
+
+// OptionalMap is the value of a map type parameter.
+type OptionalMap struct {
+	// Map is the value of a map type parameter.
+	// +optional
+	Map map[string]string `json:"map" protobuf:"bytes,1,rep,name=map"`
+	// We need the explicit +optional so that kube-builder generates the CRD without marking this as required.
+}
+
+// OptionalArray is the value of an array type parameter.
+type OptionalArray struct {
+	// Array is the value of an array type parameter.
+	// +optional
+	Array []string `json:"array" protobuf:"bytes,1,rep,name=array"`
+	// We need the explicit +optional so that kube-builder generates the CRD without marking this as required.
 }
 
 // ApplicationSourcePlugin holds options specific to config management plugins

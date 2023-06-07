@@ -6,6 +6,7 @@ import (
 	v1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 	health "github.com/argoproj/gitops-engine/pkg/health"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	intstr "k8s.io/apimachinery/pkg/util/intstr"
 	"time"
 )
 
@@ -135,6 +136,13 @@ func (c *ConverterImpl) ToArgoDestinationP(source *ApplicationDestination) *v1al
 	}
 	return pV1alpha1ApplicationDestination
 }
+func (c *ConverterImpl) intstrIntOrStringToIntstrIntOrString(source intstr.IntOrString) intstr.IntOrString {
+	var intstrIntOrString intstr.IntOrString
+	intstrIntOrString.Type = intstr.Type(source.Type)
+	intstrIntOrString.IntVal = source.IntVal
+	intstrIntOrString.StrVal = source.StrVal
+	return intstrIntOrString
+}
 func (c *ConverterImpl) pV1TimeToPV1Time(source *v1.Time) *v1.Time {
 	var pV1Time *v1.Time
 	if source != nil {
@@ -263,6 +271,9 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 		v1alpha1ApplicationSourceKustomize.CommonAnnotations = mapStringString2
 		v1alpha1ApplicationSourceKustomize.ForceCommonLabels = (*source).ForceCommonLabels
 		v1alpha1ApplicationSourceKustomize.ForceCommonAnnotations = (*source).ForceCommonAnnotations
+		v1alpha1ApplicationSourceKustomize.Namespace = (*source).Namespace
+		v1alpha1ApplicationSourceKustomize.CommonAnnotationsEnvsubst = (*source).CommonAnnotationsEnvsubst
+		v1alpha1ApplicationSourceKustomize.Replicas = c.v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas((*source).Replicas)
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -287,6 +298,9 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 		v1alpha1ApplicationSourceKustomize.CommonAnnotations = mapStringString2
 		v1alpha1ApplicationSourceKustomize.ForceCommonLabels = (*source).ForceCommonLabels
 		v1alpha1ApplicationSourceKustomize.ForceCommonAnnotations = (*source).ForceCommonAnnotations
+		v1alpha1ApplicationSourceKustomize.Namespace = (*source).Namespace
+		v1alpha1ApplicationSourceKustomize.CommonAnnotationsEnvsubst = (*source).CommonAnnotationsEnvsubst
+		v1alpha1ApplicationSourceKustomize.Replicas = c.v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas2((*source).Replicas)
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -442,6 +456,64 @@ func (c *ConverterImpl) pV1alpha1OperationStateToPV1alpha1OperationState(source 
 		pV1alpha1OperationState = &v1alpha1OperationState
 	}
 	return pV1alpha1OperationState
+}
+func (c *ConverterImpl) pV1alpha1OptionalArrayToPV1alpha1OptionalArray(source *v1alpha1.OptionalArray) *OptionalArray {
+	var pV1alpha1OptionalArray *OptionalArray
+	if source != nil {
+		var v1alpha1OptionalArray OptionalArray
+		var stringList []string
+		if (*source).Array != nil {
+			stringList = make([]string, len((*source).Array))
+			for i := 0; i < len((*source).Array); i++ {
+				stringList[i] = (*source).Array[i]
+			}
+		}
+		v1alpha1OptionalArray.Array = stringList
+		pV1alpha1OptionalArray = &v1alpha1OptionalArray
+	}
+	return pV1alpha1OptionalArray
+}
+func (c *ConverterImpl) pV1alpha1OptionalArrayToPV1alpha1OptionalArray2(source *OptionalArray) *v1alpha1.OptionalArray {
+	var pV1alpha1OptionalArray *v1alpha1.OptionalArray
+	if source != nil {
+		var v1alpha1OptionalArray v1alpha1.OptionalArray
+		var stringList []string
+		if (*source).Array != nil {
+			stringList = make([]string, len((*source).Array))
+			for i := 0; i < len((*source).Array); i++ {
+				stringList[i] = (*source).Array[i]
+			}
+		}
+		v1alpha1OptionalArray.Array = stringList
+		pV1alpha1OptionalArray = &v1alpha1OptionalArray
+	}
+	return pV1alpha1OptionalArray
+}
+func (c *ConverterImpl) pV1alpha1OptionalMapToPV1alpha1OptionalMap(source *v1alpha1.OptionalMap) *OptionalMap {
+	var pV1alpha1OptionalMap *OptionalMap
+	if source != nil {
+		var v1alpha1OptionalMap OptionalMap
+		mapStringString := make(map[string]string, len((*source).Map))
+		for key, value := range (*source).Map {
+			mapStringString[key] = value
+		}
+		v1alpha1OptionalMap.Map = mapStringString
+		pV1alpha1OptionalMap = &v1alpha1OptionalMap
+	}
+	return pV1alpha1OptionalMap
+}
+func (c *ConverterImpl) pV1alpha1OptionalMapToPV1alpha1OptionalMap2(source *OptionalMap) *v1alpha1.OptionalMap {
+	var pV1alpha1OptionalMap *v1alpha1.OptionalMap
+	if source != nil {
+		var v1alpha1OptionalMap v1alpha1.OptionalMap
+		mapStringString := make(map[string]string, len((*source).Map))
+		for key, value := range (*source).Map {
+			mapStringString[key] = value
+		}
+		v1alpha1OptionalMap.Map = mapStringString
+		pV1alpha1OptionalMap = &v1alpha1OptionalMap
+	}
+	return pV1alpha1OptionalMap
 }
 func (c *ConverterImpl) pV1alpha1ResourceResultToPV1alpha1ResourceResult(source *v1alpha1.ResourceResult) *ResourceResult {
 	var pV1alpha1ResourceResult *ResourceResult
@@ -664,19 +736,8 @@ func (c *ConverterImpl) v1alpha1ApplicationSourcePluginParameterToV1alpha1Applic
 		pString = &xstring
 	}
 	v1alpha1ApplicationSourcePluginParameter.String_ = pString
-	mapStringString := make(map[string]string, len(source.Map))
-	for key, value := range source.Map {
-		mapStringString[key] = value
-	}
-	v1alpha1ApplicationSourcePluginParameter.Map = mapStringString
-	var stringList []string
-	if source.Array != nil {
-		stringList = make([]string, len(source.Array))
-		for i := 0; i < len(source.Array); i++ {
-			stringList[i] = source.Array[i]
-		}
-	}
-	v1alpha1ApplicationSourcePluginParameter.Array = stringList
+	v1alpha1ApplicationSourcePluginParameter.OptionalMap = c.pV1alpha1OptionalMapToPV1alpha1OptionalMap(source.OptionalMap)
+	v1alpha1ApplicationSourcePluginParameter.OptionalArray = c.pV1alpha1OptionalArrayToPV1alpha1OptionalArray(source.OptionalArray)
 	return v1alpha1ApplicationSourcePluginParameter
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourcePluginParameterToV1alpha1ApplicationSourcePluginParameter2(source ApplicationSourcePluginParameter) v1alpha1.ApplicationSourcePluginParameter {
@@ -688,19 +749,8 @@ func (c *ConverterImpl) v1alpha1ApplicationSourcePluginParameterToV1alpha1Applic
 		pString = &xstring
 	}
 	v1alpha1ApplicationSourcePluginParameter.String_ = pString
-	mapStringString := make(map[string]string, len(source.Map))
-	for key, value := range source.Map {
-		mapStringString[key] = value
-	}
-	v1alpha1ApplicationSourcePluginParameter.Map = mapStringString
-	var stringList []string
-	if source.Array != nil {
-		stringList = make([]string, len(source.Array))
-		for i := 0; i < len(source.Array); i++ {
-			stringList[i] = source.Array[i]
-		}
-	}
-	v1alpha1ApplicationSourcePluginParameter.Array = stringList
+	v1alpha1ApplicationSourcePluginParameter.OptionalMap = c.pV1alpha1OptionalMapToPV1alpha1OptionalMap2(source.OptionalMap)
+	v1alpha1ApplicationSourcePluginParameter.OptionalArray = c.pV1alpha1OptionalArrayToPV1alpha1OptionalArray2(source.OptionalArray)
 	return v1alpha1ApplicationSourcePluginParameter
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourcePluginParametersToV1alpha1ApplicationSourcePluginParameters(source v1alpha1.ApplicationSourcePluginParameters) ApplicationSourcePluginParameters {
@@ -881,6 +931,38 @@ func (c *ConverterImpl) v1alpha1KustomizeImagesToV1alpha1KustomizeImages2(source
 		}
 	}
 	return v1alpha1KustomizeImages
+}
+func (c *ConverterImpl) v1alpha1KustomizeReplicaToV1alpha1KustomizeReplica(source v1alpha1.KustomizeReplica) KustomizeReplica {
+	var v1alpha1KustomizeReplica KustomizeReplica
+	v1alpha1KustomizeReplica.Name = source.Name
+	v1alpha1KustomizeReplica.Count = c.intstrIntOrStringToIntstrIntOrString(source.Count)
+	return v1alpha1KustomizeReplica
+}
+func (c *ConverterImpl) v1alpha1KustomizeReplicaToV1alpha1KustomizeReplica2(source KustomizeReplica) v1alpha1.KustomizeReplica {
+	var v1alpha1KustomizeReplica v1alpha1.KustomizeReplica
+	v1alpha1KustomizeReplica.Name = source.Name
+	v1alpha1KustomizeReplica.Count = c.intstrIntOrStringToIntstrIntOrString(source.Count)
+	return v1alpha1KustomizeReplica
+}
+func (c *ConverterImpl) v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas(source v1alpha1.KustomizeReplicas) KustomizeReplicas {
+	var v1alpha1KustomizeReplicas KustomizeReplicas
+	if source != nil {
+		v1alpha1KustomizeReplicas = make(KustomizeReplicas, len(source))
+		for i := 0; i < len(source); i++ {
+			v1alpha1KustomizeReplicas[i] = c.v1alpha1KustomizeReplicaToV1alpha1KustomizeReplica(source[i])
+		}
+	}
+	return v1alpha1KustomizeReplicas
+}
+func (c *ConverterImpl) v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas2(source KustomizeReplicas) v1alpha1.KustomizeReplicas {
+	var v1alpha1KustomizeReplicas v1alpha1.KustomizeReplicas
+	if source != nil {
+		v1alpha1KustomizeReplicas = make(v1alpha1.KustomizeReplicas, len(source))
+		for i := 0; i < len(source); i++ {
+			v1alpha1KustomizeReplicas[i] = c.v1alpha1KustomizeReplicaToV1alpha1KustomizeReplica2(source[i])
+		}
+	}
+	return v1alpha1KustomizeReplicas
 }
 func (c *ConverterImpl) v1alpha1OperationInitiatorToV1alpha1OperationInitiator(source v1alpha1.OperationInitiator) OperationInitiator {
 	var v1alpha1OperationInitiator OperationInitiator
