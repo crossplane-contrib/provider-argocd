@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/application"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	"github.com/crossplane/crossplane-runtime/pkg/controller"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,7 +32,6 @@ import (
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
@@ -43,28 +43,32 @@ import (
 
 const (
 	errNotApplication   = "managed resource is not a Argocd application custom resource"
-	errGetFailed        = "cannot get Argocd application"
 	errListFailed       = "cannot list Argocd application"
 	errKubeUpdateFailed = "cannot update Argocd application custom resource"
 	errCreateFailed     = "cannot create Argocd application"
 	errUpdateFailed     = "cannot update Argocd application"
 	errDeleteFailed     = "cannot delete Argocd application"
-	errGetSecretFailed  = "cannot get Kubernetes secret"
-	errFmtKeyNotFound   = "key %s is not found in referenced Kubernetes secret"
 )
 
-// SetupApplication adds a controller that reconciles repositories.
-func SetupApplication(mgr ctrl.Manager, l logging.Logger) error {
+// SetupApplication adds a controller that reconciles applications.
+func SetupApplication(mgr ctrl.Manager, o controller.Options) error {
 	name := managed.ControllerName(v1alpha1.ApplicationKind)
+
+	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		For(&v1alpha1.Application{}).
+		WithOptions(o.ForControllerRuntime()).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.ApplicationGroupVersionKind),
-			managed.WithExternalConnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: applications.NewApplicationServiceClient}),
-			managed.WithLogger(l.WithValues("controller", name)),
-			managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))
+			managed.WithExternalConnecter(&connector{kube: mgr.GetClient()}),
+			managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
+			managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
+			managed.WithPollInterval(o.PollInterval),
+			managed.WithLogger(o.Logger.WithValues("controller", name)),
+			managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
+			managed.WithConnectionPublishers(cps...)))
 }
 
 type connector struct {
@@ -111,7 +115,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	var apps *argocdv1alpha1.ApplicationList
 	apps, err := e.client.List(ctx, &appQuery)
 	if err != nil {
-		return managed.ExternalObservation{}, errors.Wrap(err, errGetFailed)
+		return managed.ExternalObservation{}, errors.Wrap(err, errListFailed)
 	}
 	app := &argocdv1alpha1.Application{}
 	for _, item := range apps.Items {
@@ -148,8 +152,6 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	if err != nil {
 		return managed.ExternalCreation{}, errors.Wrap(err, errCreateFailed)
 	}
-
-	meta.SetExternalName(cr, cr.Name)
 
 	return managed.ExternalCreation{}, errors.Wrap(nil, errKubeUpdateFailed)
 }

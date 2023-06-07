@@ -296,7 +296,7 @@ func TestObserve(t *testing.T) {
 				cr: Application(
 					withExternalName(testApplicationExternalName),
 				),
-				err: errors.Wrap(errBoom, errGetFailed),
+				err: errors.Wrap(errBoom, errListFailed),
 			},
 		},
 		"NeedsCreation": {
@@ -428,7 +428,6 @@ func TestCreate(t *testing.T) {
 			want: want{
 				cr: Application(
 					withName(testApplicationExternalName),
-					withExternalName(testApplicationExternalName),
 				),
 				result: managed.ExternalCreation{},
 				err:    nil,
