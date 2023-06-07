@@ -43,6 +43,10 @@ var (
 	testProjectName             = "default"
 	testDestinationNamespace    = "default-at-destination"
 	emptyString                 = ""
+	repoURL                     = "https://github.com/stefanprodan/podinfo/"
+	chartPath                   = "charts/podinfo"
+	revision                    = "HEAD"
+	selfHealEnabled             = true
 )
 
 type args struct {
@@ -124,9 +128,9 @@ func TestObserve(t *testing.T) {
 								Spec: argocdv1alpha1.ApplicationSpec{
 									Project: testProjectName,
 									Source: &argocdv1alpha1.ApplicationSource{
-										RepoURL:        "https://github.com/stefanprodan/podinfo/",
-										Path:           "charts/podinfo",
-										TargetRevision: "HEAD",
+										RepoURL:        repoURL,
+										Path:           chartPath,
+										TargetRevision: revision,
 									},
 									Destination: argocdv1alpha1.ApplicationDestination{
 										Namespace: testDestinationNamespace,
@@ -149,13 +153,13 @@ func TestObserve(t *testing.T) {
 							Namespace: &testDestinationNamespace,
 						},
 						Source: &v1alpha1.ApplicationSource{
-							RepoURL:        "https://github.com/stefanprodan/podinfo/",
-							Path:           "charts/podinfo",
-							TargetRevision: "HEAD",
+							RepoURL:        repoURL,
+							Path:           &chartPath,
+							TargetRevision: &revision,
 						},
 						SyncPolicy: &v1alpha1.SyncPolicy{
 							Automated: &v1alpha1.SyncPolicyAutomated{
-								SelfHeal: true,
+								SelfHeal: &selfHealEnabled,
 							},
 						},
 					}),
@@ -170,33 +174,18 @@ func TestObserve(t *testing.T) {
 							Namespace: &testDestinationNamespace,
 						},
 						Source: &v1alpha1.ApplicationSource{
-							RepoURL:        "https://github.com/stefanprodan/podinfo/",
-							Path:           "charts/podinfo",
-							TargetRevision: "HEAD",
+							RepoURL:        repoURL,
+							Path:           &chartPath,
+							TargetRevision: &revision,
 						},
 						SyncPolicy: &v1alpha1.SyncPolicy{
 							Automated: &v1alpha1.SyncPolicyAutomated{
-								SelfHeal: true,
+								SelfHeal: &selfHealEnabled,
 							},
 						},
 					}),
 					withConditions(xpv1.Available()),
-					withObservation(v1alpha1.ArgoApplicationStatus{
-						Resources: nil,
-						Sync: v1alpha1.SyncStatus{
-							ComparedTo: v1alpha1.ComparedTo{
-								Destination: v1alpha1.ApplicationDestination{
-									Server:    &emptyString,
-									Namespace: &emptyString,
-									Name:      &emptyString,
-								},
-							},
-						},
-						Health:               v1alpha1.HealthStatus{},
-						SourceType:           "",
-						Summary:              v1alpha1.ApplicationSummary{},
-						ResourceHealthSource: "",
-					}),
+					withObservation(initializedArgoAppStatus()),
 				),
 				result: managed.ExternalObservation{
 					ResourceExists:          true,
@@ -226,9 +215,9 @@ func TestObserve(t *testing.T) {
 								Spec: argocdv1alpha1.ApplicationSpec{
 									Project: testProjectName,
 									Source: &argocdv1alpha1.ApplicationSource{
-										RepoURL:        "https://github.com/stefanprodan/podinfo/",
-										Path:           "charts/podinfo",
-										TargetRevision: "HEAD",
+										RepoURL:        repoURL,
+										Path:           chartPath,
+										TargetRevision: revision,
 									},
 									Destination: argocdv1alpha1.ApplicationDestination{
 										Namespace: testDestinationNamespace,
@@ -246,13 +235,13 @@ func TestObserve(t *testing.T) {
 							Namespace: &testDestinationNamespace,
 						},
 						Source: &v1alpha1.ApplicationSource{
-							RepoURL:        "https://github.com/stefanprodan/podinfo/",
-							Path:           "charts/podinfo",
-							TargetRevision: "HEAD",
+							RepoURL:        repoURL,
+							Path:           &chartPath,
+							TargetRevision: &revision,
 						},
 						SyncPolicy: &v1alpha1.SyncPolicy{
 							Automated: &v1alpha1.SyncPolicyAutomated{
-								SelfHeal: true,
+								SelfHeal: &selfHealEnabled,
 							},
 						},
 					}),
@@ -267,33 +256,18 @@ func TestObserve(t *testing.T) {
 							Namespace: &testDestinationNamespace,
 						},
 						Source: &v1alpha1.ApplicationSource{
-							RepoURL:        "https://github.com/stefanprodan/podinfo/",
-							Path:           "charts/podinfo",
-							TargetRevision: "HEAD",
+							RepoURL:        repoURL,
+							Path:           &chartPath,
+							TargetRevision: &revision,
 						},
 						SyncPolicy: &v1alpha1.SyncPolicy{
 							Automated: &v1alpha1.SyncPolicyAutomated{
-								SelfHeal: true,
+								SelfHeal: &selfHealEnabled,
 							},
 						},
 					}),
 					withConditions(xpv1.Available()),
-					withObservation(v1alpha1.ArgoApplicationStatus{
-						Resources: nil,
-						Sync: v1alpha1.SyncStatus{
-							ComparedTo: v1alpha1.ComparedTo{
-								Destination: v1alpha1.ApplicationDestination{
-									Server:    &emptyString,
-									Namespace: &emptyString,
-									Name:      &emptyString,
-								},
-							},
-						},
-						Health:               v1alpha1.HealthStatus{},
-						SourceType:           "",
-						Summary:              v1alpha1.ApplicationSummary{},
-						ResourceHealthSource: "",
-					}),
+					withObservation(initializedArgoAppStatus()),
 				),
 				result: managed.ExternalObservation{
 					ResourceExists:          true,
@@ -388,6 +362,34 @@ func TestObserve(t *testing.T) {
 				t.Errorf("r: -want, +got:\n%s", diff)
 			}
 		})
+	}
+}
+
+func initializedArgoAppStatus() v1alpha1.ArgoApplicationStatus {
+	return v1alpha1.ArgoApplicationStatus{
+		Resources: nil,
+		Sync: v1alpha1.SyncStatus{
+			Revision: &emptyString,
+			ComparedTo: v1alpha1.ComparedTo{
+				Source: v1alpha1.ApplicationSource{
+					Path:           &emptyString,
+					TargetRevision: &emptyString,
+					Chart:          &emptyString,
+					Ref:            &emptyString,
+				},
+				Destination: v1alpha1.ApplicationDestination{
+					Server:    &emptyString,
+					Namespace: &emptyString,
+					Name:      &emptyString,
+				},
+			},
+		},
+		Health: v1alpha1.HealthStatus{
+			Message: &emptyString,
+		},
+		SourceType:           "",
+		Summary:              v1alpha1.ApplicationSummary{},
+		ResourceHealthSource: "",
 	}
 }
 
