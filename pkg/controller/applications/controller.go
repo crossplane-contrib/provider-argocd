@@ -18,12 +18,11 @@ package applications
 
 import (
 	"context"
-	"reflect"
 
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/application"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
-	"github.com/crossplane/crossplane-runtime/pkg/controller"
+	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -51,7 +50,7 @@ const (
 )
 
 // SetupApplication adds a controller that reconciles applications.
-func SetupApplication(mgr ctrl.Manager, o controller.Options) error {
+func SetupApplication(mgr ctrl.Manager, l logging.Logger) error {
 	name := managed.ControllerName(v1alpha1.ApplicationKind)
 
 	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
@@ -59,14 +58,12 @@ func SetupApplication(mgr ctrl.Manager, o controller.Options) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		For(&v1alpha1.Application{}).
-		WithOptions(o.ForControllerRuntime()).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.ApplicationGroupVersionKind),
 			managed.WithExternalConnecter(&connector{kube: mgr.GetClient()}),
 			managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
 			managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
-			managed.WithPollInterval(o.PollInterval),
-			managed.WithLogger(o.Logger.WithValues("controller", name)),
+			managed.WithLogger(l.WithValues("controller", name)),
 			managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 			managed.WithConnectionPublishers(cps...)))
 }
@@ -135,7 +132,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	return managed.ExternalObservation{
 		ResourceExists:          true,
-		ResourceUpToDate:        isApplicationUpToDate(&cr.Spec.ForProvider, app),
+		ResourceUpToDate:        v1alpha1.IsApplicationUpToDate(&cr.Spec.ForProvider, app),
 		ResourceLateInitialized: !cmp.Equal(current, &cr.Spec.ForProvider),
 	}, nil
 }
@@ -241,10 +238,4 @@ func generateUpdateRepositoryOptions(cr *v1alpha1.ApplicationParameters, name st
 		Application: app,
 	}
 	return o
-}
-
-func isApplicationUpToDate(cr *v1alpha1.ApplicationParameters, remote *argocdv1alpha1.Application) bool { // nolint:gocyclo
-	converter := v1alpha1.ConverterImpl{}
-	cluster := converter.ToArgoApplicationSpec(cr)
-	return reflect.DeepEqual(*cluster, remote.Spec)
 }
