@@ -9,7 +9,6 @@ PLATFORMS ?= linux_amd64 linux_arm64
 # kind-related versions
 KIND_VERSION ?= v0.14.0
 KIND_NODE_IMAGE_TAG ?= v1.24.0
-GOLANGCILINT_VERSION ?= 1.53.1
 
 # -include will silently skip missing files, which allows us
 # to load those files with a target in the Makefile. If only
