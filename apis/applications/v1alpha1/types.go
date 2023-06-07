@@ -75,11 +75,11 @@ type ApplicationSource struct {
 	// RepoURL is the URL to the repository (Git or Helm) that contains the application manifests
 	RepoURL string `json:"repoURL" protobuf:"bytes,1,opt,name=repoURL"`
 	// Path is a directory path within the Git repository, and is only valid for applications sourced from Git.
-	Path string `json:"path,omitempty" protobuf:"bytes,2,opt,name=path"`
+	Path *string `json:"path,omitempty" protobuf:"bytes,2,opt,name=path"`
 	// TargetRevision defines the revision of the source to sync the application to.
 	// In case of Git, this can be commit, tag, or branch. If omitted, will equal to HEAD.
 	// In case of Helm, this is a semver tag for the Chart's version.
-	TargetRevision string `json:"targetRevision,omitempty" protobuf:"bytes,4,opt,name=targetRevision"`
+	TargetRevision *string `json:"targetRevision,omitempty" protobuf:"bytes,4,opt,name=targetRevision"`
 	// Helm holds helm specific options
 	Helm *ApplicationSourceHelm `json:"helm,omitempty" protobuf:"bytes,7,opt,name=helm"`
 	// Kustomize holds kustomize specific options
@@ -89,9 +89,9 @@ type ApplicationSource struct {
 	// Plugin holds config management plugin specific options
 	Plugin *ApplicationSourcePlugin `json:"plugin,omitempty" protobuf:"bytes,11,opt,name=plugin"`
 	// Chart is a Helm chart name, and must be specified for applications sourced from a Helm repo.
-	Chart string `json:"chart,omitempty" protobuf:"bytes,12,opt,name=chart"`
+	Chart *string `json:"chart,omitempty" protobuf:"bytes,12,opt,name=chart"`
 	// Ref is reference to another source within sources field. This field will not be used if used with a `source` tag.
-	Ref string `json:"ref,omitempty" protobuf:"bytes,13,opt,name=ref"`
+	Ref *string `json:"ref,omitempty" protobuf:"bytes,13,opt,name=ref"`
 }
 
 // ApplicationSources contains list of required information about the sources of an application
@@ -147,37 +147,37 @@ type ApplicationSourceHelm struct {
 	// Parameters is a list of Helm parameters which are passed to the helm template command upon manifest generation
 	Parameters []HelmParameter `json:"parameters,omitempty" protobuf:"bytes,2,opt,name=parameters"`
 	// ReleaseName is the Helm release name to use. If omitted it will use the application name
-	ReleaseName string `json:"releaseName,omitempty" protobuf:"bytes,3,opt,name=releaseName"`
+	ReleaseName *string `json:"releaseName,omitempty" protobuf:"bytes,3,opt,name=releaseName"`
 	// Values specifies Helm values to be passed to helm template, typically defined as a block
-	Values string `json:"values,omitempty" protobuf:"bytes,4,opt,name=values"`
+	Values *string `json:"values,omitempty" protobuf:"bytes,4,opt,name=values"`
 	// FileParameters are file parameters to the helm template
 	FileParameters []HelmFileParameter `json:"fileParameters,omitempty" protobuf:"bytes,5,opt,name=fileParameters"`
 	// Version is the Helm version to use for templating ("3")
-	Version string `json:"version,omitempty" protobuf:"bytes,6,opt,name=version"`
+	Version *string `json:"version,omitempty" protobuf:"bytes,6,opt,name=version"`
 	// PassCredentials pass credentials to all domains (Helm's --pass-credentials)
-	PassCredentials bool `json:"passCredentials,omitempty" protobuf:"bytes,7,opt,name=passCredentials"`
+	PassCredentials *bool `json:"passCredentials,omitempty" protobuf:"bytes,7,opt,name=passCredentials"`
 	// IgnoreMissingValueFiles prevents helm template from failing when valueFiles do not exist locally by not appending them to helm template --values
-	IgnoreMissingValueFiles bool `json:"ignoreMissingValueFiles,omitempty" protobuf:"bytes,8,opt,name=ignoreMissingValueFiles"`
+	IgnoreMissingValueFiles *bool `json:"ignoreMissingValueFiles,omitempty" protobuf:"bytes,8,opt,name=ignoreMissingValueFiles"`
 	// SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
-	SkipCrds bool `json:"skipCrds,omitempty" protobuf:"bytes,9,opt,name=skipCrds"`
+	SkipCrds *bool `json:"skipCrds,omitempty" protobuf:"bytes,9,opt,name=skipCrds"`
 }
 
 // HelmParameter is a parameter that's passed to helm template during manifest generation
 type HelmParameter struct {
 	// Name is the name of the Helm parameter
-	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	Name *string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
 	// Value is the value for the Helm parameter
-	Value string `json:"value,omitempty" protobuf:"bytes,2,opt,name=value"`
+	Value *string `json:"value,omitempty" protobuf:"bytes,2,opt,name=value"`
 	// ForceString determines whether to tell Helm to interpret booleans and numbers as strings
-	ForceString bool `json:"forceString,omitempty" protobuf:"bytes,3,opt,name=forceString"`
+	ForceString *bool `json:"forceString,omitempty" protobuf:"bytes,3,opt,name=forceString"`
 }
 
 // HelmFileParameter is a file parameter that's passed to helm template during manifest generation
 type HelmFileParameter struct {
 	// Name is the name of the Helm parameter
-	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	Name *string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
 	// Path is the path to the file containing the values for the Helm parameter
-	Path string `json:"path,omitempty" protobuf:"bytes,2,opt,name=path"`
+	Path *string `json:"path,omitempty" protobuf:"bytes,2,opt,name=path"`
 }
 
 // +kubebuilder:object:root=true
@@ -208,25 +208,25 @@ type ApplicationList struct {
 // ApplicationSourceKustomize holds options specific to an Application source specific to Kustomize
 type ApplicationSourceKustomize struct {
 	// NamePrefix is a prefix appended to resources for Kustomize apps
-	NamePrefix string `json:"namePrefix,omitempty" protobuf:"bytes,1,opt,name=namePrefix"`
+	NamePrefix *string `json:"namePrefix,omitempty" protobuf:"bytes,1,opt,name=namePrefix"`
 	// NameSuffix is a suffix appended to resources for Kustomize apps
-	NameSuffix string `json:"nameSuffix,omitempty" protobuf:"bytes,2,opt,name=nameSuffix"`
+	NameSuffix *string `json:"nameSuffix,omitempty" protobuf:"bytes,2,opt,name=nameSuffix"`
 	// Images is a list of Kustomize image override specifications
 	Images KustomizeImages `json:"images,omitempty" protobuf:"bytes,3,opt,name=images"`
 	// CommonLabels is a list of additional labels to add to rendered manifests
 	CommonLabels map[string]string `json:"commonLabels,omitempty" protobuf:"bytes,4,opt,name=commonLabels"`
 	// Version controls which version of Kustomize to use for rendering manifests
-	Version string `json:"version,omitempty" protobuf:"bytes,5,opt,name=version"`
+	Version *string `json:"version,omitempty" protobuf:"bytes,5,opt,name=version"`
 	// CommonAnnotations is a list of additional annotations to add to rendered manifests
 	CommonAnnotations map[string]string `json:"commonAnnotations,omitempty" protobuf:"bytes,6,opt,name=commonAnnotations"`
 	// ForceCommonLabels specifies whether to force applying common labels to resources for Kustomize apps
-	ForceCommonLabels bool `json:"forceCommonLabels,omitempty" protobuf:"bytes,7,opt,name=forceCommonLabels"`
+	ForceCommonLabels *bool `json:"forceCommonLabels,omitempty" protobuf:"bytes,7,opt,name=forceCommonLabels"`
 	// ForceCommonAnnotations specifies whether to force applying common annotations to resources for Kustomize apps
-	ForceCommonAnnotations bool `json:"forceCommonAnnotations,omitempty" protobuf:"bytes,8,opt,name=forceCommonAnnotations"`
+	ForceCommonAnnotations *bool `json:"forceCommonAnnotations,omitempty" protobuf:"bytes,8,opt,name=forceCommonAnnotations"`
 	// Namespace sets the namespace that Kustomize adds to all resources
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,9,opt,name=namespace"`
+	Namespace *string `json:"namespace,omitempty" protobuf:"bytes,9,opt,name=namespace"`
 	// CommonAnnotationsEnvsubst specifies whether to apply env variables substitution for annotation values
-	CommonAnnotationsEnvsubst bool `json:"commonAnnotationsEnvsubst,omitempty" protobuf:"bytes,10,opt,name=commonAnnotationsEnvsubst"`
+	CommonAnnotationsEnvsubst *bool `json:"commonAnnotationsEnvsubst,omitempty" protobuf:"bytes,10,opt,name=commonAnnotationsEnvsubst"`
 	// Replicas is a list of Kustomize Replicas override specifications
 	Replicas KustomizeReplicas `json:"replicas,omitempty" protobuf:"bytes,11,opt,name=replicas"`
 }
@@ -272,11 +272,11 @@ type SyncPolicy struct {
 // SyncPolicyAutomated controls the behavior of an automated sync
 type SyncPolicyAutomated struct {
 	// Prune specifies whether to delete resources from the cluster that are not found in the sources anymore as part of automated sync (default: false)
-	Prune bool `json:"prune,omitempty" protobuf:"bytes,1,opt,name=prune"`
+	Prune *bool `json:"prune,omitempty" protobuf:"bytes,1,opt,name=prune"`
 	// SelfHeal specifes whether to revert resources back to their desired state upon modification in the cluster (default: false)
-	SelfHeal bool `json:"selfHeal,omitempty" protobuf:"bytes,2,opt,name=selfHeal"`
+	SelfHeal *bool `json:"selfHeal,omitempty" protobuf:"bytes,2,opt,name=selfHeal"`
 	// AllowEmpty allows apps have zero live resources (default: false)
-	AllowEmpty bool `json:"allowEmpty,omitempty" protobuf:"bytes,3,opt,name=allowEmpty"`
+	AllowEmpty *bool `json:"allowEmpty,omitempty" protobuf:"bytes,3,opt,name=allowEmpty"`
 }
 
 // SyncStrategy controls the manner in which a sync is performed
@@ -290,11 +290,11 @@ type SyncStrategy struct {
 // Backoff is the backoff strategy to use on subsequent retries for failing syncs
 type Backoff struct {
 	// Duration is the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
-	Duration string `json:"duration,omitempty" protobuf:"bytes,1,opt,name=duration"`
+	Duration *string `json:"duration,omitempty" protobuf:"bytes,1,opt,name=duration"`
 	// Factor is a factor to multiply the base duration after each failed retry
 	Factor *int64 `json:"factor,omitempty" protobuf:"bytes,2,name=factor"`
 	// MaxDuration is the maximum amount of time allowed for the backoff strategy
-	MaxDuration string `json:"maxDuration,omitempty" protobuf:"bytes,3,opt,name=maxDuration"`
+	MaxDuration *string `json:"maxDuration,omitempty" protobuf:"bytes,3,opt,name=maxDuration"`
 }
 
 // SyncStrategyApply uses `kubectl apply` to perform the apply
@@ -302,7 +302,7 @@ type SyncStrategyApply struct {
 	// Force indicates whether or not to supply the --force flag to `kubectl apply`.
 	// The --force flag deletes and re-create the resource, when PATCH encounters conflict and has
 	// retried for 5 times.
-	Force bool `json:"force,omitempty" protobuf:"bytes,1,opt,name=force"`
+	Force *bool `json:"force,omitempty" protobuf:"bytes,1,opt,name=force"`
 }
 
 // SyncStrategyHook will perform a sync using hooks annotations.
@@ -316,7 +316,7 @@ type SyncStrategyHook struct {
 // RetryStrategy controls the strategy to apply if a sync fails
 type RetryStrategy struct {
 	// Limit is the maximum number of attempts for retrying a failed sync. If set to 0, no retries will be performed.
-	Limit int64 `json:"limit,omitempty" protobuf:"bytes,1,opt,name=limit"`
+	Limit *int64 `json:"limit,omitempty" protobuf:"bytes,1,opt,name=limit"`
 	// Backoff controls how to backoff on subsequent retries of failed syncs
 	Backoff *Backoff `json:"backoff,omitempty" protobuf:"bytes,2,opt,name=backoff,casttype=Backoff"`
 }
@@ -330,13 +330,13 @@ type ManagedNamespaceMetadata struct {
 // ApplicationSourceDirectory holds config management plugin specific options
 type ApplicationSourceDirectory struct {
 	// Recurse specifies whether to scan a directory recursively for manifests
-	Recurse bool `json:"recurse,omitempty" protobuf:"bytes,1,opt,name=recurse"`
+	Recurse *bool `json:"recurse,omitempty" protobuf:"bytes,1,opt,name=recurse"`
 	// Jsonnet holds options specific to Jsonnet
 	Jsonnet ApplicationSourceJsonnet `json:"jsonnet,omitempty" protobuf:"bytes,2,opt,name=jsonnet"`
 	// Exclude contains a glob pattern to match paths against that should be explicitly excluded from being used during manifest generation
-	Exclude string `json:"exclude,omitempty" protobuf:"bytes,3,opt,name=exclude"`
+	Exclude *string `json:"exclude,omitempty" protobuf:"bytes,3,opt,name=exclude"`
 	// Include contains a glob pattern to match paths against that should be explicitly included during manifest generation
-	Include string `json:"include,omitempty" protobuf:"bytes,4,opt,name=include"`
+	Include *string `json:"include,omitempty" protobuf:"bytes,4,opt,name=include"`
 }
 
 // ApplicationSourceJsonnet holds options specific to Jsonnet
@@ -353,7 +353,7 @@ type ApplicationSourceJsonnet struct {
 type JsonnetVar struct {
 	Name  string `json:"name" protobuf:"bytes,1,opt,name=name"`
 	Value string `json:"value" protobuf:"bytes,2,opt,name=value"`
-	Code  bool   `json:"code,omitempty" protobuf:"bytes,3,opt,name=code"`
+	Code  *bool  `json:"code,omitempty" protobuf:"bytes,3,opt,name=code"`
 }
 
 // ApplicationSourcePluginParameters is a list of specific config management parameters
@@ -362,7 +362,7 @@ type ApplicationSourcePluginParameters []ApplicationSourcePluginParameter
 // ApplicationSourcePluginParameter holds options specific to config management parameters
 type ApplicationSourcePluginParameter struct {
 	// Name is the name identifying a parameter.
-	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	Name *string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
 	// String_ is the value of a string type parameter.
 	String_ *string `json:"string,omitempty" protobuf:"bytes,5,opt,name=string"` //nolint:all
 	// Map is the value of a map type parameter.
@@ -389,7 +389,7 @@ type OptionalArray struct {
 
 // ApplicationSourcePlugin holds options specific to config management plugins
 type ApplicationSourcePlugin struct {
-	Name       string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	Name       *string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
 	Env        `json:"env,omitempty" protobuf:"bytes,2,opt,name=env"`
 	Parameters ApplicationSourcePluginParameters `json:"parameters,omitempty" protobuf:"bytes,3,opt,name=parameters"`
 }

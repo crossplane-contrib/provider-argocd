@@ -40,11 +40,11 @@ type RevisionHistories []RevisionHistory
 // RevisionHistory contains history information about a previous sync
 type RevisionHistory struct {
 	// Revision holds the revision the sync was performed against
-	Revision string `json:"revision,omitempty" protobuf:"bytes,2,opt,name=revision"`
+	Revision *string `json:"revision,omitempty" protobuf:"bytes,2,opt,name=revision"`
 	// DeployedAt holds the time the sync operation completed
 	DeployedAt metav1.Time `json:"deployedAt" protobuf:"bytes,4,opt,name=deployedAt"`
 	// ID is an auto incrementing identifier of the RevisionHistory
-	ID int64 `json:"id" protobuf:"bytes,5,opt,name=id"`
+	ID *int64 `json:"id" protobuf:"bytes,5,opt,name=id"`
 	// Source is a reference to the application source used for the sync operation
 	Source ApplicationSource `json:"source,omitempty" protobuf:"bytes,6,opt,name=source"`
 	// DeployStartedAt holds the time the sync operation started
@@ -57,16 +57,16 @@ type RevisionHistory struct {
 
 // ResourceStatus holds the current sync and health status of a resource
 type ResourceStatus struct {
-	Group           string        `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
-	Version         string        `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
-	Kind            string        `json:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
-	Namespace       string        `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
-	Name            string        `json:"name,omitempty" protobuf:"bytes,5,opt,name=name"`
-	Status          string        `json:"status,omitempty" protobuf:"bytes,6,opt,name=status"`
+	Group           *string       `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
+	Version         *string       `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
+	Kind            *string       `json:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
+	Namespace       *string       `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	Name            *string       `json:"name,omitempty" protobuf:"bytes,5,opt,name=name"`
+	Status          *string       `json:"status,omitempty" protobuf:"bytes,6,opt,name=status"`
 	Health          *HealthStatus `json:"health,omitempty" protobuf:"bytes,7,opt,name=health"`
-	Hook            bool          `json:"hook,omitempty" protobuf:"bytes,8,opt,name=hook"`
-	RequiresPruning bool          `json:"requiresPruning,omitempty" protobuf:"bytes,9,opt,name=requiresPruning"`
-	SyncWave        int64         `json:"syncWave,omitempty" protobuf:"bytes,10,opt,name=syncWave"`
+	Hook            *bool         `json:"hook,omitempty" protobuf:"bytes,8,opt,name=hook"`
+	RequiresPruning *bool         `json:"requiresPruning,omitempty" protobuf:"bytes,9,opt,name=requiresPruning"`
+	SyncWave        *int64        `json:"syncWave,omitempty" protobuf:"bytes,10,opt,name=syncWave"`
 }
 
 // SyncStatus contains information about the currently observed live and desired states of an application
@@ -76,7 +76,7 @@ type SyncStatus struct {
 	// ComparedTo contains information about what has been compared
 	ComparedTo ComparedTo `json:"comparedTo,omitempty" protobuf:"bytes,2,opt,name=comparedTo"`
 	// Revision contains information about the revision the comparison has been performed to
-	Revision string `json:"revision,omitempty" protobuf:"bytes,3,opt,name=revision"`
+	Revision *string `json:"revision,omitempty" protobuf:"bytes,3,opt,name=revision"`
 	// Revisions contains information about the revisions of multiple sources the comparison has been performed to
 	Revisions []string `json:"revisions,omitempty" protobuf:"bytes,4,opt,name=revisions"`
 }
@@ -86,15 +86,15 @@ type HealthStatus struct {
 	// Status holds the status code of the application or resource
 	Status health.HealthStatusCode `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
 	// Message is a human-readable informational message describing the health status
-	Message string `json:"message,omitempty" protobuf:"bytes,2,opt,name=message"`
+	Message *string `json:"message,omitempty" protobuf:"bytes,2,opt,name=message"`
 }
 
 // InfoItem contains arbitrary, human readable information about an application
 type InfoItem struct {
 	// Name is a human readable title for this piece of information.
-	Name string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
+	Name *string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
 	// Value is human readable content.
-	Value string `json:"value,omitempty" protobuf:"bytes,2,opt,name=value"`
+	Value *string `json:"value,omitempty" protobuf:"bytes,2,opt,name=value"`
 }
 
 // ComparedTo contains application source and target which was used for resources comparison
@@ -124,15 +124,15 @@ type OperationState struct {
 	// Phase is the current phase of the operation
 	Phase OperationPhase `json:"phase,omitempty" protobuf:"bytes,2,opt,name=phase"`
 	// Message holds any pertinent messages when attempting to perform operation (typically errors).
-	Message string `json:"message,omitempty" protobuf:"bytes,3,opt,name=message"`
+	Message *string `json:"message,omitempty" protobuf:"bytes,3,opt,name=message"`
 	// SyncResult is the result of a Sync operation
 	SyncResult *SyncOperationResult `json:"syncResult,omitempty" protobuf:"bytes,4,opt,name=syncResult"`
 	// StartedAt contains time of operation start
-	StartedAt metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
+	StartedAt *metav1.Time `json:"startedAt,omitempty" protobuf:"bytes,6,opt,name=startedAt"`
 	// FinishedAt contains time of operation completion
 	FinishedAt *metav1.Time `json:"finishedAt,omitempty" protobuf:"bytes,7,opt,name=finishedAt"`
 	// RetryCount contains time of operation retries
-	RetryCount int64 `json:"retryCount,omitempty" protobuf:"bytes,8,opt,name=retryCount"`
+	RetryCount *int64 `json:"retryCount,omitempty" protobuf:"bytes,8,opt,name=retryCount"`
 }
 
 // OperationPhase specifies the phase of the sync
@@ -152,9 +152,9 @@ type ApplicationSummary struct {
 // OperationInitiator contains information about the initiator of an operation
 type OperationInitiator struct {
 	// Username contains the name of a user who started operation
-	Username string `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
+	Username *string `json:"username,omitempty" protobuf:"bytes,1,opt,name=username"`
 	// Automated is set to true if operation was initiated automatically by the application controller.
-	Automated bool `json:"automated,omitempty" protobuf:"bytes,2,opt,name=automated"`
+	Automated *bool `json:"automated,omitempty" protobuf:"bytes,2,opt,name=automated"`
 }
 
 // Operation contains information about a requested or running operation
@@ -199,27 +199,27 @@ type ResourceResult struct {
 	// Name specifies the name of the resource
 	Name string `json:"name" protobuf:"bytes,5,opt,name=name"`
 	// Status holds the final result of the sync. Will be empty if the resources is yet to be applied/pruned and is always zero-value for hooks
-	Status string `json:"status,omitempty" protobuf:"bytes,6,opt,name=status"`
+	Status *string `json:"status,omitempty" protobuf:"bytes,6,opt,name=status"`
 	// Message contains an informational or error message for the last sync OR operation
-	Message string `json:"message,omitempty" protobuf:"bytes,7,opt,name=message"`
+	Message *string `json:"message,omitempty" protobuf:"bytes,7,opt,name=message"`
 	// HookType specifies the type of the hook. Empty for non-hook resources
-	HookType string `json:"hookType,omitempty" protobuf:"bytes,8,opt,name=hookType"`
+	HookType *string `json:"hookType,omitempty" protobuf:"bytes,8,opt,name=hookType"`
 	// HookPhase contains the state of any operation associated with this resource OR hook
 	// This can also contain values for non-hook resources.
 	HookPhase OperationPhase `json:"hookPhase,omitempty" protobuf:"bytes,9,opt,name=hookPhase"`
 	// SyncPhase indicates the particular phase of the sync that this result was acquired in
-	SyncPhase string `json:"syncPhase,omitempty" protobuf:"bytes,10,opt,name=syncPhase"`
+	SyncPhase *string `json:"syncPhase,omitempty" protobuf:"bytes,10,opt,name=syncPhase"`
 }
 
 // SyncOperation contains details about a sync operation.
 type SyncOperation struct {
 	// Revision is the revision (Git) or chart version (Helm) which to sync the application to
 	// If omitted, will use the revision specified in app spec.
-	Revision string `json:"revision,omitempty" protobuf:"bytes,1,opt,name=revision"`
+	Revision *string `json:"revision,omitempty" protobuf:"bytes,1,opt,name=revision"`
 	// Prune specifies to delete resources from the cluster that are no longer tracked in git
-	Prune bool `json:"prune,omitempty" protobuf:"bytes,2,opt,name=prune"`
+	Prune *bool `json:"prune,omitempty" protobuf:"bytes,2,opt,name=prune"`
 	// DryRun specifies to perform a `kubectl apply --dry-run` without actually performing the sync
-	DryRun bool `json:"dryRun,omitempty" protobuf:"bytes,3,opt,name=dryRun"`
+	DryRun *bool `json:"dryRun,omitempty" protobuf:"bytes,3,opt,name=dryRun"`
 	// SyncStrategy describes how to perform the sync
 	SyncStrategy *SyncStrategy `json:"syncStrategy,omitempty" protobuf:"bytes,4,opt,name=syncStrategy"`
 	// Resources describes which resources shall be part of the sync
@@ -241,8 +241,8 @@ type SyncOperation struct {
 
 // SyncOperationResource contains resources to sync.
 type SyncOperationResource struct {
-	Group     string `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
-	Kind      string `json:"kind" protobuf:"bytes,2,opt,name=kind"`
-	Name      string `json:"name" protobuf:"bytes,3,opt,name=name"`
-	Namespace string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	Group     *string `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
+	Kind      string  `json:"kind" protobuf:"bytes,2,opt,name=kind"`
+	Name      string  `json:"name" protobuf:"bytes,3,opt,name=name"`
+	Namespace *string `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
 }
