@@ -423,10 +423,11 @@ func TestCreate(t *testing.T) {
 							},
 						}, nil)
 				}),
-				cr: Application(withName(testApplicationExternalName)),
+				cr: Application(withExternalName(testApplicationExternalName), withName(testApplicationExternalName)),
 			},
 			want: want{
 				cr: Application(
+					withExternalName(testApplicationExternalName),
 					withName(testApplicationExternalName),
 				),
 				result: managed.ExternalCreation{},
@@ -448,10 +449,10 @@ func TestCreate(t *testing.T) {
 					).Return(
 						nil, errBoom)
 				}),
-				cr: Application(withName(testApplicationExternalName)),
+				cr: Application(withExternalName(testApplicationExternalName), withName(testApplicationExternalName)),
 			},
 			want: want{
-				cr:     Application(withName(testApplicationExternalName)),
+				cr:     Application(withExternalName(testApplicationExternalName), withName(testApplicationExternalName)),
 				result: managed.ExternalCreation{},
 				err:    errors.Wrap(errBoom, errCreateFailed),
 			},

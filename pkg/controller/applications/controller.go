@@ -156,7 +156,6 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotApplication)
 	}
-	name := meta.GetExternalName(cr)
 	updateRequest := generateUpdateRepositoryOptions(cr)
 	_, err := e.client.Update(ctx, updateRequest)
 	if err != nil {
@@ -200,9 +199,9 @@ func generateApplicationObservation(app *argocdv1alpha1.Application) v1alpha1.Ar
 	return *status
 }
 
-func generateCreateApplicationRequest(p *v1alpha1.Application) *application.ApplicationCreateRequest {
+func generateCreateApplicationRequest(cr *v1alpha1.Application) *application.ApplicationCreateRequest {
 	converter := v1alpha1.ConverterImpl{}
-	spec := converter.ToArgoApplicationSpec(&p.Spec.ForProvider)
+	spec := converter.ToArgoApplicationSpec(&cr.Spec.ForProvider)
 
 	app := &argocdv1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{},
