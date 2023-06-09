@@ -99,9 +99,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	var name = meta.GetExternalName(cr)
 
 	if name == "" {
-		return managed.ExternalObservation{
-			ResourceExists: false,
-		}, nil
+		return managed.ExternalObservation{}, nil
 	}
 
 	appQuery := application.ApplicationQuery{
@@ -143,7 +141,7 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalCreation{}, errors.New(errNotApplication)
 	}
 
-	createRequest := generateCreateApplicationRequest(&cr.Spec.ForProvider, cr.Name)
+	createRequest := generateCreateApplicationRequest(cr)
 
 	_, err := e.client.Create(ctx, createRequest)
 	if err != nil {
@@ -159,7 +157,7 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalUpdate{}, errors.New(errNotApplication)
 	}
 	name := meta.GetExternalName(cr)
-	updateRequest := generateUpdateRepositoryOptions(&cr.Spec.ForProvider, name)
+	updateRequest := generateUpdateRepositoryOptions(cr)
 	_, err := e.client.Update(ctx, updateRequest)
 	if err != nil {
 		return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateFailed)
@@ -202,14 +200,14 @@ func generateApplicationObservation(app *argocdv1alpha1.Application) v1alpha1.Ar
 	return *status
 }
 
-func generateCreateApplicationRequest(p *v1alpha1.ApplicationParameters, name string) *application.ApplicationCreateRequest { // nolint:gocyclo
+func generateCreateApplicationRequest(p *v1alpha1.Application) *application.ApplicationCreateRequest {
 	converter := v1alpha1.ConverterImpl{}
-	spec := converter.ToArgoApplicationSpec(p)
+	spec := converter.ToArgoApplicationSpec(&p.Spec.ForProvider)
 
 	app := &argocdv1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name: meta.GetExternalName(cr),
 		},
 		Spec: *spec,
 	}
@@ -221,15 +219,15 @@ func generateCreateApplicationRequest(p *v1alpha1.ApplicationParameters, name st
 	return repoCreateRequest
 }
 
-func generateUpdateRepositoryOptions(cr *v1alpha1.ApplicationParameters, name string) *application.ApplicationUpdateRequest {
+func generateUpdateRepositoryOptions(cr *v1alpha1.Application) *application.ApplicationUpdateRequest {
 	converter := v1alpha1.ConverterImpl{}
 
-	spec := converter.ToArgoApplicationSpec(cr)
+	spec := converter.ToArgoApplicationSpec(&cr.Spec.ForProvider)
 
 	app := &argocdv1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name: meta.GetExternalName(cr),
 		},
 		Spec: *spec,
 	}
