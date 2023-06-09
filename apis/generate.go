@@ -28,9 +28,15 @@ limitations under the License.
 // Generate crossplane-runtime methodsets (resource.Managed, etc)
 //go:generate go run -tags generate github.com/crossplane/crossplane-tools/cmd/angryjet generate-methodsets --header-file=../hack/boilerplate.go.txt ./...
 
+// Generate conversion code
+//
+//go:generate go run -tags generate github.com/jmattheis/goverter/cmd/goverter -wrapErrors -output ./applications/v1alpha1/zz_generated.conversion.go -packageName v1alpha1 -packagePath=github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1 ./applications/v1alpha1
+
 package apis
 
 import (
+	_ "github.com/jmattheis/goverter/cmd/goverter" //nolint:typecheck
+
 	_ "sigs.k8s.io/controller-tools/cmd/controller-gen" //nolint:typecheck
 
 	_ "github.com/crossplane/crossplane-tools/cmd/angryjet" //nolint:typecheck

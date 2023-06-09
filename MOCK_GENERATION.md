@@ -14,3 +14,7 @@ The following example shows how to generate mocks for the `projects` API:
     MOCK_INTERFACE="ProjectServiceClient"
     
     mockgen -package $MOCK_API -destination pkg/clients/mock/$MOCK_API/mock.go github.com/crossplane-contrib/provider-argocd/pkg/clients/$MOCK_API $MOCK_INTERFACE
+
+## go:generate
+
+To automatically regenerate mocks, extend `pkg/clients/generate.go`.

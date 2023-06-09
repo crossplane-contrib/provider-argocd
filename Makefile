@@ -126,6 +126,28 @@ run: go.build
 	@# To see other arguments that can be provided, run the command with --help instead
 	$(GO_OUT_DIR)/provider --debug
 
+dev-debug: $(KIND) $(KUBECTL)
+	@$(INFO) Creating kind cluster
+	@$(KIND) create cluster --name=$(PROJECT_NAME)-dev
+	@$(KUBECTL) cluster-info --context kind-$(PROJECT_NAME)-dev
+	@$(KUBECTL) create ns argocd
+	@$(INFO) Installing ArgoCD
+	@$(KUBECTL) apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+	@$(INFO) Installing Crossplane CRDs
+	@$(KUBECTL) apply -k https://github.com/crossplane/crossplane//cluster?ref=master
+	@$(INFO) Installing Provider Template CRDs
+	@$(KUBECTL) apply -R -f package/crds
+	@$(INFO) Creating crossplane-system namespace
+	@$(KUBECTL) create ns crossplane-system
+	@$(INFO) Creating provider config and secret
+	@$(KIND) get kubeconfig --name=$(PROJECT_NAME)-dev > kubeconfig
+	@$(INFO) Now you can debug the provider with the IDE...
+	@$(ROOT_DIR)/hack/local-argocd-setup.sh
+
+dev-teardown: $(KIND) $(KUBECTL)
+	@$(INFO) Deleting kind cluster
+	@$(KIND) delete cluster --name=$(PROJECT_NAME)-dev
+
 .PHONY: cobertura manifests submodules fallthrough test-integration run crds.clean
 
 # ====================================================================================
