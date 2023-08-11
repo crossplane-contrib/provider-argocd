@@ -66,6 +66,14 @@ XPKGS = provider-argocd
 # we ensure image is present in daemon.
 xpkg.build.provider-argocd: do.build.images
 
+# Setup E2E tests based on e2e-framework
+E2E_FILTER ?= .*
+E2E_CONTROLLER ?= $(BUILD_REGISTRY)/$(subst crossplane-,crossplane/,$(PROJECT_NAME)):latest
+E2E_XPKG_TAR ?= $(XPKG_OUTPUT_DIR)/$(PLATFORM)/$(PROJECT_NAME)-$(VERSION).xpkg
+E2E_XPKG_TAG ?= e2e/$(PROJECT_NAME):$(VERSION)
+
+export E2E_IMAGES = {"crossplane/provider-argocd":"${E2E_XPKG_TAG}"}
+
 # ====================================================================================
 # Targets
 
@@ -150,6 +158,22 @@ dev-teardown: $(KIND) $(KUBECTL)
 
 .PHONY: cobertura manifests submodules fallthrough test-integration run crds.clean
 
+
+.PHOBY: e2e.alternative-run
+
+e2e.alternative-run: $(KIND) $(HELM3) build e2e.alternative-run.load-image
+	@$(INFO) running e2e tests
+	$(foreach var,$(.VARIABLES),$(info $(var) = $($(var))))
+	@echo "E2E_IMAGES=$$E2E_IMAGES"
+	env
+	go test -v  $(PROJECT_REPO)/e2e/... -tags=e2e -count=1 -test.v -run '$(E2E_FILTER)'
+	@$(OK) e2e tests passed
+
+e2e.alternative-run.load-image:
+
+	$(eval DIGEST=$(shell docker image load -i $(E2E_XPKG_TAR) | cut -d ":" -f3))
+
+	docker tag $(DIGEST) $(E2E_XPKG_TAG)
 # ====================================================================================
 # Special Targets
 

@@ -19,15 +19,24 @@ func TestMain(m *testing.M) {
 	logging.EnableVerboseLogging(&verbosity)
 
 	testenv := env.NewParallel()
-
+	key := "crossplane/provider-argocd"
+	imgs := images.GetImagesFromJSONOrPanic(key, &key)
 	clusterSetup := setup.ClusterSetup{
-		Name:             "argocd",
-		Images:           images.ProviderImages{},
-		ControllerConfig: v1alpha1.ControllerConfig{},
+		Name:   "argocd",
+		Images: imgs,
+		ControllerConfig: &v1alpha1.ControllerConfig{
+			Spec: v1alpha1.ControllerConfigSpec{
+				Image: &imgs.Package,
+			},
+		},
 		SecretData:       nil,
 		AddToSchemaFuncs: nil,
 	}
-	clusterSetup.Run(testenv)
+	clusterSetup.Configure(testenv)
 
 	os.Exit(testenv.Run(m))
+}
+
+func TestFoo(t *testing.T) {
+	t.Skip()
 }
