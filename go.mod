@@ -3,15 +3,13 @@ module github.com/crossplane-contrib/provider-argocd
 go 1.19
 
 require (
-	github.com/argoproj/argo-cd/v2 v2.7.4
-	github.com/argoproj/gitops-engine v0.7.1-0.20230526233214-ad9a694fe4bc
 	github.com/crossplane/crossplane v1.11.5
 	github.com/crossplane/crossplane-runtime v0.19.2
 	github.com/crossplane/crossplane-tools v0.0.0-20220901191540-806c0b01097b
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
 	github.com/jmattheis/goverter v0.17.4
-	github.com/maximilianbraun/xp-testing v0.0.1
+	github.com/maximilianbraun/xp-testing v0.0.2-0.20230814132903-9c8ec2bfecb7
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.56.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
@@ -36,6 +34,8 @@ require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/alessio/shellescape v1.4.1 // indirect
+	github.com/argoproj/argo-cd/v2 v2.7.4 // indirect
+	github.com/argoproj/gitops-engine v0.7.1-0.20230526233214-ad9a694fe4bc // indirect
 	github.com/argoproj/pkg v0.13.7-0.20221221191914-44694015343d // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
@@ -228,4 +228,5 @@ replace (
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.26.3
 	k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.26.3
 	k8s.io/sample-controller => k8s.io/sample-controller v0.26.3
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.14.6
 )

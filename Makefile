@@ -165,7 +165,6 @@ e2e.alternative-run: $(KIND) $(HELM3) build e2e.alternative-run.load-image
 	@$(INFO) running e2e tests
 	$(foreach var,$(.VARIABLES),$(info $(var) = $($(var))))
 	@echo "E2E_IMAGES=$$E2E_IMAGES"
-	env
 	go test -v  $(PROJECT_REPO)/e2e/... -tags=e2e -count=1 -test.v -run '$(E2E_FILTER)'
 	@$(OK) e2e tests passed
 

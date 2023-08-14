@@ -20,7 +20,8 @@ func TestMain(m *testing.M) {
 
 	testenv := env.NewParallel()
 	key := "crossplane/provider-argocd"
-	imgs := images.GetImagesFromJSONOrPanic(key, &key)
+	imgs := images.GetImagesFromEnvironmentOrPanic(key, &key)
+	// Enhance interface for one- based providers
 	clusterSetup := setup.ClusterSetup{
 		Name:   "argocd",
 		Images: imgs,
