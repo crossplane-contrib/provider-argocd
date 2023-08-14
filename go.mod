@@ -11,13 +11,13 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
 	github.com/jmattheis/goverter v0.17.4
-	github.com/maximilianbraun/xp-testing v0.0.0-00010101000000-000000000000
+	github.com/maximilianbraun/xp-testing v0.0.1
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.56.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	k8s.io/api v0.27.4
 	k8s.io/apimachinery v0.27.4
-	sigs.k8s.io/controller-runtime v0.14.6
+	sigs.k8s.io/controller-runtime v0.15.0
 	sigs.k8s.io/controller-tools v0.12.1
 	sigs.k8s.io/e2e-framework v0.2.0
 )
@@ -229,5 +229,3 @@ replace (
 	k8s.io/sample-cli-plugin => k8s.io/sample-cli-plugin v0.26.3
 	k8s.io/sample-controller => k8s.io/sample-controller v0.26.3
 )
-
-replace github.com/maximilianbraun/xp-testing => ../xp-testing
