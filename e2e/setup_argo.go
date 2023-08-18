@@ -69,10 +69,8 @@ func addUserToArgocd(namespace string) env.Func {
 
 func addRBAC(namespace string) func(ctx context.Context, config *envconf.Config) (context.Context, error) {
 	return func(ctx context.Context, config *envconf.Config) (context.Context, error) {
-		_, err := waitForConfigMapAvailable(ctx, config, "argocd-rbac-cm", namespace)
-		if err != nil {
-			return ctx, err
-
+		if downstrCtx, err := waitForConfigMapAvailable(ctx, config, "argocd-rbac-cm", namespace); err != nil {
+			return downstrCtx, err
 		}
 		return patchConfigMap(ctx, config, "argocd-rbac-cm", namespace, `{"data":{"policy.csv":"g, provider-argocd, role:admin"}}`)
 	}
@@ -181,6 +179,10 @@ func installArgoManifests(argocdVersion string) env.Func {
 func downloadManifest(argocdVersion string) (string, error) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/argoproj/argo-cd/%s/manifests/install.yaml", argocdVersion)
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, url, nil)
+
+	if err != nil {
+		return "", err
+	}
 
 	client := http.DefaultClient
 	res, err := client.Do(req)
