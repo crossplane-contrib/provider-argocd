@@ -4,10 +4,12 @@ package e2e
 
 import (
 	"fmt"
-	"github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1"
+	"testing"
+
 	"github.com/maximilianbraun/xp-testing/pkg/resources"
 	"sigs.k8s.io/e2e-framework/pkg/features"
-	"testing"
+
+	"github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1"
 )
 
 func Test_Application_v1alpha1(t *testing.T) {

@@ -1,7 +1,8 @@
 run:
   deadline: 20m
   timeout: 20m
-
+  build-tags:
+    - e2e
   skip-files:
   - "zz_generated\\..+\\.go$"
 

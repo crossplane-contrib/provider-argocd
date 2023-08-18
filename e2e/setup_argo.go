@@ -3,16 +3,20 @@ package e2e
 import (
 	"context"
 	"fmt"
-	"github.com/maximilianbraun/xp-testing/pkg/xpenvfuncs"
 	"io"
+	"log"
+	"net/http"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/maximilianbraun/xp-testing/pkg/xpenvfuncs"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
-	"net/http"
-	"os"
 	"sigs.k8s.io/e2e-framework/klient/decoder"
 	"sigs.k8s.io/e2e-framework/klient/k8s"
 	"sigs.k8s.io/e2e-framework/klient/k8s/resources"
@@ -21,8 +25,6 @@ import (
 	"sigs.k8s.io/e2e-framework/pkg/env"
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/envfuncs"
-	"strings"
-	"time"
 )
 
 const (
@@ -109,9 +111,9 @@ func waitForArgocdToBeAvailable(namespace string) env.Func {
 			return nil, err
 		}
 		klog.V(4).Info("Waiting for Argocd to become available")
-		for _, item := range deployments.Items {
+		for i := range deployments.Items {
 			err := wait.For(
-				c.DeploymentConditionMatch(&item, appsv1.DeploymentAvailable, v1.ConditionTrue),
+				c.DeploymentConditionMatch(&deployments.Items[i], appsv1.DeploymentAvailable, v1.ConditionTrue),
 				wait.WithTimeout(time.Minute), wait.WithImmediate())
 			if err != nil {
 				return nil, err
@@ -149,14 +151,21 @@ func installArgoManifests(argocdVersion string) env.Func {
 	}
 }
 
-// v2.7.4
 func downloadManifest(argocdVersion string) (string, error) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/argoproj/argo-cd/%s/manifests/install.yaml", argocdVersion)
-	res, err := http.Get(url)
+	reader := strings.Reader{}
+
+	res, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, url, &reader)
+
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 	d, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", err

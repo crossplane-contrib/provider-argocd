@@ -3,10 +3,12 @@
 package e2e
 
 import (
-	"github.com/crossplane-contrib/provider-argocd/apis"
-	runtime "k8s.io/apimachinery/pkg/runtime"
 	"os"
 	"testing"
+
+	runtime "k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/crossplane-contrib/provider-argocd/apis"
 
 	xpv1alpha1 "github.com/crossplane/crossplane/apis/pkg/v1alpha1"
 	"sigs.k8s.io/e2e-framework/pkg/env"
