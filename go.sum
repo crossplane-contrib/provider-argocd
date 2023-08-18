@@ -547,6 +547,8 @@ github.com/maximilianbraun/xp-testing v0.0.2-0.20230814104351-ce1f8451c27a h1:2Z
 github.com/maximilianbraun/xp-testing v0.0.2-0.20230814104351-ce1f8451c27a/go.mod h1:iGrABPMMvqgQg43ypEqi+AX2/vb5Eiy5MBYXYUX3qEc=
 github.com/maximilianbraun/xp-testing v0.0.2-0.20230814132903-9c8ec2bfecb7 h1:iQIekuJ15uVz20Rkq3ciEt/pgzWEhsqTwgpyVPEmwfs=
 github.com/maximilianbraun/xp-testing v0.0.2-0.20230814132903-9c8ec2bfecb7/go.mod h1:iGrABPMMvqgQg43ypEqi+AX2/vb5Eiy5MBYXYUX3qEc=
+github.com/maximilianbraun/xp-testing v0.0.2-0.20230818075205-001d609cd248 h1:jPJ0ezMIMTFS0oIAtd/fEjOHvkrH4JZTLDC1GGri/t8=
+github.com/maximilianbraun/xp-testing v0.0.2-0.20230818075205-001d609cd248/go.mod h1:MI3ZKAcWey3y7C7NjYLDEMKTUNxvLRXtUCvJJ6Qijeg=
 github.com/minio/md5-simd v1.1.2/go.mod h1:MzdKDxYpY2BT9XQFocsiZf/NKVtR7nkE4RoEpN+20RM=
 github.com/minio/minio-go/v7 v7.0.45/go.mod h1:nCrRzjoSUQh8hgKKtu3Y708OLvRLtuASMg2/nvmbarw=
 github.com/minio/sha256-simd v1.0.0/go.mod h1:OuYzVNI5vcoYIAmbIvHPl3N3jUzVedXbKy5RFepssQM=

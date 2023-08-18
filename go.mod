@@ -9,7 +9,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
 	github.com/jmattheis/goverter v0.17.4
-	github.com/maximilianbraun/xp-testing v0.0.2-0.20230814132903-9c8ec2bfecb7
+	github.com/maximilianbraun/xp-testing v0.0.2-0.20230818075205-001d609cd248
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.56.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6

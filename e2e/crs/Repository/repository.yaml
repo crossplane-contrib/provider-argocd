@@ -1,0 +1,11 @@
+---
+apiVersion: repositories.argocd.crossplane.io/v1alpha1
+kind: Repository
+metadata:
+  name: example-project.git
+spec:
+  forProvider:
+    repo: https://github.com/stefanprodan/podinfo.git
+    type: git
+  providerConfigRef:
+    name: argocd-provider
