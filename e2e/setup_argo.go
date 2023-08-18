@@ -69,6 +69,11 @@ func addUserToArgocd(namespace string) env.Func {
 
 func addRBAC(namespace string) func(ctx context.Context, config *envconf.Config) (context.Context, error) {
 	return func(ctx context.Context, config *envconf.Config) (context.Context, error) {
+		_, err := waitForConfigMapAvailable(ctx, config, "argocd-rbac-cm", namespace)
+		if err != nil {
+			return ctx, err
+
+		}
 		return patchConfigMap(ctx, config, "argocd-rbac-cm", namespace, `{"data":{"policy.csv":"g, provider-argocd, role:admin"}}`)
 	}
 }
@@ -84,7 +89,6 @@ func patchConfigMap(ctx context.Context, config *envconf.Config, name string, na
 		PatchType: types.MergePatchType,
 		Data:      []byte(patchData),
 	}
-
 	err := config.Client().Resources().Patch(ctx, &configmap, patch)
 	if err != nil {
 		return nil, err
@@ -94,8 +98,31 @@ func patchConfigMap(ctx context.Context, config *envconf.Config, name string, na
 
 func addUser(namespace string) func(ctx context.Context, config *envconf.Config) (context.Context, error) {
 	return func(ctx context.Context, config *envconf.Config) (context.Context, error) {
+		_, err := waitForConfigMapAvailable(ctx, config, "argocd-cm", namespace)
+		if err != nil {
+			return ctx, err
+
+		}
 		return patchConfigMap(ctx, config, "argocd-cm", namespace, `{"data":{"accounts.provider-argocd":"apiKey"}}`)
 	}
+}
+
+func waitForConfigMapAvailable(ctx context.Context, config *envconf.Config, name string, namespace string) (context.Context, error) {
+	res := config.Client().Resources()
+	res = res.WithNamespace(namespace)
+
+	c := conditions.New(res)
+	list := v1.ConfigMapList{}
+	list.Items = []v1.ConfigMap{{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}}
+	klog.V(4).Infof("Waiting for Configmap %s/%s", namespace, name)
+	err := wait.For(c.ResourcesFound(&list), wait.WithImmediate(), wait.WithTimeout(time.Minute*2))
+
+	return ctx, err
 }
 
 func waitForArgocdToBeAvailable(namespace string) env.Func {
@@ -153,9 +180,10 @@ func installArgoManifests(argocdVersion string) env.Func {
 
 func downloadManifest(argocdVersion string) (string, error) {
 	url := fmt.Sprintf("https://raw.githubusercontent.com/argoproj/argo-cd/%s/manifests/install.yaml", argocdVersion)
-	reader := strings.Reader{}
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, url, nil)
 
-	res, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, url, &reader)
+	client := http.DefaultClient
+	res, err := client.Do(req)
 
 	if err != nil {
 		return "", err
@@ -170,5 +198,9 @@ func downloadManifest(argocdVersion string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return string(d), nil
+	if res.StatusCode != http.StatusOK {
+		return "", err
+	}
+	manifests := string(d)
+	return manifests, nil
 }
