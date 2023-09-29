@@ -30,6 +30,8 @@ type Converter interface {
 	FromArgoApplicationStatus(in *argocdv1alpha1.ApplicationStatus) *ArgoApplicationStatus
 }
 
+// ExtV1JSONToRuntimeRawExtension converts an extv1.JSON into a
+// *runtime.RawExtension.
 func ExtV1JSONToRuntimeRawExtension(in extv1.JSON) *runtime.RawExtension {
 	return &runtime.RawExtension{
 		Raw: in.Raw,
