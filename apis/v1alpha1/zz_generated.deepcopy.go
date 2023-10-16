@@ -97,6 +97,11 @@ func (in *ProviderConfigSpec) DeepCopyInto(out *ProviderConfigSpec) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.GRPCWeb != nil {
+		in, out := &in.GRPCWeb, &out.GRPCWeb
+		*out = new(bool)
+		**out = **in
+	}
 	in.Credentials.DeepCopyInto(&out.Credentials)
 }
 

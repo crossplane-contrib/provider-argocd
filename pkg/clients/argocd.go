@@ -80,11 +80,18 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 	if err != nil {
 		return nil, err
 	}
+	grpcWeb := false
+	if pc.Spec.GRPCWeb != nil {
+		grpcWeb = *pc.Spec.GRPCWeb
+	}
+
 	return &argocd.ClientOptions{
 		ServerAddr: pc.Spec.ServerAddr,
 		Insecure:   insecure,
 		PlainText:  plaintext,
 		AuthToken:  authToken,
+		GRPCWeb: grpcWeb,
+		GRPCWebRootPath: pc.Spec.GRPCWebRootPath,
 	}, nil
 }
 
