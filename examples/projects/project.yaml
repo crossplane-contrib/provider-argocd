@@ -6,7 +6,6 @@ metadata:
   labels:
     global-project: "true"
 spec:
-  forProvider:
-    description: nothing but an example
+  forProvider: {}
   providerConfigRef:
     name: argocd-provider
