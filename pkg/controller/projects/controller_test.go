@@ -44,6 +44,7 @@ var (
 	testProjectExternalName = "testproject"
 	testDescription         = "This is a Test"
 	testDescription2        = "This description changed"
+	testLabels              = map[string]string{"label1": "value1"}
 )
 
 type args struct {
@@ -82,6 +83,10 @@ func withSpec(p v1alpha1.ProjectParameters) ProjectModifier {
 
 func withObjectMeta(p metav1.ObjectMeta) ProjectModifier {
 	return func(r *v1alpha1.Project) { r.ObjectMeta = p }
+}
+
+func withLabels(l map[string]string) ProjectModifier {
+	return func(r *v1alpha1.Project) { r.Labels = l }
 }
 
 func withObservation(p v1alpha1.ProjectObservation) ProjectModifier {
@@ -125,6 +130,7 @@ func TestObserve(t *testing.T) {
 				}),
 				cr: Project(
 					withExternalName(testProjectExternalName),
+					withLabels(testLabels),
 					withSpec(v1alpha1.ProjectParameters{
 						Description: &testDescription,
 					}),
@@ -133,6 +139,7 @@ func TestObserve(t *testing.T) {
 			want: want{
 				cr: Project(
 					withExternalName(testProjectExternalName),
+					withLabels(testLabels),
 					withSpec(v1alpha1.ProjectParameters{
 						Description: &testDescription,
 					}),
@@ -322,7 +329,7 @@ func TestCreate(t *testing.T) {
 						context.Background(),
 						&project.ProjectCreateRequest{
 							Project: &argocdv1alpha1.AppProject{
-								ObjectMeta: metav1.ObjectMeta{Name: testProjectExternalName},
+								ObjectMeta: metav1.ObjectMeta{Name: testProjectExternalName, Labels: testLabels},
 								Spec: argocdv1alpha1.AppProjectSpec{
 									Description: testDescription,
 								},
@@ -332,7 +339,8 @@ func TestCreate(t *testing.T) {
 						&argocdv1alpha1.AppProject{
 							TypeMeta: metav1.TypeMeta{},
 							ObjectMeta: metav1.ObjectMeta{
-								Name: testProjectExternalName,
+								Name:   testProjectExternalName,
+								Labels: testLabels,
 							},
 							Spec: argocdv1alpha1.AppProjectSpec{
 								Description: testDescription,
@@ -342,7 +350,8 @@ func TestCreate(t *testing.T) {
 				}),
 				cr: Project(
 					withObjectMeta(metav1.ObjectMeta{
-						Name: testProjectExternalName,
+						Name:   testProjectExternalName,
+						Labels: testLabels,
 					}),
 					withSpec(v1alpha1.ProjectParameters{
 						Description: &testDescription,
@@ -355,7 +364,8 @@ func TestCreate(t *testing.T) {
 						Description: &testDescription,
 					}),
 					withObjectMeta(metav1.ObjectMeta{
-						Name: testProjectExternalName,
+						Name:   testProjectExternalName,
+						Labels: testLabels,
 					}),
 					withExternalName(testProjectExternalName),
 				),
@@ -450,7 +460,8 @@ func TestUpdate(t *testing.T) {
 						&argocdv1alpha1.AppProject{
 							TypeMeta: metav1.TypeMeta{},
 							ObjectMeta: metav1.ObjectMeta{
-								Name: testProjectExternalName,
+								Name:   testProjectExternalName,
+								Labels: testLabels,
 							},
 							Spec: argocdv1alpha1.AppProjectSpec{
 								Description: testDescription,
@@ -473,7 +484,8 @@ func TestUpdate(t *testing.T) {
 					).Return(&argocdv1alpha1.AppProject{
 						TypeMeta: metav1.TypeMeta{},
 						ObjectMeta: metav1.ObjectMeta{
-							Name: testProjectExternalName,
+							Name:   testProjectExternalName,
+							Labels: testLabels,
 						},
 						Spec: argocdv1alpha1.AppProjectSpec{
 							Description: testDescription2,
@@ -483,7 +495,8 @@ func TestUpdate(t *testing.T) {
 				}),
 				cr: Project(
 					withObjectMeta(metav1.ObjectMeta{
-						Name: testProjectExternalName,
+						Name:   testProjectExternalName,
+						Labels: testLabels,
 					}),
 					withSpec(v1alpha1.ProjectParameters{
 						Description: &testDescription2,
@@ -497,7 +510,8 @@ func TestUpdate(t *testing.T) {
 						Description: &testDescription2,
 					}),
 					withObjectMeta(metav1.ObjectMeta{
-						Name: testProjectExternalName,
+						Name:   testProjectExternalName,
+						Labels: testLabels,
 					}),
 					withExternalName(testProjectExternalName),
 				),

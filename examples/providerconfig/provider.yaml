@@ -5,7 +5,7 @@ kind: ProviderConfig
 metadata:
   name: argocd-provider
 spec:
-  serverAddr: argocd-server.argocd.svc:443
+  serverAddr: localhost:8443
   insecure: true
   plainText: false
   credentials:
