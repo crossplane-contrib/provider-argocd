@@ -85,14 +85,6 @@ func withObjectMeta(p metav1.ObjectMeta) ProjectModifier {
 	return func(r *v1alpha1.Project) { r.ObjectMeta = p }
 }
 
-func withObjectMetaLabels(l map[string]string) ProjectModifier {
-	return func(r *v1alpha1.Project) { r.ObjectMeta.Labels = l }
-}
-
-func withProjectLabels(l map[string]string) ProjectModifier {
-	return func(r *v1alpha1.Project) { r.Spec.ForProvider.ProjectLabels = l }
-}
-
 func withObservation(p v1alpha1.ProjectObservation) ProjectModifier {
 	return func(r *v1alpha1.Project) { r.Status.AtProvider = p }
 }
