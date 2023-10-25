@@ -85,8 +85,12 @@ func withObjectMeta(p metav1.ObjectMeta) ProjectModifier {
 	return func(r *v1alpha1.Project) { r.ObjectMeta = p }
 }
 
-func withLabels(l map[string]string) ProjectModifier {
-	return func(r *v1alpha1.Project) { r.Labels = l }
+func withObjectMetaLabels(l map[string]string) ProjectModifier {
+	return func(r *v1alpha1.Project) { r.ObjectMeta.Labels = l }
+}
+
+func withProjectLabels(l map[string]string) ProjectModifier {
+	return func(r *v1alpha1.Project) { r.Spec.ForProvider.ProjectLabels = l }
 }
 
 func withObservation(p v1alpha1.ProjectObservation) ProjectModifier {
@@ -120,7 +124,8 @@ func TestObserve(t *testing.T) {
 						&argocdv1alpha1.AppProject{
 							TypeMeta: metav1.TypeMeta{},
 							ObjectMeta: metav1.ObjectMeta{
-								Name: testProjectExternalName,
+								Name:   testProjectExternalName,
+								Labels: testLabels,
 							},
 							Spec: argocdv1alpha1.AppProjectSpec{
 								Description: testDescription,
@@ -130,18 +135,18 @@ func TestObserve(t *testing.T) {
 				}),
 				cr: Project(
 					withExternalName(testProjectExternalName),
-					withLabels(testLabels),
 					withSpec(v1alpha1.ProjectParameters{
-						Description: &testDescription,
+						Description:   &testDescription,
+						ProjectLabels: testLabels,
 					}),
 				),
 			},
 			want: want{
 				cr: Project(
 					withExternalName(testProjectExternalName),
-					withLabels(testLabels),
 					withSpec(v1alpha1.ProjectParameters{
-						Description: &testDescription,
+						Description:   &testDescription,
+						ProjectLabels: testLabels,
 					}),
 					withConditions(xpv1.Available()),
 					withObservation(v1alpha1.ProjectObservation{
@@ -350,22 +355,22 @@ func TestCreate(t *testing.T) {
 				}),
 				cr: Project(
 					withObjectMeta(metav1.ObjectMeta{
-						Name:   testProjectExternalName,
-						Labels: testLabels,
+						Name: testProjectExternalName,
 					}),
 					withSpec(v1alpha1.ProjectParameters{
-						Description: &testDescription,
+						Description:   &testDescription,
+						ProjectLabels: testLabels,
 					}),
 				),
 			},
 			want: want{
 				cr: Project(
 					withSpec(v1alpha1.ProjectParameters{
-						Description: &testDescription,
+						Description:   &testDescription,
+						ProjectLabels: testLabels,
 					}),
 					withObjectMeta(metav1.ObjectMeta{
-						Name:   testProjectExternalName,
-						Labels: testLabels,
+						Name: testProjectExternalName,
 					}),
 					withExternalName(testProjectExternalName),
 				),

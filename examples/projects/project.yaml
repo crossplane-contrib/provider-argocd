@@ -3,9 +3,9 @@ apiVersion: projects.argocd.crossplane.io/v1alpha1
 kind: Project
 metadata:
   name: example-project
-  labels:
-    global-project: "true"
 spec:
-  forProvider: {}
+  forProvider:
+    projectLabels:
+      argocd.crossplane.io/global-project: "true"
   providerConfigRef:
     name: argocd-provider

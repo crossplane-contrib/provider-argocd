@@ -258,6 +258,12 @@ spec:
                           created for apps which have orphaned resources
                         type: boolean
                     type: object
+                  projectLabels:
+                    additionalProperties:
+                      type: string
+                    description: ProjectLabels labels that will be applied to the
+                      AppProject
+                    type: object
                   roles:
                     description: Roles are user defined RBAC roles associated with
                       this project
