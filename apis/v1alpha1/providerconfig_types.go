@@ -37,11 +37,11 @@ type ProviderConfigSpec struct {
 
 	// Enables gRPC-web protocol. Useful if Argo CD server is behind proxy which does not support HTTP2.
 	// +optional
-	GRPCWeb         *bool `json:"grpcWeb,omitempty"`
+	GRPCWeb *bool `json:"grpcWeb,omitempty"`
 
 	// Enables gRPC-web protocol. Useful if Argo CD server is behind proxy which does not support HTTP2. Set web root.
 	// +optional
-	GRPCWebRootPath string `json:"grpcWebRootPath,omitempty"`
+	GRPCWebRootPath *string `json:"grpcWebRootPath,omitempty"`
 
 	// Credentials required to authenticate to this provider.
 	Credentials ProviderCredentials `json:"credentials"`

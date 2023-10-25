@@ -25,6 +25,7 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
@@ -68,30 +69,23 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
 
-	insecure := false
-	if pc.Spec.Insecure != nil {
-		insecure = *pc.Spec.Insecure
-	}
-	plaintext := false
-	if pc.Spec.PlainText != nil {
-		plaintext = *pc.Spec.PlainText
-	}
+	insecure := ptr.Deref(pc.Spec.Insecure, false)
+	plaintext := ptr.Deref(pc.Spec.PlainText, false)
+
 	authToken, err := authFromCredentials(ctx, c, pc.Spec.Credentials)
 	if err != nil {
 		return nil, err
 	}
-	grpcWeb := false
-	if pc.Spec.GRPCWeb != nil {
-		grpcWeb = *pc.Spec.GRPCWeb
-	}
+	grpcWeb := ptr.Deref(pc.Spec.GRPCWeb, false)
+	grpcWebRoot := ptr.Deref(pc.Spec.GRPCWebRootPath, "")
 
 	return &argocd.ClientOptions{
-		ServerAddr: pc.Spec.ServerAddr,
-		Insecure:   insecure,
-		PlainText:  plaintext,
-		AuthToken:  authToken,
-		GRPCWeb: grpcWeb,
-		GRPCWebRootPath: pc.Spec.GRPCWebRootPath,
+		ServerAddr:      pc.Spec.ServerAddr,
+		Insecure:        insecure,
+		PlainText:       plaintext,
+		AuthToken:       authToken,
+		GRPCWeb:         grpcWeb,
+		GRPCWebRootPath: grpcWebRoot,
 	}, nil
 }
 
