@@ -13,9 +13,9 @@ import (
 	xpv1alpha1 "github.com/crossplane/crossplane/apis/pkg/v1alpha1"
 	"sigs.k8s.io/e2e-framework/pkg/env"
 
-	"github.com/maximilianbraun/xp-testing/pkg/images"
-	"github.com/maximilianbraun/xp-testing/pkg/logging"
-	"github.com/maximilianbraun/xp-testing/pkg/setup"
+	"github.com/crossplane-contrib/xp-testing/pkg/images"
+	"github.com/crossplane-contrib/xp-testing/pkg/logging"
+	"github.com/crossplane-contrib/xp-testing/pkg/setup"
 )
 
 var testenv env.Environment

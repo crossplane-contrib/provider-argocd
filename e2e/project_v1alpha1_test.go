@@ -5,7 +5,7 @@ package e2e
 import (
 	"testing"
 
-	"github.com/maximilianbraun/xp-testing/pkg/resources"
+	"github.com/crossplane-contrib/xp-testing/pkg/resources"
 	"sigs.k8s.io/e2e-framework/pkg/features"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1"

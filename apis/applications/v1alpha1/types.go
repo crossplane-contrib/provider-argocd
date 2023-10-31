@@ -20,6 +20,7 @@ package v1alpha1
 
 import (
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	extv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -160,6 +161,8 @@ type ApplicationSourceHelm struct {
 	IgnoreMissingValueFiles *bool `json:"ignoreMissingValueFiles,omitempty" protobuf:"bytes,8,opt,name=ignoreMissingValueFiles"`
 	// SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
 	SkipCrds *bool `json:"skipCrds,omitempty" protobuf:"bytes,9,opt,name=skipCrds"`
+	// ValuesObject specifies Helm values to be passed to helm template, defined as a map. This takes precedence over Values.
+	ValuesObject extv1.JSON `json:"valuesObject,omitempty" protobuf:"bytes,10,opt,name=valuesObject"`
 }
 
 // HelmParameter is a parameter that's passed to helm template during manifest generation

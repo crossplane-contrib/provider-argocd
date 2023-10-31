@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/maximilianbraun/xp-testing/pkg/xpenvfuncs"
+	"github.com/crossplane-contrib/xp-testing/pkg/xpenvfuncs"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

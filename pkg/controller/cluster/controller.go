@@ -27,6 +27,9 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/utils/pointer"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -50,6 +53,7 @@ const (
 	errDeleteFailed    = "cannot delete Argocd Cluster"
 	errGetSecretFailed = "cannot get Kubernetes secret"
 	errFmtKeyNotFound  = "key %s is not found in referenced Kubernetes secret"
+	errParseKubeconfig = "unable to parse kubeconfig"
 )
 
 // SetupCluster adds a controller that reconciles cluster.
@@ -89,7 +93,7 @@ type external struct {
 	client cluster.ServiceClient
 }
 
-func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) { // nolint: gocyclo
 	cr, ok := mg.(*v1alpha1.Cluster)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotCluster)
@@ -103,7 +107,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	clusterQuery := argocdcluster.ClusterQuery{
 		Name:   meta.GetExternalName(cr),
-		Server: cr.Spec.ForProvider.Server,
+		Server: pointer.StringDeref(cr.Spec.ForProvider.Server, ""),
 	}
 
 	observedCluster, err := e.client.Get(ctx, &clusterQuery)
@@ -115,21 +119,26 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		}
 		return managed.ExternalObservation{}, errors.Wrap(err, errGetFailed)
 	}
-	if meta.WasDeleted(cr) && meta.GetExternalName(cr) == observedCluster.Name {
+	if meta.WasDeleted(cr) && meta.GetExternalName(cr) != observedCluster.Name {
 		// ArgoCD Cluster resource ignores the name field. This detects the deletion of the default cluster resource.
 		return managed.ExternalObservation{}, nil
 	}
 
-	current := cr.Spec.ForProvider.DeepCopy()
+	currentSpec := cr.Spec.ForProvider.DeepCopy()
 	lateInitializeCluster(&cr.Spec.ForProvider, observedCluster)
 
-	cr.Status.AtProvider = generateClusterObservation(observedCluster)
+	kubeconfigSecretResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.Config.KubeconfigSecretRef)
+	if err != nil {
+		return managed.ExternalObservation{}, err
+	}
+	currentStatusAtProvider := cr.Status.AtProvider.DeepCopy()
+	cr.Status.AtProvider = generateClusterObservation(observedCluster, kubeconfigSecretResourceVersion)
 	cr.Status.SetConditions(xpv1.Available())
 
 	return managed.ExternalObservation{
 		ResourceExists:          true,
-		ResourceUpToDate:        isClusterUpToDate(&cr.Spec.ForProvider, observedCluster),
-		ResourceLateInitialized: !cmp.Equal(current, &cr.Spec.ForProvider),
+		ResourceUpToDate:        isClusterUpToDate(cr, currentStatusAtProvider, observedCluster),
+		ResourceLateInitialized: !cmp.Equal(currentSpec, &cr.Spec.ForProvider),
 	}, nil
 }
 
@@ -177,8 +186,9 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 	if !ok {
 		return errors.New(errNotCluster)
 	}
+
 	clusterQuery := argocdcluster.ClusterQuery{
-		Server: cr.Spec.ForProvider.Server,
+		Server: *cr.Spec.ForProvider.Server,
 		Name:   meta.GetExternalName(cr),
 	}
 
@@ -199,9 +209,18 @@ func lateInitializeCluster(p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Clus
 	if p.Shard == nil {
 		p.Shard = r.Shard
 	}
+
+	if p.Server == nil {
+		p.Server = &r.Server
+	}
+
+	if p.Name == nil {
+		p.Name = &r.Name
+	}
+
 }
 
-func generateClusterObservation(r *argocdv1alpha1.Cluster) v1alpha1.ClusterObservation {
+func generateClusterObservation(r *argocdv1alpha1.Cluster, kubeconfigSecretResourceVersion string) v1alpha1.ClusterObservation {
 	if r == nil {
 		return v1alpha1.ClusterObservation{}
 	}
@@ -219,12 +238,17 @@ func generateClusterObservation(r *argocdv1alpha1.Cluster) v1alpha1.ClusterObser
 		},
 	}
 
+	if kubeconfigSecretResourceVersion != "" {
+		o.Kubeconfig = &v1alpha1.KubeconfigObservation{
+			Secret: v1alpha1.SecretObservation{ResourceVersion: kubeconfigSecretResourceVersion},
+		}
+	}
+
 	return o
 }
 
 func (e *external) generateCreateClusterOptions(ctx context.Context, p *v1alpha1.Cluster) (*argocdcluster.ClusterCreateRequest, error) {
 	argoCluster, err := e.convertClusterTypes(ctx, &p.Spec.ForProvider)
-
 	clusterCreateRequest := &argocdcluster.ClusterCreateRequest{
 		Cluster: &argoCluster,
 		Upsert:  false,
@@ -235,21 +259,26 @@ func (e *external) generateCreateClusterOptions(ctx context.Context, p *v1alpha1
 
 func (e *external) convertClusterTypes(ctx context.Context, p *v1alpha1.ClusterParameters) (argocdv1alpha1.Cluster, error) { // nolint:gocyclo // checking all parameters can't be reduced
 	argoCluster := argocdv1alpha1.Cluster{
-		Server: p.Server,
-		Name:   p.Name,
-		Config: argocdv1alpha1.ClusterConfig{
-			TLSClientConfig: argocdv1alpha1.TLSClientConfig{
-				Insecure: p.Config.TLSClientConfig.Insecure,
-			},
-		},
+		Config: argocdv1alpha1.ClusterConfig{},
+	}
+
+	if p.Server != nil {
+		argoCluster.Server = pointer.StringDeref(p.Server, "")
+	}
+
+	if p.Name != nil {
+		argoCluster.Name = pointer.StringDeref(p.Name, "")
 	}
 
 	if p.Config.Username != nil {
 		argoCluster.Config.Username = *p.Config.Username
 	}
 
-	if p.Config.TLSClientConfig.ServerName != nil {
-		argoCluster.Config.TLSClientConfig.ServerName = *p.Config.TLSClientConfig.ServerName
+	if p.Config.TLSClientConfig != nil {
+		if p.Config.TLSClientConfig.ServerName != nil {
+			argoCluster.Config.TLSClientConfig.ServerName = *p.Config.TLSClientConfig.ServerName
+		}
+		argoCluster.Config.TLSClientConfig.Insecure = p.Config.TLSClientConfig.Insecure
 	}
 
 	if p.Config.AWSAuthConfig != nil {
@@ -322,7 +351,8 @@ func (e *external) generateUpdateClusterOptions(ctx context.Context, p *v1alpha1
 	return o, err
 }
 
-func isClusterUpToDate(p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) bool { // nolint:gocyclo // checking all parameters can't be reduced
+func isClusterUpToDate(cr *v1alpha1.Cluster, o *v1alpha1.ClusterObservation, r *argocdv1alpha1.Cluster) bool { // nolint:gocyclo // checking all parameters can't be reduced
+	p := cr.Spec.ForProvider
 	if (p.Project != nil && !cmp.Equal(*p.Project, r.Project)) || (p.Project == nil && r.Project != "") {
 		return false
 	}
@@ -331,9 +361,11 @@ func isClusterUpToDate(p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster)
 		!cmp.Equal(p.Namespaces, r.Namespaces),
 		!cmp.Equal(p.Shard, r.Shard),
 		!cmp.Equal(p.Labels, r.Labels),
-		!cmp.Equal(p.Annotations, r.Annotations):
+		!cmp.Equal(p.Annotations, r.Annotations),
+		!cmp.Equal(cr.Status.AtProvider.Kubeconfig, o.Kubeconfig):
 		return false
 	}
+
 	return true
 }
 
@@ -341,13 +373,12 @@ func isEqualConfig(p *v1alpha1.ClusterConfig, r *argocdv1alpha1.ClusterConfig) b
 	if p == nil && r == nil {
 		return true
 	}
-
 	if p == nil || r == nil {
 		return false
 	}
 	switch {
 	case p.Username != nil && *p.Username != r.Username,
-		!isEqualTLSConfig(&p.TLSClientConfig, &r.TLSClientConfig),
+		!isEqualTLSConfig(p.TLSClientConfig, &r.TLSClientConfig),
 		!isEqualAWSAuthConfig(p.AWSAuthConfig, r.AWSAuthConfig),
 		!isEqualExecProviderConfig(p.ExecProviderConfig, r.ExecProviderConfig):
 		return false
@@ -359,14 +390,16 @@ func isEqualTLSConfig(p *v1alpha1.TLSClientConfig, r *argocdv1alpha1.TLSClientCo
 	if p == nil && r == nil {
 		return true
 	}
-
-	if p == nil || r == nil {
+	if p != nil && r == nil {
 		return false
 	}
-	switch {
-	case p.Insecure != r.Insecure,
-		p.ServerName != nil && *p.ServerName != r.ServerName:
-		return false
+
+	if p != nil && r != nil {
+		switch {
+		case p.Insecure != r.Insecure,
+			p.ServerName != nil && *p.ServerName != r.ServerName:
+			return false
+		}
 	}
 	return true
 }
@@ -425,7 +458,7 @@ func (e *external) resolveReferences(ctx context.Context, cr *v1alpha1.ClusterPa
 		r.Config.BearerToken = s
 	}
 
-	if cr.Config.TLSClientConfig.CertDataSecretRef != nil {
+	if cr.Config.TLSClientConfig != nil && cr.Config.TLSClientConfig.CertDataSecretRef != nil {
 		payload, err := e.getPayload(ctx, cr.Config.TLSClientConfig.CertDataSecretRef)
 		if err != nil {
 			return err
@@ -433,23 +466,50 @@ func (e *external) resolveReferences(ctx context.Context, cr *v1alpha1.ClusterPa
 		r.Config.TLSClientConfig.CertData = payload
 	}
 
-	if cr.Config.TLSClientConfig.KeyDataSecretRef != nil {
-		payload, err := e.getPayload(ctx, cr.Config.TLSClientConfig.KeyDataSecretRef)
+	if cr.Config.TLSClientConfig != nil {
+		if cr.Config.TLSClientConfig.KeyDataSecretRef != nil {
+			payload, err := e.getPayload(ctx, cr.Config.TLSClientConfig.KeyDataSecretRef)
+			if err != nil {
+				return err
+			}
+			r.Config.TLSClientConfig.KeyData = payload
+		}
+
+		if cr.Config.TLSClientConfig.CADataSecretRef != nil {
+			payload, err := e.getPayload(ctx, cr.Config.TLSClientConfig.CADataSecretRef)
+			if err != nil {
+				return err
+			}
+			r.Config.TLSClientConfig.CAData = payload
+			cr.Config.TLSClientConfig.CAData = payload
+
+		}
+	}
+	if cr.Config.KubeconfigSecretRef != nil {
+		err := e.extractKubeconfigFromSecretRef(ctx, cr, r)
+
 		if err != nil {
 			return err
 		}
-		r.Config.TLSClientConfig.KeyData = payload
 	}
 
-	if cr.Config.TLSClientConfig.CADataSecretRef != nil {
-		payload, err := e.getPayload(ctx, cr.Config.TLSClientConfig.CADataSecretRef)
-		if err != nil {
-			return err
-		}
-		r.Config.TLSClientConfig.CAData = payload
-		cr.Config.TLSClientConfig.CAData = payload
-	}
 	return nil
+}
+
+// fetch resource version from a SecretRef so that we can track any updates
+func (e *external) getSecretResourceVersion(ctx context.Context, ref *v1alpha1.SecretReference) (string, error) {
+	if ref == nil {
+		return "", nil
+	}
+	nn := types.NamespacedName{
+		Name:      ref.Name,
+		Namespace: ref.Namespace,
+	}
+	sc := &corev1.Secret{}
+	if err := e.kube.Get(ctx, nn, sc); err != nil {
+		return "", errors.Wrap(err, errGetSecretFailed)
+	}
+	return sc.GetResourceVersion(), nil
 }
 
 // fetch kubernetes secret payload
@@ -472,4 +532,53 @@ func (e *external) getPayload(ctx context.Context, ref *v1alpha1.SecretReference
 	}
 
 	return nil, nil
+}
+
+// extractKubeconfigFromSecretRef extracts login information from a Kubeconfig Secret Reference
+func (e *external) extractKubeconfigFromSecretRef(ctx context.Context, p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) error {
+
+	kubeconfig, err := e.getPayload(ctx, p.Config.KubeconfigSecretRef)
+	if err != nil {
+		return err
+	}
+	restConfig, err := newRESTConfigForKubeconfig(kubeconfig)
+	if err != nil {
+		return errors.Wrap(err, errParseKubeconfig)
+	}
+
+	if restConfig.Host != "" {
+		if p.Name == nil {
+			p.Name = &restConfig.Host
+			r.Name = restConfig.Host
+		}
+		p.Server = &restConfig.Host
+		r.Server = restConfig.Host
+	}
+
+	if restConfig.BearerToken != "" {
+		r.Config.BearerToken = restConfig.BearerToken
+	}
+
+	if restConfig.Username != "" {
+		p.Config.Username = &restConfig.Username
+		r.Config.Username = restConfig.Username
+	}
+
+	r.Config.TLSClientConfig = argocdv1alpha1.TLSClientConfig{
+		Insecure:   restConfig.TLSClientConfig.Insecure,
+		CAData:     restConfig.CAData,
+		CertData:   restConfig.TLSClientConfig.CertData,
+		KeyData:    restConfig.TLSClientConfig.KeyData,
+		ServerName: restConfig.TLSClientConfig.ServerName,
+	}
+	return nil
+}
+
+// newRESTConfigForKubeconfig returns a REST Config for the given KubeConfigValue.
+func newRESTConfigForKubeconfig(kubeConfig []byte) (*rest.Config, error) {
+	restConfig, err := clientcmd.RESTConfigFromKubeConfig(kubeConfig)
+	if err != nil {
+		return nil, err
+	}
+	return restConfig, nil
 }

@@ -6,7 +6,9 @@ import (
 	v1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 	health "github.com/argoproj/gitops-engine/pkg/health"
 	common "github.com/argoproj/gitops-engine/pkg/sync/common"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	runtime "k8s.io/apimachinery/pkg/runtime"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
 	"time"
 )
@@ -84,19 +86,12 @@ func (c *ConverterImpl) ToArgoApplicationSpec(source *ApplicationParameters) *v1
 		v1alpha1ApplicationSpec.Destination = c.ToArgoDestination((*source).Destination)
 		v1alpha1ApplicationSpec.Project = (*source).Project
 		v1alpha1ApplicationSpec.SyncPolicy = c.pV1alpha1SyncPolicyToPV1alpha1SyncPolicy((*source).SyncPolicy)
-		var v1alpha1ResourceIgnoreDifferencesList []v1alpha1.ResourceIgnoreDifferences
-		if (*source).IgnoreDifferences != nil {
-			v1alpha1ResourceIgnoreDifferencesList = make([]v1alpha1.ResourceIgnoreDifferences, len((*source).IgnoreDifferences))
-			for i := 0; i < len((*source).IgnoreDifferences); i++ {
-				v1alpha1ResourceIgnoreDifferencesList[i] = c.v1alpha1ResourceIgnoreDifferencesToV1alpha1ResourceIgnoreDifferences((*source).IgnoreDifferences[i])
-			}
-		}
-		v1alpha1ApplicationSpec.IgnoreDifferences = v1alpha1ResourceIgnoreDifferencesList
+		v1alpha1ApplicationSpec.IgnoreDifferences = c.v1alpha1ResourceIgnoreDifferencesListToV1alpha1IgnoreDifferences((*source).IgnoreDifferences)
 		var v1alpha1InfoList []v1alpha1.Info
 		if (*source).Info != nil {
 			v1alpha1InfoList = make([]v1alpha1.Info, len((*source).Info))
-			for j := 0; j < len((*source).Info); j++ {
-				v1alpha1InfoList[j] = c.v1alpha1InfoToV1alpha1Info((*source).Info[j])
+			for i := 0; i < len((*source).Info); i++ {
+				v1alpha1InfoList[i] = c.v1alpha1InfoToV1alpha1Info((*source).Info[i])
 			}
 		}
 		v1alpha1ApplicationSpec.Info = v1alpha1InfoList
@@ -154,8 +149,15 @@ func (c *ConverterImpl) intstrIntOrStringToIntstrIntOrString(source intstr.IntOr
 	intstrIntOrString.StrVal = source.StrVal
 	return intstrIntOrString
 }
-func (c *ConverterImpl) pV1TimeToPV1Time(source *v1.Time) *v1.Time {
-	var pV1Time *v1.Time
+func (c *ConverterImpl) pRuntimeRawExtensionToV1JSON(source *runtime.RawExtension) v1.JSON {
+	var v1JSON v1.JSON
+	if source != nil {
+		v1JSON = c.runtimeRawExtensionToV1JSON((*source))
+	}
+	return v1JSON
+}
+func (c *ConverterImpl) pV1TimeToPV1Time(source *v11.Time) *v11.Time {
+	var pV1Time *v11.Time
 	if source != nil {
 		v1Time := c.v1TimeToV1Time((*source))
 		pV1Time = &v1Time
@@ -241,6 +243,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSour
 		v1alpha1ApplicationSourceHelm.IgnoreMissingValueFiles = &pBool2
 		pBool3 := (*source).SkipCrds
 		v1alpha1ApplicationSourceHelm.SkipCrds = &pBool3
+		v1alpha1ApplicationSourceHelm.ValuesObject = c.pRuntimeRawExtensionToV1JSON((*source).ValuesObject)
 		pV1alpha1ApplicationSourceHelm = &v1alpha1ApplicationSourceHelm
 	}
 	return pV1alpha1ApplicationSourceHelm
@@ -303,6 +306,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSour
 			xbool3 = *(*source).SkipCrds
 		}
 		v1alpha1ApplicationSourceHelm.SkipCrds = xbool3
+		v1alpha1ApplicationSourceHelm.ValuesObject = ExtV1JSONToRuntimeRawExtension((*source).ValuesObject)
 		pV1alpha1ApplicationSourceHelm = &v1alpha1ApplicationSourceHelm
 	}
 	return pV1alpha1ApplicationSourceHelm
@@ -805,16 +809,28 @@ func (c *ConverterImpl) pV1alpha1SyncStrategyToPV1alpha1SyncStrategy(source *v1a
 	}
 	return pV1alpha1SyncStrategy
 }
+func (c *ConverterImpl) runtimeRawExtensionToV1JSON(source runtime.RawExtension) v1.JSON {
+	var v1JSON v1.JSON
+	var byteList []uint8
+	if source.Raw != nil {
+		byteList = make([]uint8, len(source.Raw))
+		for i := 0; i < len(source.Raw); i++ {
+			byteList[i] = source.Raw[i]
+		}
+	}
+	v1JSON.Raw = byteList
+	return v1JSON
+}
 func (c *ConverterImpl) timeTimeToTimeTime(source time.Time) time.Time {
 	var timeTime time.Time
 	return timeTime
 }
-func (c *ConverterImpl) v1TimeToPV1Time(source v1.Time) *v1.Time {
+func (c *ConverterImpl) v1TimeToPV1Time(source v11.Time) *v11.Time {
 	v1Time := c.v1TimeToV1Time(source)
 	return &v1Time
 }
-func (c *ConverterImpl) v1TimeToV1Time(source v1.Time) v1.Time {
-	var v1Time v1.Time
+func (c *ConverterImpl) v1TimeToV1Time(source v11.Time) v11.Time {
+	var v1Time v11.Time
 	v1Time.Time = c.timeTimeToTimeTime(source.Time)
 	return v1Time
 }
@@ -1195,6 +1211,16 @@ func (c *ConverterImpl) v1alpha1OperationToV1alpha1Operation(source v1alpha1.Ope
 	v1alpha1Operation.Info = pV1alpha1InfoList
 	v1alpha1Operation.Retry = c.v1alpha1RetryStrategyToV1alpha1RetryStrategy(source.Retry)
 	return v1alpha1Operation
+}
+func (c *ConverterImpl) v1alpha1ResourceIgnoreDifferencesListToV1alpha1IgnoreDifferences(source []ResourceIgnoreDifferences) v1alpha1.IgnoreDifferences {
+	var v1alpha1IgnoreDifferences v1alpha1.IgnoreDifferences
+	if source != nil {
+		v1alpha1IgnoreDifferences = make(v1alpha1.IgnoreDifferences, len(source))
+		for i := 0; i < len(source); i++ {
+			v1alpha1IgnoreDifferences[i] = c.v1alpha1ResourceIgnoreDifferencesToV1alpha1ResourceIgnoreDifferences(source[i])
+		}
+	}
+	return v1alpha1IgnoreDifferences
 }
 func (c *ConverterImpl) v1alpha1ResourceIgnoreDifferencesToV1alpha1ResourceIgnoreDifferences(source ResourceIgnoreDifferences) v1alpha1.ResourceIgnoreDifferences {
 	var v1alpha1ResourceIgnoreDifferences v1alpha1.ResourceIgnoreDifferences

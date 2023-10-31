@@ -7,7 +7,7 @@ import (
 	"path"
 	"testing"
 
-	"github.com/maximilianbraun/xp-testing/pkg/resources"
+	"github.com/crossplane-contrib/xp-testing/pkg/resources"
 	"sigs.k8s.io/e2e-framework/pkg/features"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"

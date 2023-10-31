@@ -23,6 +23,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
+	"k8s.io/utils/pointer"
 
 	argocdCluster "github.com/argoproj/argo-cd/v2/pkg/apiclient/cluster"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
@@ -122,10 +123,10 @@ func TestObserve(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 						Config: v1alpha1.ClusterConfig{
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -136,10 +137,10 @@ func TestObserve(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 						Config: v1alpha1.ClusterConfig{
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -189,10 +190,10 @@ func TestObserve(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 						Config: v1alpha1.ClusterConfig{
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -203,11 +204,11 @@ func TestObserve(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server:     testClusterServer,
-						Name:       testClusterExternalName,
+						Server:     pointer.String(testClusterServer),
+						Name:       pointer.String(testClusterExternalName),
 						Namespaces: testNamespaces[:],
 						Config: v1alpha1.ClusterConfig{
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -256,11 +257,11 @@ func TestObserve(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 						Config: v1alpha1.ClusterConfig{
 							Username: &testUsername,
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -271,11 +272,11 @@ func TestObserve(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 						Config: v1alpha1.ClusterConfig{
 							Username: &testUsername,
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -406,10 +407,10 @@ func TestCreate(t *testing.T) {
 				}),
 				cr: Cluster(
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 						Config: v1alpha1.ClusterConfig{
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -420,10 +421,10 @@ func TestCreate(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 						Config: v1alpha1.ClusterConfig{
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -456,10 +457,10 @@ func TestCreate(t *testing.T) {
 				}),
 				cr: Cluster(
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 						Config: v1alpha1.ClusterConfig{
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -469,10 +470,10 @@ func TestCreate(t *testing.T) {
 			want: want{
 				cr: Cluster(
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 						Config: v1alpha1.ClusterConfig{
-							TLSClientConfig: v1alpha1.TLSClientConfig{
+							TLSClientConfig: &v1alpha1.TLSClientConfig{
 								Insecure: true,
 							},
 						},
@@ -532,8 +533,8 @@ func TestUpdate(t *testing.T) {
 				}),
 				cr: Cluster(
 					withSpec(v1alpha1.ClusterParameters{
-						Server:     testClusterServer,
-						Name:       testClusterExternalName,
+						Server:     pointer.String(testClusterServer),
+						Name:       pointer.String(testClusterExternalName),
 						Namespaces: testNamespaces[:],
 					}),
 					withExternalName(testClusterExternalName),
@@ -542,8 +543,8 @@ func TestUpdate(t *testing.T) {
 			want: want{
 				cr: Cluster(
 					withSpec(v1alpha1.ClusterParameters{
-						Server:     testClusterServer,
-						Name:       testClusterExternalName,
+						Server:     pointer.String(testClusterServer),
+						Name:       pointer.String(testClusterExternalName),
 						Namespaces: testNamespaces[:],
 					}),
 					withExternalName(testClusterExternalName),
@@ -562,8 +563,8 @@ func TestUpdate(t *testing.T) {
 				}),
 				cr: Cluster(
 					withSpec(v1alpha1.ClusterParameters{
-						Server:     testClusterServer,
-						Name:       testClusterExternalName,
+						Server:     pointer.String(testClusterServer),
+						Name:       pointer.String(testClusterExternalName),
 						Namespaces: testNamespaces[:],
 					}),
 					withExternalName(testClusterExternalName),
@@ -572,8 +573,8 @@ func TestUpdate(t *testing.T) {
 			want: want{
 				cr: Cluster(
 					withSpec(v1alpha1.ClusterParameters{
-						Server:     testClusterServer,
-						Name:       testClusterExternalName,
+						Server:     pointer.String(testClusterServer),
+						Name:       pointer.String(testClusterExternalName),
 						Namespaces: testNamespaces[:],
 					}),
 					withExternalName(testClusterExternalName),
@@ -627,8 +628,8 @@ func TestDelete(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 					}),
 				),
 			},
@@ -636,8 +637,8 @@ func TestDelete(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 					}),
 				),
 				err: nil,
@@ -658,8 +659,8 @@ func TestDelete(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 					}),
 				),
 			},
@@ -667,8 +668,8 @@ func TestDelete(t *testing.T) {
 				cr: Cluster(
 					withExternalName(testClusterExternalName),
 					withSpec(v1alpha1.ClusterParameters{
-						Server: testClusterServer,
-						Name:   testClusterExternalName,
+						Server: pointer.String(testClusterServer),
+						Name:   pointer.String(testClusterExternalName),
 					}),
 				),
 				err: errors.Wrap(errBoom, errDeleteFailed),

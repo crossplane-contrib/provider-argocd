@@ -129,6 +129,26 @@ spec:
                               doesn't seem to be present
                             type: string
                         type: object
+                      kubeconfigSecretRef:
+                        description: KubeconfigSecretRef contains a reference to a
+                          Kubernetes secret entry that contains a raw kubeconfig in
+                          YAML or JSON. See https://kubernetes.io/docs/reference/config-api/kubeconfig.v1/
+                          for more info about Kubeconfigs
+                        properties:
+                          key:
+                            description: Key whose value will be used.
+                            type: string
+                          name:
+                            description: Name of the secret.
+                            type: string
+                          namespace:
+                            description: Namespace of the secret.
+                            type: string
+                        required:
+                        - key
+                        - name
+                        - namespace
+                        type: object
                       passwordSecretRef:
                         description: PasswordSecretRef contains a reference to a kubernetes
                           secret containing the Password
@@ -231,8 +251,6 @@ spec:
                       username:
                         description: Server requires Basic authentication
                         type: string
-                    required:
-                    - tlsClientConfig
                     type: object
                   labels:
                     additionalProperties:
@@ -241,7 +259,7 @@ spec:
                     type: object
                   name:
                     description: Name of the cluster. If omitted, will use the server
-                      address
+                      address. Optional if using a kubeconfig
                     type: string
                   namespaces:
                     description: Holds list of namespaces which are accessible in
@@ -256,7 +274,8 @@ spec:
                       entity
                     type: string
                   server:
-                    description: Server is the API server URL of the Kubernetes cluster
+                    description: Server is the API server URL of the Kubernetes cluster.
+                      Optional if using a kubeconfig
                     type: string
                   shard:
                     description: Shard contains optional shard number. Calculated
@@ -265,8 +284,6 @@ spec:
                     type: integer
                 required:
                 - config
-                - name
-                - server
                 type: object
               providerConfigRef:
                 default:
@@ -503,6 +520,18 @@ spec:
                         type: string
                     required:
                     - applicationsCount
+                    type: object
+                  kubeconfig:
+                    description: Kubeconfig tracks changes to a Kubeconfig secret
+                    properties:
+                      secret:
+                        description: SecretObservation observes a secret
+                        properties:
+                          resourceVersion:
+                            description: ResourceVersion tracks the meta1.ResourceVersion
+                              of an Object
+                            type: string
+                        type: object
                     type: object
                 type: object
               conditions:
