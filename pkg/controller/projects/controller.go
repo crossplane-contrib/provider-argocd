@@ -319,7 +319,7 @@ func generateCreateProjectOptions(p *v1alpha1.Project) *project.ProjectCreateReq
 	projectCreateRequest := &project.ProjectCreateRequest{
 		Project: &argocdv1alpha1.AppProject{
 			Spec:       projSpec,
-			ObjectMeta: metav1.ObjectMeta{Name: p.Name},
+			ObjectMeta: metav1.ObjectMeta{Name: p.Name, Labels: p.Spec.ForProvider.ProjectLabels},
 		},
 		Upsert: false,
 	}
