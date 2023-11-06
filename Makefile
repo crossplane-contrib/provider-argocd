@@ -37,13 +37,16 @@ GO_STATIC_PACKAGES = $(GO_PROJECT)/cmd/provider
 GO_LDFLAGS += -X $(GO_PROJECT)/pkg/version.Version=$(VERSION)
 GO_SUBDIRS += cmd pkg apis
 GO111MODULE = on
+GOLANGCILINT_VERSION = 1.54.2
 -include build/makelib/golang.mk
 
 # ====================================================================================
 # Setup Kubernetes tools
 
-UP_VERSION = v0.13.0
+UP_VERSION = v0.18.0
 UP_CHANNEL = stable
+UPTEST_VERSION = v0.5.0
+
 -include build/makelib/k8s_tools.mk
 
 # ====================================================================================
@@ -152,33 +155,6 @@ dev-teardown: $(KIND) $(KUBECTL)
 
 # ====================================================================================
 # Special Targets
-
-# Install gomplate
-GOMPLATE_VERSION := 3.10.0
-GOMPLATE := $(TOOLS_HOST_DIR)/gomplate-$(GOMPLATE_VERSION)
-
-$(GOMPLATE):
-	@$(INFO) installing gomplate $(SAFEHOSTPLATFORM)
-	@mkdir -p $(TOOLS_HOST_DIR)
-	@curl -fsSLo $(GOMPLATE) https://github.com/hairyhenderson/gomplate/releases/download/v$(GOMPLATE_VERSION)/gomplate_$(SAFEHOSTPLATFORM) || $(FAIL)
-	@chmod +x $(GOMPLATE)
-	@$(OK) installing gomplate $(SAFEHOSTPLATFORM)
-
-export GOMPLATE
-
-# This target adds a new api type and its controller.
-# You would still need to register new api in "apis/<provider>.go" and
-# controller in "pkg/controller/<provider>.go".
-# Arguments:
-#   provider: Camel case name of your provider, e.g. GitHub, PlanetScale
-#   group: API group for the type you want to add.
-#   kind: Kind of the type you want to add
-#	apiversion: API version of the type you want to add. Optional and defaults to "v1alpha1"
-provider.addtype: $(GOMPLATE)
-	@[ "${provider}" ] || ( echo "argument \"provider\" is not set"; exit 1 )
-	@[ "${group}" ] || ( echo "argument \"group\" is not set"; exit 1 )
-	@[ "${kind}" ] || ( echo "argument \"kind\" is not set"; exit 1 )
-	@PROVIDER=$(provider) GROUP=$(group) KIND=$(kind) APIVERSION=$(apiversion) PROJECT_REPO=$(PROJECT_REPO) ./hack/helpers/addtype.sh
 
 define CROSSPLANE_MAKE_HELP
 Crossplane Targets:

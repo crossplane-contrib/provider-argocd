@@ -26,6 +26,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -60,7 +61,6 @@ func SetupProject(mgr ctrl.Manager, l logging.Logger) error {
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.ProjectGroupVersionKind),
 			managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}),
-			managed.WithInitializers(managed.NewDefaultProviderConfig(mgr.GetClient())),
 			managed.WithLogger(l.WithValues("controller", name)),
 			managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))
 }
@@ -146,9 +146,7 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 
 	meta.SetExternalName(cr, resp.Name)
 
-	return managed.ExternalCreation{
-		ExternalNameAssigned: true,
-	}, errors.Wrap(nil, errKubeUpdateFailed)
+	return managed.ExternalCreation{}, errors.Wrap(nil, errKubeUpdateFailed)
 }
 
 func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
@@ -266,13 +264,13 @@ func lateInitializeProject(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppP
 
 		for i, res := range r.SyncWindows {
 			p.SyncWindows[i] = v1alpha1.SyncWindow{
-				Kind:         &res.Kind,
-				Schedule:     &res.Schedule,
-				Duration:     &res.Duration,
+				Kind:         ptr.To(res.Kind),
+				Schedule:     ptr.To(res.Schedule),
+				Duration:     ptr.To(res.Duration),
 				Applications: res.Applications,
 				Namespaces:   res.Namespaces,
 				Clusters:     res.Clusters,
-				ManualSync:   &res.ManualSync,
+				ManualSync:   ptr.To(res.ManualSync),
 			}
 		}
 	}

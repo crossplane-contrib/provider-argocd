@@ -64,7 +64,6 @@ func SetupRepository(mgr ctrl.Manager, l logging.Logger) error {
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.RepositoryGroupVersionKind),
 			managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: repositories.NewRepositoryServiceClient}),
-			managed.WithInitializers(managed.NewDefaultProviderConfig(mgr.GetClient())),
 			managed.WithLogger(l.WithValues("controller", name)),
 			managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))
 }
@@ -213,9 +212,7 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 
 	meta.SetExternalName(cr, cr.Spec.ForProvider.Repo)
 
-	return managed.ExternalCreation{
-		ExternalNameAssigned: true,
-	}, errors.Wrap(nil, errKubeUpdateFailed)
+	return managed.ExternalCreation{}, errors.Wrap(nil, errKubeUpdateFailed)
 }
 
 func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) { // nolint:gocyclo

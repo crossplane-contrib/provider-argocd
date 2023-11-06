@@ -10,9 +10,9 @@ on:
 
 env:
   # Common versions
-  GO_VERSION: '1.19'
-  GOLANGCI_VERSION: 'v1.52.2'
-  DOCKER_BUILDX_VERSION: 'v0.8.2'
+  GO_VERSION: '1.21.2'
+  GOLANGCI_VERSION: 'v1.54.2'
+  DOCKER_BUILDX_VERSION: 'v0.10.0'
 
   # Common users. We can't run a step 'if secrets.AWS_USR != ""' but we can run
   # a step 'if env.AWS_USR' != ""', so we copy these to succinctly test whether
@@ -171,10 +171,10 @@ jobs:
         run: make -j2 test
 
       - name: Publish Unit Test Coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v4
         with:
           flags: unittests
-          file: _output/tests/linux_amd64/coverage.txt
+          files: _output/tests/linux_amd64/coverage.txt
 
   e2e-tests:
     runs-on: ubuntu-20.04
