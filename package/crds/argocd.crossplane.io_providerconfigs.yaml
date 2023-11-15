@@ -99,6 +99,14 @@ spec:
                 required:
                 - source
                 type: object
+              grpcWeb:
+                description: Enables gRPC-web protocol. Useful if Argo CD server is
+                  behind proxy which does not support HTTP2.
+                type: boolean
+              grpcWebRootPath:
+                description: Enables gRPC-web protocol. Useful if Argo CD server is
+                  behind proxy which does not support HTTP2. Set web root.
+                type: string
               insecure:
                 description: 'Insecure specifies whether to disable strict tls validation.
                   Default: false.'

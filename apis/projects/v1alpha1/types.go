@@ -68,6 +68,9 @@ type ProjectParameters struct {
 	// ClusterResourceBlacklist contains list of blacklisted cluster level resources
 	// +optional
 	ClusterResourceBlacklist []metav1.GroupKind `json:"clusterResourceBlacklist,omitempty"`
+	// ProjectLabels labels that will be applied to the AppProject
+	// +optional
+	ProjectLabels map[string]string `json:"projectLabels,omitempty"`
 }
 
 // ApplicationDestination holds information about the application's destination

@@ -29,7 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -107,7 +107,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	clusterQuery := argocdcluster.ClusterQuery{
 		Name:   meta.GetExternalName(cr),
-		Server: pointer.StringDeref(cr.Spec.ForProvider.Server, ""),
+		Server: ptr.Deref(cr.Spec.ForProvider.Server, ""),
 	}
 
 	observedCluster, err := e.client.Get(ctx, &clusterQuery)
@@ -263,11 +263,11 @@ func (e *external) convertClusterTypes(ctx context.Context, p *v1alpha1.ClusterP
 	}
 
 	if p.Server != nil {
-		argoCluster.Server = pointer.StringDeref(p.Server, "")
+		argoCluster.Server = ptr.Deref(p.Server, "")
 	}
 
 	if p.Name != nil {
-		argoCluster.Name = pointer.StringDeref(p.Name, "")
+		argoCluster.Name = ptr.Deref(p.Name, "")
 	}
 
 	if p.Config.Username != nil {
