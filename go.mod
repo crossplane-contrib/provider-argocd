@@ -9,7 +9,7 @@ require (
 	github.com/crossplane/crossplane-tools v0.0.0-20220901191540-806c0b01097b
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.9
-	github.com/jmattheis/goverter v0.17.4
+	github.com/jmattheis/goverter v1.2.0
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.58.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
