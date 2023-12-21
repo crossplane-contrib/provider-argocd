@@ -21,11 +21,11 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applications"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/config"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/projects"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/repositories"
+	"github.com/crossplane-contrib/provider-argocd/internal/controller/applications"
+	"github.com/crossplane-contrib/provider-argocd/internal/controller/cluster"
+	"github.com/crossplane-contrib/provider-argocd/internal/controller/config"
+	"github.com/crossplane-contrib/provider-argocd/internal/controller/projects"
+	"github.com/crossplane-contrib/provider-argocd/internal/controller/repositories"
 )
 
 // Setup creates all argocd API controllers with the supplied logger and adds

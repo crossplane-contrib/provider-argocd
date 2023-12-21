@@ -41,8 +41,8 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
+	"github.com/crossplane-contrib/provider-argocd/internal/clients"
+	"github.com/crossplane-contrib/provider-argocd/internal/clients/cluster"
 )
 
 const (

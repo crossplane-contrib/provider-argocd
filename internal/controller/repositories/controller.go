@@ -38,8 +38,8 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/repositories"
+	"github.com/crossplane-contrib/provider-argocd/internal/clients"
+	"github.com/crossplane-contrib/provider-argocd/internal/clients/repositories"
 )
 
 const (
