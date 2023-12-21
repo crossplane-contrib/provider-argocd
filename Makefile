@@ -136,7 +136,7 @@ dev-debug: $(KIND) $(KUBECTL)
 	@$(INFO) Installing Crossplane CRDs
 	@$(KUBECTL) apply -k https://github.com/crossplane/crossplane//cluster?ref=master
 	@$(INFO) Installing Provider Template CRDs
-	@$(KUBECTL) apply -R -f package/crds
+	@$(KUBECTL) apply --server-side=true -R -f package/crds
 	@$(INFO) Creating crossplane-system namespace
 	@$(KUBECTL) create ns crossplane-system
 	@$(INFO) Creating provider config and secret

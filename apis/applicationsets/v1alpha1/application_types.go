@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-//go:generate go run github.com/crossplane/crossplane-tools/cmd/angryjet generate-methodsets ./...
-
 package v1alpha1
 
 import (
@@ -25,8 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-// ApplicationParameters define the desired state of an ArgoCD Git Application
-type ApplicationParameters struct {
+// ApplicationSpec define the desired state of an ArgoCD Git Application
+type ApplicationSpec struct {
 	Source *ApplicationSource `json:"source,omitempty" protobuf:"bytes,1,opt,name=source"`
 	// Destination is a reference to the target Kubernetes server and namespace
 	Destination ApplicationDestination `json:"destination" protobuf:"bytes,2,name=destination"`
@@ -102,15 +100,14 @@ type ApplicationSources []ApplicationSource
 type ApplicationDestination struct {
 	// Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
 	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.Cluster
-	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.ServerAddress()
 	// +crossplane:generate:reference:refFieldName=ServerRef
 	// +crossplane:generate:reference:selectorFieldName=ServerSelector
 	// +optional
 	Server *string `json:"server,omitempty"`
-	// ServerRef is a reference to Cluster used to set Server
+	// ServerRef is a reference to an Cluster used to set Server
 	// +optional
 	ServerRef *xpv1.Reference `json:"serverRef,omitempty"`
-	// ServerSelector selects references to Cluster used to set Server
+	// SourceReposSelector selects references to Repositories used to set SourceRepos
 	// +optional
 	ServerSelector *xpv1.Selector `json:"serverSelector,omitempty"`
 	// Namespace specifies the target namespace for the application's resources.
@@ -138,18 +135,6 @@ type ConnectionState struct {
 	Status     string       `json:"status,omitempty"`
 	Message    string       `json:"message,omitempty"`
 	ModifiedAt *metav1.Time `json:"attemptedAt,omitempty"`
-}
-
-// A ApplicationSpec defines the desired state of an ArgoCD Application.
-type ApplicationSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       ApplicationParameters `json:"forProvider"`
-}
-
-// A ApplicationStatus represents the observed state of an ArgoCD Application.
-type ApplicationStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          ArgoApplicationStatus `json:"atProvider,omitempty"`
 }
 
 // ApplicationSourceHelm holds helm specific options
@@ -192,31 +177,6 @@ type HelmFileParameter struct {
 	Name *string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
 	// Path is the path to the file containing the values for the Helm parameter
 	Path *string `json:"path,omitempty" protobuf:"bytes,2,opt,name=path"`
-}
-
-// +kubebuilder:object:root=true
-
-// An Application is a managed resource that represents an ArgoCD Application
-// +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
-// +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
-// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,argocd}
-type Application struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   ApplicationSpec   `json:"spec"`
-	Status ApplicationStatus `json:"status,omitempty"`
-}
-
-// +kubebuilder:object:root=true
-
-// ApplicationList contains a list of Application items
-type ApplicationList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Application `json:"items"`
 }
 
 // ApplicationSourceKustomize holds options specific to an Application source specific to Kustomize

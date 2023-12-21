@@ -14,7 +14,7 @@ import (
 // goverter:extend ExtV1JSONToRuntimeRawExtension
 // goverter:struct:comment // +k8s:deepcopy-gen=false
 // goverter:output:file ./zz_generated.conversion.go
-// goverter:output:package github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1
+// goverter:output:package github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1
 // +k8s:deepcopy-gen=false
 type Converter interface {
 
@@ -26,9 +26,11 @@ type Converter interface {
 
 	ToArgoDestination(in ApplicationDestination) argocdv1alpha1.ApplicationDestination
 
-	ToArgoApplicationSpec(in *ApplicationParameters) *argocdv1alpha1.ApplicationSpec
+	ToArgoApplicationSetSpec(in *ApplicationSetParameters) *argocdv1alpha1.ApplicationSetSpec
+	FromArgoApplicationSetSpec(in *argocdv1alpha1.ApplicationSetSpec) *ApplicationSetParameters
 
-	FromArgoApplicationStatus(in *argocdv1alpha1.ApplicationStatus) *ArgoApplicationStatus
+	FromArgoApplicationSetStatus(in *argocdv1alpha1.ApplicationSetStatus) *ArgoApplicationSetStatus
+	ToArgoApplicationSetStatus(in *ArgoApplicationSetStatus) *argocdv1alpha1.ApplicationSetStatus
 }
 
 // ExtV1JSONToRuntimeRawExtension converts an extv1.JSON into a
