@@ -27,7 +27,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
 	"github.com/crossplane-contrib/provider-argocd/apis"
-	"github.com/crossplane-contrib/provider-argocd/internal/controller"
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller"
 )
 
 func main() {

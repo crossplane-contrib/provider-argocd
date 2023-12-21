@@ -34,8 +34,8 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/test"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1"
-	mockclient "github.com/crossplane-contrib/provider-argocd/internal/clients/mock/projects"
-	"github.com/crossplane-contrib/provider-argocd/internal/clients/projects"
+	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/mock/projects"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/projects"
 )
 
 var (
