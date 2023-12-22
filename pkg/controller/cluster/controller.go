@@ -66,7 +66,6 @@ func SetupCluster(mgr ctrl.Manager, l logging.Logger) error {
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.ClusterGroupVersionKind),
 			managed.WithExternalConnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: cluster.NewClusterServiceClient}),
-			managed.WithInitializers(managed.NewDefaultProviderConfig(mgr.GetClient())),
 			managed.WithLogger(l.WithValues("controller", name)),
 			managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))
 }
@@ -175,9 +174,7 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 
 	meta.SetExternalName(cr, resp.Name)
 
-	return managed.ExternalCreation{
-		ExternalNameAssigned: true,
-	}, nil
+	return managed.ExternalCreation{}, nil
 }
 
 func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
