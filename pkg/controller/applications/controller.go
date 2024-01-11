@@ -194,13 +194,14 @@ func generateApplicationObservation(app *argocdv1alpha1.Application) v1alpha1.Ar
 		return v1alpha1.ArgoApplicationStatus{}
 	}
 
-	converter := v1alpha1.ConverterImpl{}
+	converter := &v1alpha1.ConverterImpl{}
 	status := converter.FromArgoApplicationStatus(&app.Status)
 	return *status
 }
 
 func generateCreateApplicationRequest(cr *v1alpha1.Application) *application.ApplicationCreateRequest {
-	converter := v1alpha1.ConverterImpl{}
+	converter := &v1alpha1.ConverterImpl{}
+
 	spec := converter.ToArgoApplicationSpec(&cr.Spec.ForProvider)
 
 	app := &argocdv1alpha1.Application{

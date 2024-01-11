@@ -71,6 +71,82 @@ spec:
                         description: Name is an alternate way of specifying the target
                           cluster by its symbolic name
                         type: string
+                      nameRef:
+                        description: NameRef is a reference to a Cluster used to set
+                          Name
+                        properties:
+                          name:
+                            description: Name of the referenced object.
+                            type: string
+                          policy:
+                            description: Policies for referencing.
+                            properties:
+                              resolution:
+                                default: Required
+                                description: Resolution specifies whether resolution
+                                  of this reference is required. The default is 'Required',
+                                  which means the reconcile will fail if the reference
+                                  cannot be resolved. 'Optional' means this reference
+                                  will be a no-op if it cannot be resolved.
+                                enum:
+                                - Required
+                                - Optional
+                                type: string
+                              resolve:
+                                description: Resolve specifies when this reference
+                                  should be resolved. The default is 'IfNotPresent',
+                                  which will attempt to resolve the reference only
+                                  when the corresponding field is not present. Use
+                                  'Always' to resolve the reference on every reconcile.
+                                enum:
+                                - Always
+                                - IfNotPresent
+                                type: string
+                            type: object
+                        required:
+                        - name
+                        type: object
+                      nameSelector:
+                        description: NameSelector is a reference to a Cluster used
+                          to set Name
+                        properties:
+                          matchControllerRef:
+                            description: MatchControllerRef ensures an object with
+                              the same controller reference as the selecting object
+                              is selected.
+                            type: boolean
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            description: MatchLabels ensures an object with matching
+                              labels is selected.
+                            type: object
+                          policy:
+                            description: Policies for selection.
+                            properties:
+                              resolution:
+                                default: Required
+                                description: Resolution specifies whether resolution
+                                  of this reference is required. The default is 'Required',
+                                  which means the reconcile will fail if the reference
+                                  cannot be resolved. 'Optional' means this reference
+                                  will be a no-op if it cannot be resolved.
+                                enum:
+                                - Required
+                                - Optional
+                                type: string
+                              resolve:
+                                description: Resolve specifies when this reference
+                                  should be resolved. The default is 'IfNotPresent',
+                                  which will attempt to resolve the reference only
+                                  when the corresponding field is not present. Use
+                                  'Always' to resolve the reference on every reconcile.
+                                enum:
+                                - Always
+                                - IfNotPresent
+                                type: string
+                            type: object
+                        type: object
                       namespace:
                         description: Namespace specifies the target namespace for
                           the application's resources. The namespace will only be
@@ -82,8 +158,8 @@ spec:
                           and must be set to the Kubernetes control plane API
                         type: string
                       serverRef:
-                        description: ServerRef is a reference to an Cluster used to
-                          set Server
+                        description: ServerRef is a reference to Cluster used to set
+                          Server
                         properties:
                           name:
                             description: Name of the referenced object.
@@ -117,8 +193,8 @@ spec:
                         - name
                         type: object
                       serverSelector:
-                        description: SourceReposSelector selects references to Repositories
-                          used to set SourceRepos
+                        description: ServerSelector selects references to Cluster
+                          used to set Server
                         properties:
                           matchControllerRef:
                             description: MatchControllerRef ensures an object with
@@ -3428,6 +3504,86 @@ spec:
                                 description: Name is an alternate way of specifying
                                   the target cluster by its symbolic name
                                 type: string
+                              nameRef:
+                                description: NameRef is a reference to a Cluster used
+                                  to set Name
+                                properties:
+                                  name:
+                                    description: Name of the referenced object.
+                                    type: string
+                                  policy:
+                                    description: Policies for referencing.
+                                    properties:
+                                      resolution:
+                                        default: Required
+                                        description: Resolution specifies whether
+                                          resolution of this reference is required.
+                                          The default is 'Required', which means the
+                                          reconcile will fail if the reference cannot
+                                          be resolved. 'Optional' means this reference
+                                          will be a no-op if it cannot be resolved.
+                                        enum:
+                                        - Required
+                                        - Optional
+                                        type: string
+                                      resolve:
+                                        description: Resolve specifies when this reference
+                                          should be resolved. The default is 'IfNotPresent',
+                                          which will attempt to resolve the reference
+                                          only when the corresponding field is not
+                                          present. Use 'Always' to resolve the reference
+                                          on every reconcile.
+                                        enum:
+                                        - Always
+                                        - IfNotPresent
+                                        type: string
+                                    type: object
+                                required:
+                                - name
+                                type: object
+                              nameSelector:
+                                description: NameSelector is a reference to a Cluster
+                                  used to set Name
+                                properties:
+                                  matchControllerRef:
+                                    description: MatchControllerRef ensures an object
+                                      with the same controller reference as the selecting
+                                      object is selected.
+                                    type: boolean
+                                  matchLabels:
+                                    additionalProperties:
+                                      type: string
+                                    description: MatchLabels ensures an object with
+                                      matching labels is selected.
+                                    type: object
+                                  policy:
+                                    description: Policies for selection.
+                                    properties:
+                                      resolution:
+                                        default: Required
+                                        description: Resolution specifies whether
+                                          resolution of this reference is required.
+                                          The default is 'Required', which means the
+                                          reconcile will fail if the reference cannot
+                                          be resolved. 'Optional' means this reference
+                                          will be a no-op if it cannot be resolved.
+                                        enum:
+                                        - Required
+                                        - Optional
+                                        type: string
+                                      resolve:
+                                        description: Resolve specifies when this reference
+                                          should be resolved. The default is 'IfNotPresent',
+                                          which will attempt to resolve the reference
+                                          only when the corresponding field is not
+                                          present. Use 'Always' to resolve the reference
+                                          on every reconcile.
+                                        enum:
+                                        - Always
+                                        - IfNotPresent
+                                        type: string
+                                    type: object
+                                type: object
                               namespace:
                                 description: Namespace specifies the target namespace
                                   for the application's resources. The namespace will
@@ -3440,8 +3596,8 @@ spec:
                                   plane API
                                 type: string
                               serverRef:
-                                description: ServerRef is a reference to an Cluster
-                                  used to set Server
+                                description: ServerRef is a reference to Cluster used
+                                  to set Server
                                 properties:
                                   name:
                                     description: Name of the referenced object.
@@ -3477,8 +3633,8 @@ spec:
                                 - name
                                 type: object
                               serverSelector:
-                                description: SourceReposSelector selects references
-                                  to Repositories used to set SourceRepos
+                                description: ServerSelector selects references to
+                                  Cluster used to set Server
                                 properties:
                                   matchControllerRef:
                                     description: MatchControllerRef ensures an object

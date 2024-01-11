@@ -19,7 +19,7 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Destination.Server),
-		Extract:      reference.ExternalName(),
+		Extract:      v1alpha1.ServerAddress(),
 		Reference:    mg.Spec.ForProvider.Destination.ServerRef,
 		Selector:     mg.Spec.ForProvider.Destination.ServerSelector,
 		To: reference.To{
@@ -34,8 +34,24 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 	mg.Spec.ForProvider.Destination.ServerRef = rsp.ResolvedReference
 
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Destination.Name),
+		Extract:      v1alpha1.ServerName(),
+		Reference:    mg.Spec.ForProvider.Destination.NameRef,
+		Selector:     mg.Spec.ForProvider.Destination.NameSelector,
+		To: reference.To{
+			List:    &v1alpha1.ClusterList{},
+			Managed: &v1alpha1.Cluster{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Spec.ForProvider.Destination.Name")
+	}
+	mg.Spec.ForProvider.Destination.Name = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Spec.ForProvider.Destination.NameRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Status.AtProvider.Sync.ComparedTo.Destination.Server),
-		Extract:      reference.ExternalName(),
+		Extract:      v1alpha1.ServerAddress(),
 		Reference:    mg.Status.AtProvider.Sync.ComparedTo.Destination.ServerRef,
 		Selector:     mg.Status.AtProvider.Sync.ComparedTo.Destination.ServerSelector,
 		To: reference.To{
@@ -48,6 +64,22 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 	}
 	mg.Status.AtProvider.Sync.ComparedTo.Destination.Server = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Status.AtProvider.Sync.ComparedTo.Destination.ServerRef = rsp.ResolvedReference
+
+	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		CurrentValue: reference.FromPtrValue(mg.Status.AtProvider.Sync.ComparedTo.Destination.Name),
+		Extract:      v1alpha1.ServerName(),
+		Reference:    mg.Status.AtProvider.Sync.ComparedTo.Destination.NameRef,
+		Selector:     mg.Status.AtProvider.Sync.ComparedTo.Destination.NameSelector,
+		To: reference.To{
+			List:    &v1alpha1.ClusterList{},
+			Managed: &v1alpha1.Cluster{},
+		},
+	})
+	if err != nil {
+		return errors.Wrap(err, "mg.Status.AtProvider.Sync.ComparedTo.Destination.Name")
+	}
+	mg.Status.AtProvider.Sync.ComparedTo.Destination.Name = reference.ToPtrValue(rsp.ResolvedValue)
+	mg.Status.AtProvider.Sync.ComparedTo.Destination.NameRef = rsp.ResolvedReference
 
 	return nil
 }

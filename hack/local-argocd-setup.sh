@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Debug
-set -x
+#set -x
 # Be defensive
 set -euo pipefail
 # -m Job control is enabled
@@ -14,7 +14,7 @@ logInfo () { echo -e  "${GREEN}[INFO] $@ ${NOCOLOR}"; }
 
 
 logInfo "Waiting for Argo CD to become available."
-kubectl wait --for condition=available --namespace argocd deployment.apps --all
+kubectl wait --for condition=available --namespace argocd deployment.apps --all --timeout=300s
 
 logInfo "Patching configmaps"
 kubectl patch configmap/argocd-cm \
