@@ -317,6 +317,9 @@ func generateCreateRepositoryOptions(p *v1alpha1.RepositoryParameters) *reposito
 	if p.Type != nil {
 		repo.Type = *p.Type
 	}
+	if p.Project != nil {
+		repo.Project = *p.Project
+	}
 	if p.Name != nil {
 		repo.Name = *p.Name
 	}
@@ -359,6 +362,9 @@ func generateUpdateRepositoryOptions(p *v1alpha1.RepositoryParameters) *reposito
 	}
 	if p.Type != nil {
 		repo.Type = *p.Type
+	}
+	if p.Project != nil {
+		repo.Project = *p.Project
 	}
 	if p.Name != nil {
 		repo.Name = *p.Name

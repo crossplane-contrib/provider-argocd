@@ -53,6 +53,10 @@ type RepositoryParameters struct {
 	// type of the repo, maybe "git or "helm, "git" is assumed if empty or absent
 	// +optional
 	Type *string `json:"type,omitempty"`
+	// Project is a reference to the project with scoped repositories
+	// +optional
+	// only for git repos
+	Project *string `json:"project,omitempty"`
 	// only for Helm repos
 	// +optional
 	Name *string `json:"name,omitempty"`

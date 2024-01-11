@@ -127,6 +127,10 @@ spec:
                     - name
                     - namespace
                     type: object
+                  project:
+                    description: Project is a reference to the project with scoped
+                      repositories only for git repos
+                    type: string
                   repo:
                     description: URL of the repo
                     type: string
