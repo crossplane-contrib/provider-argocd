@@ -23,6 +23,7 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/repository"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	"github.com/argoproj/argo-cd/v2/util/io"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -62,7 +63,7 @@ func SetupRepository(mgr ctrl.Manager, l logging.Logger) error {
 		For(&v1alpha1.Repository{}).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.RepositoryGroupVersionKind),
-			managed.WithExternalConnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: repositories.NewRepositoryServiceClient}),
+			managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: repositories.NewRepositoryServiceClient}),
 			managed.WithInitializers(managed.NewDefaultProviderConfig(mgr.GetClient())),
 			managed.WithLogger(l.WithValues("controller", name)),
 			managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))
@@ -70,7 +71,8 @@ func SetupRepository(mgr ctrl.Manager, l logging.Logger) error {
 
 type connector struct {
 	kube              client.Client
-	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) repository.RepositoryServiceClient
+	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, repository.RepositoryServiceClient)
+	conn              io.Closer
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -82,7 +84,13 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if err != nil {
 		return nil, err
 	}
-	return &external{kube: c.kube, client: c.newArgocdClientFn(cfg)}, nil
+	conn, argocdClient := c.newArgocdClientFn(cfg)
+	c.conn = conn
+	return &external{kube: c.kube, client: argocdClient}, nil
+}
+
+func (c *connector) Disconnect(ctx context.Context) error {
+	return c.conn.Close()
 }
 
 type external struct {

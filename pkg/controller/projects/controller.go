@@ -22,6 +22,7 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/project"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	"github.com/argoproj/argo-cd/v2/util/io"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -58,7 +59,7 @@ func SetupProject(mgr ctrl.Manager, l logging.Logger) error {
 		For(&v1alpha1.Project{}).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.ProjectGroupVersionKind),
-			managed.WithExternalConnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}),
+			managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}),
 			managed.WithInitializers(managed.NewDefaultProviderConfig(mgr.GetClient())),
 			managed.WithLogger(l.WithValues("controller", name)),
 			managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))
@@ -66,7 +67,8 @@ func SetupProject(mgr ctrl.Manager, l logging.Logger) error {
 
 type connector struct {
 	kube              client.Client
-	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) project.ProjectServiceClient
+	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, project.ProjectServiceClient)
+	conn              io.Closer
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -78,7 +80,13 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if err != nil {
 		return nil, err
 	}
-	return &external{kube: c.kube, client: c.newArgocdClientFn(cfg)}, nil
+	conn, argocdClient := c.newArgocdClientFn(cfg)
+	c.conn = conn
+	return &external{kube: c.kube, client: argocdClient}, nil
+}
+
+func (c *connector) Disconnect(ctx context.Context) error {
+	return c.conn.Close()
 }
 
 type external struct {

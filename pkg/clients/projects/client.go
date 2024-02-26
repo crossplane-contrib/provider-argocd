@@ -7,6 +7,7 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/project"
 	"github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	"github.com/argoproj/argo-cd/v2/util/io"
 
 	"google.golang.org/grpc"
 )
@@ -28,9 +29,9 @@ type ProjectServiceClient interface {
 }
 
 // NewProjectServiceClient creates a new API client from a set of config options, or fails fatally if the new client creation fails.
-func NewProjectServiceClient(clientOpts *apiclient.ClientOptions) project.ProjectServiceClient {
-	_, repoIf := apiclient.NewClientOrDie(clientOpts).NewProjectClientOrDie()
-	return repoIf
+func NewProjectServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, project.ProjectServiceClient) {
+	conn, repoIf := apiclient.NewClientOrDie(clientOpts).NewProjectClientOrDie()
+	return conn, repoIf
 }
 
 // IsErrorProjectNotFound helper function to test for errorProjectNotFound error.

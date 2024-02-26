@@ -7,6 +7,7 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/repository"
 	"github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	"github.com/argoproj/argo-cd/v2/util/io"
 
 	"google.golang.org/grpc"
 )
@@ -30,9 +31,9 @@ type RepositoryServiceClient interface {
 }
 
 // NewRepositoryServiceClient creates a new API client from a set of config options, or fails fatally if the new client creation fails.
-func NewRepositoryServiceClient(clientOpts *apiclient.ClientOptions) repository.RepositoryServiceClient {
-	_, repoIf := apiclient.NewClientOrDie(clientOpts).NewRepoClientOrDie()
-	return repoIf
+func NewRepositoryServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, repository.RepositoryServiceClient) {
+	conn, repoIf := apiclient.NewClientOrDie(clientOpts).NewRepoClientOrDie()
+	return conn, repoIf
 }
 
 // IsErrorRepositoryNotFound helper function to test for errorRepositoryNotFound error.

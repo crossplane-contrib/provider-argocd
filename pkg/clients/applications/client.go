@@ -7,6 +7,7 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/application"
 	"github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	"github.com/argoproj/argo-cd/v2/util/io"
 
 	"google.golang.org/grpc"
 )
@@ -34,9 +35,9 @@ type ServiceClient interface {
 }
 
 // NewApplicationServiceClient creates a new API client from a set of config options, or fails fatally if the new client creation fails.
-func NewApplicationServiceClient(clientOpts *apiclient.ClientOptions) ServiceClient {
-	_, repoIf := apiclient.NewClientOrDie(clientOpts).NewApplicationClientOrDie()
-	return repoIf
+func NewApplicationServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, ServiceClient) {
+	conn, repoIf := apiclient.NewClientOrDie(clientOpts).NewApplicationClientOrDie()
+	return conn, repoIf
 }
 
 // IsErrorApplicationNotFound helper function to test for errorNotFound error.
