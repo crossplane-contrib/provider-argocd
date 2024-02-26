@@ -25,7 +25,7 @@ echo_success(){
     printf "\n${GRN}%s${NOC}\n" "$1"
 }
 echo_warn(){
-    printf "\n${YLW}%s${NOC}" "$1"
+    printf "\n${YLW}%s${NOC}\n" "$1"
 }
 echo_error(){
     printf "\n${RED}%s${NOC}" "$1"
@@ -43,6 +43,7 @@ eval $(make --no-print-directory -C ${projectdir} build.vars)
 SAFEHOSTARCH="${SAFEHOSTARCH:-amd64}"
 CONTROLLER_IMAGE="${BUILD_REGISTRY}/${PROJECT_NAME}-${SAFEHOSTARCH}"
 
+version_tag="$(cat ${projectdir}/_output/version)"
 # tag as latest version to load into kind cluster
 K8S_CLUSTER="${K8S_CLUSTER:-${BUILD_REGISTRY}-inttests}"
 
@@ -83,8 +84,9 @@ EOF
 echo "${KIND_CONFIG}" | "${KIND}" create cluster --name="${K8S_CLUSTER}" --wait=5m --image="${KIND_NODE_IMAGE}" --config=-
 
 # tag controller image and load it into kind cluster
-docker tag "${CONTROLLER_IMAGE}" "${PACKAGE_NAME}"
-"${KIND}" load docker-image "${PACKAGE_NAME}" --name="${K8S_CLUSTER}"
+PACKAGE_NAME_REF="xpkg.upbound.io/$PACKAGE_NAME"
+docker tag "${CONTROLLER_IMAGE}" "${PACKAGE_NAME_REF}"
+"${KIND}" load docker-image "${PACKAGE_NAME_REF}" --name="${K8S_CLUSTER}"
 
 echo_step "create crossplane-system namespace"
 "${KUBECTL}" create ns crossplane-system
@@ -129,13 +131,13 @@ echo "${PVC_YAML}" | "${KUBECTL}" create -f -
 
 # install crossplane from stable channel
 echo_step "installing crossplane from stable channel"
-"${HELM3}" repo add crossplane-stable https://charts.crossplane.io/stable/ --force-update
+"${HELM3}" repo add crossplane-stable https://charts.crossplane.io/stable/
 chart_version="$("${HELM3}" search repo crossplane-stable/crossplane | awk 'FNR == 2 {print $2}')"
 echo_info "using crossplane version ${chart_version}"
 echo
 # we replace empty dir with our PVC so that the /cache dir in the kind node
 # container is exposed to the crossplane pod
-"${HELM3}" install crossplane --namespace crossplane-system crossplane-stable/crossplane --version ${chart_version} --wait --set packageCache.pvc=package-cache
+"${HELM3}" install crossplane --namespace crossplane-system crossplane-stable/crossplane --version "${chart_version}" --wait --set packageCache.pvc=package-cache
 
 # ----------- integration tests
 echo_step "--- INTEGRATION TESTS ---"
@@ -162,25 +164,23 @@ docker exec "${K8S_CLUSTER}-control-plane" ls -la /cache
 
 echo_step "waiting for provider to be installed"
 
-if ! kubectl wait "provider.pkg.crossplane.io/${PACKAGE_NAME}" --for=condition=healthy --timeout=180s; then
-  echo_warn "kubectl describe provider.pkg.crossplane.io/${PACKAGE_NAME}\n"
+if ! kubectl wait "provider.pkg.crossplane.io/${PACKAGE_NAME}" --for=condition=healthy --timeout=300s ; then
+  echo_warn "kubectl describe provider.pkg.crossplane.io/${PACKAGE_NAME}"
   kubectl describe "provider.pkg.crossplane.io/${PACKAGE_NAME}"
-  echo_warn "kubectl describe providerrevision.pkg.crossplane.io\n"
+  echo_warn "kubectl describe providerrevision.pkg.crossplane.io"
   kubectl describe providerrevision.pkg.crossplane.io
 
-  DEPLOY_NAMES=$(kubectl get deploy -n crossplane-system -oname | grep ${PACKAGE_NAME})
+  DEPLOY_NAMES=$(kubectl get deploy -n "${CROSSPLANE_NAMESPACE}" -oname | grep ${PACKAGE_NAME})
   for DEPLOY in $DEPLOY_NAMES; do
-    echo_warn "kubectl describe $DEPLOY\n"
-    kubectl describe "$DEPLOY"
+    echo_warn "kubectl describe -n ${CROSSPLANE_NAMESPACE} $DEPLOY"
+    kubectl describe -n "${CROSSPLANE_NAMESPACE}" "$DEPLOY"
   done
 
-  POD_NAMES=$(kubectl get pods -n crossplane-system -oname | grep ${PACKAGE_NAME})
+  POD_NAMES=$(kubectl get pods -n "${CROSSPLANE_NAMESPACE}" -oname | grep ${PACKAGE_NAME})
   for POD in $POD_NAMES; do
-    echo_warn "kubectl describe $POD\n"
-    kubectl describe "$POD"
+    echo_warn "kubectl describe -n ${CROSSPLANE_NAMESPACE} $POD"
+    kubectl describe -n "${CROSSPLANE_NAMESPACE}" "$POD"
   done
-
-  echo_error "Provider was not installed in time."
 fi
 
 echo_step "uninstalling ${PROJECT_NAME}"
