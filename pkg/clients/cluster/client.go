@@ -7,6 +7,7 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/cluster"
 	"github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	"github.com/argoproj/argo-cd/v2/util/io"
 
 	"google.golang.org/grpc"
 )
@@ -29,9 +30,9 @@ type ServiceClient interface {
 }
 
 // NewClusterServiceClient creates a new API client from a set of config options, or fails fatally if the new client creation fails.
-func NewClusterServiceClient(clientOpts *apiclient.ClientOptions) cluster.ClusterServiceClient {
-	_, repoIf := apiclient.NewClientOrDie(clientOpts).NewClusterClientOrDie()
-	return repoIf
+func NewClusterServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, cluster.ClusterServiceClient) {
+	conn, repoIf := apiclient.NewClientOrDie(clientOpts).NewClusterClientOrDie()
+	return conn, repoIf
 }
 
 // IsErrorClusterNotFound helper function to test for errorClusterNotFound error.
