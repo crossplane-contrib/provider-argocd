@@ -18,5 +18,5 @@ func IsApplicationUpToDate(cr *v1alpha1.ApplicationParameters, remote *argocdv1a
 		// the unexported fields should not bother here, since we don't copy them or write them
 		cmpopts.IgnoreUnexported(argocdv1alpha1.ApplicationDestination{}),
 	}
-	return cmp.Equal(*cluster, remote.Spec, opts...)
+	return cmp.Equal(*cluster, remote.Spec, opts...) && cmp.Equal(cr.Annotations, remote.Annotations, opts...)
 }

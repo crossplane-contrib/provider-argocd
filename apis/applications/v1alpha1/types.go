@@ -48,6 +48,9 @@ type ApplicationParameters struct {
 
 	// Sources is a reference to the location of the application's manifests or chart
 	Sources ApplicationSources `json:"sources,omitempty" protobuf:"bytes,8,opt,name=sources"`
+
+	// Annotations that will be applied to the ArgoCD Application
+	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,12,opt,name=annotations"`
 }
 
 // ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored during comparison with live state.
