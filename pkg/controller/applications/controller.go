@@ -215,7 +215,8 @@ func generateCreateApplicationRequest(cr *v1alpha1.Application) *application.App
 	app := &argocdv1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: meta.GetExternalName(cr),
+			Name:        meta.GetExternalName(cr),
+			Annotations: cr.Spec.ForProvider.Annotations,
 		},
 		Spec: *spec,
 	}
@@ -235,7 +236,8 @@ func generateUpdateRepositoryOptions(cr *v1alpha1.Application) *application.Appl
 	app := &argocdv1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: meta.GetExternalName(cr),
+			Name:        meta.GetExternalName(cr),
+			Annotations: cr.Spec.ForProvider.Annotations,
 		},
 		Spec: *spec,
 	}

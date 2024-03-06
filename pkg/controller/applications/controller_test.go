@@ -47,6 +47,7 @@ var (
 	chartPath                   = "charts/podinfo"
 	revision                    = "HEAD"
 	selfHealEnabled             = true
+	testApplicationAnnotations  = map[string]string{"annotation1": "value1"}
 )
 
 type args struct {
@@ -123,7 +124,8 @@ func TestObserve(t *testing.T) {
 							Items: []argocdv1alpha1.Application{{
 								TypeMeta: metav1.TypeMeta{},
 								ObjectMeta: metav1.ObjectMeta{
-									Name: testApplicationExternalName,
+									Name:        testApplicationExternalName,
+									Annotations: testApplicationAnnotations,
 								},
 								Spec: argocdv1alpha1.ApplicationSpec{
 									Project: testProjectName,
@@ -162,6 +164,7 @@ func TestObserve(t *testing.T) {
 								SelfHeal: &selfHealEnabled,
 							},
 						},
+						Annotations: testApplicationAnnotations,
 					}),
 				),
 			},
@@ -183,6 +186,7 @@ func TestObserve(t *testing.T) {
 								SelfHeal: &selfHealEnabled,
 							},
 						},
+						Annotations: testApplicationAnnotations,
 					}),
 					withConditions(xpv1.Available()),
 					withObservation(initializedArgoAppStatus()),
@@ -210,7 +214,8 @@ func TestObserve(t *testing.T) {
 							Items: []argocdv1alpha1.Application{{
 								TypeMeta: metav1.TypeMeta{},
 								ObjectMeta: metav1.ObjectMeta{
-									Name: testApplicationExternalName,
+									Name:        testApplicationExternalName,
+									Annotations: testApplicationAnnotations,
 								},
 								Spec: argocdv1alpha1.ApplicationSpec{
 									Project: testProjectName,
@@ -244,6 +249,7 @@ func TestObserve(t *testing.T) {
 								SelfHeal: &selfHealEnabled,
 							},
 						},
+						Annotations: testApplicationAnnotations,
 					}),
 				),
 			},
@@ -265,6 +271,7 @@ func TestObserve(t *testing.T) {
 								SelfHeal: &selfHealEnabled,
 							},
 						},
+						Annotations: testApplicationAnnotations,
 					}),
 					withConditions(xpv1.Available()),
 					withObservation(initializedArgoAppStatus()),
@@ -496,7 +503,8 @@ func TestUpdate(t *testing.T) {
 						&argocdApplication.ApplicationUpdateRequest{
 							Application: &argocdv1alpha1.Application{
 								ObjectMeta: metav1.ObjectMeta{
-									Name: testApplicationExternalName,
+									Name:        testApplicationExternalName,
+									Annotations: testApplicationAnnotations,
 								},
 								Spec: argocdv1alpha1.ApplicationSpec{
 									Project: testProjectName,
@@ -508,7 +516,8 @@ func TestUpdate(t *testing.T) {
 						},
 					).Return(&argocdv1alpha1.Application{
 						ObjectMeta: metav1.ObjectMeta{
-							Name: testApplicationExternalName,
+							Name:        testApplicationExternalName,
+							Annotations: testApplicationAnnotations,
 						},
 					}, nil)
 				}),
@@ -519,6 +528,7 @@ func TestUpdate(t *testing.T) {
 						Destination: v1alpha1.ApplicationDestination{
 							Namespace: &testDestinationNamespace,
 						},
+						Annotations: testApplicationAnnotations,
 					}),
 					withExternalName(testApplicationExternalName),
 				),
@@ -531,6 +541,7 @@ func TestUpdate(t *testing.T) {
 						Destination: v1alpha1.ApplicationDestination{
 							Namespace: &testDestinationNamespace,
 						},
+						Annotations: testApplicationAnnotations,
 					}),
 					withExternalName(testApplicationExternalName),
 				),
@@ -546,7 +557,8 @@ func TestUpdate(t *testing.T) {
 						&argocdApplication.ApplicationUpdateRequest{
 							Application: &argocdv1alpha1.Application{
 								ObjectMeta: metav1.ObjectMeta{
-									Name: testApplicationExternalName,
+									Name:        testApplicationExternalName,
+									Annotations: testApplicationAnnotations,
 								},
 								Spec: argocdv1alpha1.ApplicationSpec{
 									Project: testProjectName,
@@ -557,7 +569,8 @@ func TestUpdate(t *testing.T) {
 				}),
 				cr: Application(
 					withSpec(v1alpha1.ApplicationParameters{
-						Project: testProjectName,
+						Project:     testProjectName,
+						Annotations: testApplicationAnnotations,
 					}),
 					withExternalName(testApplicationExternalName),
 				),
@@ -565,7 +578,8 @@ func TestUpdate(t *testing.T) {
 			want: want{
 				cr: Application(
 					withSpec(v1alpha1.ApplicationParameters{
-						Project: testProjectName,
+						Project:     testProjectName,
+						Annotations: testApplicationAnnotations,
 					}),
 					withExternalName(testApplicationExternalName),
 				),

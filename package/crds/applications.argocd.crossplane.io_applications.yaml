@@ -63,6 +63,11 @@ spec:
                 description: ApplicationParameters define the desired state of an
                   ArgoCD Git Application
                 properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: Annotations that will be applied to the ArgoCD Application
+                    type: object
                   destination:
                     description: Destination is a reference to the target Kubernetes
                       server and namespace
