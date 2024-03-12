@@ -72,7 +72,7 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 	insecure := ptr.Deref(pc.Spec.Insecure, false)
 	plaintext := ptr.Deref(pc.Spec.PlainText, false)
 
-	authToken, err := authFromCredentials(ctx, c, pc.Spec.Credentials)
+	authToken, err := authFromCredentials(ctx, c, pc)
 	if err != nil {
 		return nil, err
 	}
@@ -89,13 +89,26 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 	}, nil
 }
 
-func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.ProviderCredentials) (string, error) {
+func authFromCredentials(ctx context.Context, c client.Client, pc *v1alpha1.ProviderConfig) (string, error) {
+	creds := pc.Spec.Credentials
 	switch s := creds.Source; s { //nolint:exhaustive
 	case xpv1.CredentialsSourceSecret:
 		csr := creds.SecretRef
 		if csr == nil {
 			return "", errors.New("no credentials secret referenced")
 		}
+
+		if csr.Key == "username" {
+			secretRef := pc.Status.TokenSecretRef
+			tokenSecret := &corev1.Secret{}
+			c.Get(ctx, types.NamespacedName{Namespace: secretRef.Namespace, Name: secretRef.Name}, tokenSecret)
+			token, ok := tokenSecret.Data["token"]
+			if !ok {
+				panic("oh no")
+			}
+			return string(token), nil
+		}
+
 		s := &corev1.Secret{}
 		if err := c.Get(ctx, types.NamespacedName{Namespace: csr.Namespace, Name: csr.Name}, s); err != nil {
 			return "", errors.Wrap(err, "cannot get credentials secret")

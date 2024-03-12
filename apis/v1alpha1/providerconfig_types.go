@@ -59,6 +59,9 @@ type ProviderCredentials struct {
 // A ProviderConfigStatus represents the status of a ProviderConfig.
 type ProviderConfigStatus struct {
 	xpv1.ProviderConfigStatus `json:",inline"`
+	// TokenSecretRef is the reference to the secret containing ArgoCD token
+	// +optional
+	TokenSecretRef xpv1.SecretReference `json:"tokenSecretRef,omitempty"`
 }
 
 // +kubebuilder:object:root=true
