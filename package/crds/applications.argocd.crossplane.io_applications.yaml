@@ -248,6 +248,11 @@ spec:
                             type: object
                         type: object
                     type: object
+                  finalizers:
+                    description: Finalizers added to the ArgoCD Application
+                    items:
+                      type: string
+                    type: array
                   ignoreDifferences:
                     description: IgnoreDifferences is a list of resources and their
                       fields which should be ignored during comparison

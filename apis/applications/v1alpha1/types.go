@@ -51,6 +51,9 @@ type ApplicationParameters struct {
 
 	// Annotations that will be applied to the ArgoCD Application
 	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,12,opt,name=annotations"`
+
+	// Finalizers added to the ArgoCD Application
+	Finalizers []string `json:"finalizers,omitempty" protobuf:"bytes,13,opt,name=finalizers"`
 }
 
 // ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored during comparison with live state.
