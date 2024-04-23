@@ -6,3 +6,4 @@ package mock
 //go:generate go run -mod=mod github.com/golang/mock/mockgen -package projects -destination=./projects/mock.go -source=../projects/client.go ServiceClient -build_flags=-mod=mod
 //go:generate go run -mod=mod github.com/golang/mock/mockgen -package cluster -destination=./cluster/mock.go -source=../cluster/client.go ServiceClient -build_flags=-mod=mod
 //go:generate go run -mod=mod github.com/golang/mock/mockgen -package applicationsets -destination=./applicationsets/mock.go -source=../applicationsets/client.go ServiceClient -build_flags=-mod=mod
+//go:generate go run -mod=mod github.com/golang/mock/mockgen -package repositories -destination=./repositories/mock.go -source=../repositories/client.go ServiceClient -build_flags=-mod=mod

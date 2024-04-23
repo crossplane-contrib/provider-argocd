@@ -92,10 +92,41 @@ type SecretReference struct {
 	Key string `json:"key"`
 }
 
+// PasswordObservation holds the status of a referenced password
+type PasswordObservation struct {
+	Secret SecretObservation `json:"secret,omitempty"`
+}
+
+// SecretObservation observes a secret
+type SecretObservation struct {
+	// ResourceVersion tracks the meta1.ResourceVersion of an Object
+	ResourceVersion string `json:"resourceVersion,omitempty"`
+}
+
 // RepositoryObservation represents an argocd repository.
 type RepositoryObservation struct {
 	// Current state of repository server connecting
 	ConnectionState ConnectionState `json:"connectionState,omitempty"`
+
+	// Password tracks changes to a Password secret
+	// +optional
+	Password *PasswordObservation `json:"password,omitempty"`
+
+	// SSHPrivateKey tracks changes to a SSHPrivateKey secret
+	// +optional
+	SSHPrivateKey *PasswordObservation `json:"sshPrivateKey,omitempty"`
+
+	// TLSClientCertData tracks changes to a TLSClientCertData secret
+	// +optional
+	TLSClientCertData *PasswordObservation `json:"tlsClientCertData,omitempty"`
+
+	// TLSClientCertKey tracks changes to a TLSClientCertKey secret
+	// +optional
+	TLSClientCertKey *PasswordObservation `json:"tlsClientCertKey,omitempty"`
+
+	// GithubAppPrivateKey tracks changes to a GithubAppPrivateKey secret
+	// +optional
+	GithubAppPrivateKey *PasswordObservation `json:"githubAppPrivateKey,omitempty"`
 }
 
 // ConnectionState is the observed state of the argocd repository

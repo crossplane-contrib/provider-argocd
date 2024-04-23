@@ -114,34 +114,50 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		Repo: meta.GetExternalName(cr),
 	}
 
-	// workaround for https://github.com/argoproj/argo-cd/issues/5951
-	// we have to use ListRepositories() because Get() doesn't work -^
-	repository := &argocdv1alpha1.Repository{}
-	repositoryList, err := e.client.ListRepositories(ctx, &repoQuery)
+	observedRepository, err := e.client.Get(ctx, &repoQuery)
 	if err != nil {
-		return managed.ExternalObservation{}, errors.Wrap(err, errGetFailed)
+		return managed.ExternalObservation{}, resource.Ignore(repositories.IsErrorRepositoryNotFound, err)
 	}
-	if repositoryList.Items != nil {
-		for _, r := range repositoryList.Items {
-			if r.Repo == repoQuery.Repo {
-				repository = r
-				break
-			}
-		}
+
+	passwordSecretResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.PasswordRef)
+	if err != nil {
+		return managed.ExternalObservation{}, err
 	}
-	if repository.Repo == "" {
-		return managed.ExternalObservation{}, nil
+	sshPrivateKeyResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.SSHPrivateKeyRef)
+	if err != nil {
+		return managed.ExternalObservation{}, err
+	}
+	tlsClientCertDataResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.TLSClientCertDataRef)
+	if err != nil {
+		return managed.ExternalObservation{}, err
+	}
+	tlsClientCertKeyResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.TLSClientCertKeyRef)
+	if err != nil {
+		return managed.ExternalObservation{}, err
+	}
+	githubAppPrivateKeyResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.GithubAppPrivateKeyRef)
+	if err != nil {
+		return managed.ExternalObservation{}, err
+	}
+
+	resourceVersions := secretResourceVersion{
+		Password:            passwordSecretResourceVersion,
+		SSHPrivateKey:       sshPrivateKeyResourceVersion,
+		TLSClientCertData:   tlsClientCertDataResourceVersion,
+		TLSClientCertKey:    tlsClientCertKeyResourceVersion,
+		GithubAppPrivateKey: githubAppPrivateKeyResourceVersion,
 	}
 
 	current := cr.Spec.ForProvider.DeepCopy()
-	lateInitializeRepository(&cr.Spec.ForProvider, repository)
+	lateInitializeRepository(&cr.Spec.ForProvider, observedRepository)
 
-	cr.Status.AtProvider = generateRepositoryObservation(repository)
+	currentStatusAtProvider := cr.Status.AtProvider.DeepCopy()
+	cr.Status.AtProvider = generateRepositoryObservation(observedRepository, resourceVersions)
 	cr.Status.SetConditions(xpv1.Available())
 
 	return managed.ExternalObservation{
 		ResourceExists:          true,
-		ResourceUpToDate:        isRepositoryUpToDate(&cr.Spec.ForProvider, repository),
+		ResourceUpToDate:        isRepositoryUpToDate(cr, currentStatusAtProvider, observedRepository),
 		ResourceLateInitialized: !cmp.Equal(current, &cr.Spec.ForProvider),
 	}, nil
 }
@@ -295,7 +311,19 @@ func lateInitializeRepository(p *v1alpha1.RepositoryParameters, r *argocdv1alpha
 	p.GitHubAppEnterpriseBaseURL = clients.LateInitializeStringPtr(p.GitHubAppEnterpriseBaseURL, r.GitHubAppEnterpriseBaseURL)
 }
 
-func generateRepositoryObservation(r *argocdv1alpha1.Repository) v1alpha1.RepositoryObservation {
+type secretResourceVersion struct {
+	Password string
+
+	SSHPrivateKey string
+
+	TLSClientCertData string
+
+	TLSClientCertKey string
+
+	GithubAppPrivateKey string
+}
+
+func generateRepositoryObservation(r *argocdv1alpha1.Repository, secretResourceVersion secretResourceVersion) v1alpha1.RepositoryObservation {
 	if r == nil {
 		return v1alpha1.RepositoryObservation{}
 	}
@@ -305,6 +333,36 @@ func generateRepositoryObservation(r *argocdv1alpha1.Repository) v1alpha1.Reposi
 			Message:    r.ConnectionState.Message,
 			ModifiedAt: r.ConnectionState.ModifiedAt,
 		},
+	}
+
+	if secretResourceVersion.Password != "" {
+		o.Password = &v1alpha1.PasswordObservation{
+			Secret: v1alpha1.SecretObservation{ResourceVersion: secretResourceVersion.Password},
+		}
+	}
+
+	if secretResourceVersion.SSHPrivateKey != "" {
+		o.SSHPrivateKey = &v1alpha1.PasswordObservation{
+			Secret: v1alpha1.SecretObservation{ResourceVersion: secretResourceVersion.SSHPrivateKey},
+		}
+	}
+
+	if secretResourceVersion.TLSClientCertData != "" {
+		o.TLSClientCertData = &v1alpha1.PasswordObservation{
+			Secret: v1alpha1.SecretObservation{ResourceVersion: secretResourceVersion.TLSClientCertData},
+		}
+	}
+
+	if secretResourceVersion.TLSClientCertKey != "" {
+		o.TLSClientCertKey = &v1alpha1.PasswordObservation{
+			Secret: v1alpha1.SecretObservation{ResourceVersion: secretResourceVersion.TLSClientCertKey},
+		}
+	}
+
+	if secretResourceVersion.GithubAppPrivateKey != "" {
+		o.GithubAppPrivateKey = &v1alpha1.PasswordObservation{
+			Secret: v1alpha1.SecretObservation{ResourceVersion: secretResourceVersion.GithubAppPrivateKey},
+		}
 	}
 	return o
 }
@@ -393,8 +451,8 @@ func generateUpdateRepositoryOptions(p *v1alpha1.RepositoryParameters) *reposito
 	return o
 }
 
-func isRepositoryUpToDate(p *v1alpha1.RepositoryParameters, r *argocdv1alpha1.Repository) bool { // nolint:gocyclo
-
+func isRepositoryUpToDate(rr *v1alpha1.Repository, o *v1alpha1.RepositoryObservation, r *argocdv1alpha1.Repository) bool { // nolint:gocyclo
+	p := rr.Spec.ForProvider
 	if !cmp.Equal(p.Username, clients.StringToPtr(r.Username)) {
 		return false
 	}
@@ -425,8 +483,39 @@ func isRepositoryUpToDate(p *v1alpha1.RepositoryParameters, r *argocdv1alpha1.Re
 	if !cmp.Equal(p.GitHubAppEnterpriseBaseURL, clients.StringToPtr(r.GitHubAppEnterpriseBaseURL)) {
 		return false
 	}
+	if !cmp.Equal(rr.Status.AtProvider.Password, o.Password) {
+		return false
+	}
+	if !cmp.Equal(rr.Status.AtProvider.SSHPrivateKey, o.SSHPrivateKey) {
+		return false
+	}
+	if !cmp.Equal(rr.Status.AtProvider.TLSClientCertData, o.TLSClientCertData) {
+		return false
+	}
+	if !cmp.Equal(rr.Status.AtProvider.TLSClientCertKey, o.TLSClientCertKey) {
+		return false
+	}
+	if !cmp.Equal(rr.Status.AtProvider.GithubAppPrivateKey, o.GithubAppPrivateKey) {
+		return false
+	}
 
 	return true
+}
+
+// fetch resource version from a SecretRef so that we can track any updates
+func (e *external) getSecretResourceVersion(ctx context.Context, ref *v1alpha1.SecretReference) (string, error) {
+	if ref == nil {
+		return "", nil
+	}
+	nn := types.NamespacedName{
+		Name:      ref.Name,
+		Namespace: ref.Namespace,
+	}
+	sc := &corev1.Secret{}
+	if err := e.kube.Get(ctx, nn, sc); err != nil {
+		return "", errors.Wrap(err, errGetSecretFailed)
+	}
+	return sc.GetResourceVersion(), nil
 }
 
 // fetch kubernetes secret payload

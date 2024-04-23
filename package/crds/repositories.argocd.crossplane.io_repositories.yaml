@@ -387,6 +387,69 @@ spec:
                       status:
                         type: string
                     type: object
+                  githubAppPrivateKey:
+                    description: GithubAppPrivateKey tracks changes to a GithubAppPrivateKey
+                      secret
+                    properties:
+                      secret:
+                        description: SecretObservation observes a secret
+                        properties:
+                          resourceVersion:
+                            description: ResourceVersion tracks the meta1.ResourceVersion
+                              of an Object
+                            type: string
+                        type: object
+                    type: object
+                  password:
+                    description: Password tracks changes to a Password secret
+                    properties:
+                      secret:
+                        description: SecretObservation observes a secret
+                        properties:
+                          resourceVersion:
+                            description: ResourceVersion tracks the meta1.ResourceVersion
+                              of an Object
+                            type: string
+                        type: object
+                    type: object
+                  sshPrivateKey:
+                    description: SSHPrivateKey tracks changes to a SSHPrivateKey secret
+                    properties:
+                      secret:
+                        description: SecretObservation observes a secret
+                        properties:
+                          resourceVersion:
+                            description: ResourceVersion tracks the meta1.ResourceVersion
+                              of an Object
+                            type: string
+                        type: object
+                    type: object
+                  tlsClientCertData:
+                    description: TLSClientCertData tracks changes to a TLSClientCertData
+                      secret
+                    properties:
+                      secret:
+                        description: SecretObservation observes a secret
+                        properties:
+                          resourceVersion:
+                            description: ResourceVersion tracks the meta1.ResourceVersion
+                              of an Object
+                            type: string
+                        type: object
+                    type: object
+                  tlsClientCertKey:
+                    description: TLSClientCertKey tracks changes to a TLSClientCertKey
+                      secret
+                    properties:
+                      secret:
+                        description: SecretObservation observes a secret
+                        properties:
+                          resourceVersion:
+                            description: ResourceVersion tracks the meta1.ResourceVersion
+                              of an Object
+                            type: string
+                        type: object
+                    type: object
                 type: object
               conditions:
                 description: Conditions of the resource.
