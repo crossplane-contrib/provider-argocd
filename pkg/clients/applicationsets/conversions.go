@@ -1,9 +1,11 @@
-package v1alpha1
+package applicationsets
 
 import (
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 	extv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+
+	"github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
 )
 
 // Converter helps to convert ArgoCD types to api types of this provider and vise-versa
@@ -14,7 +16,7 @@ import (
 // goverter:extend ExtV1JSONToRuntimeRawExtension
 // goverter:struct:comment // +k8s:deepcopy-gen=false
 // goverter:output:file ./zz_generated.conversion.go
-// goverter:output:package github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1
+// goverter:output:package github.com/crossplane-contrib/provider-argocd/pkg/clients/applicationsets
 // +k8s:deepcopy-gen=false
 type Converter interface {
 
@@ -22,15 +24,15 @@ type Converter interface {
 	// goverter:ignore ServerSelector
 	// goverter:ignore NameRef
 	// goverter:ignore NameSelector
-	FromArgoDestination(in argocdv1alpha1.ApplicationDestination) ApplicationDestination
+	FromArgoDestination(in argocdv1alpha1.ApplicationDestination) v1alpha1.ApplicationDestination
 
-	ToArgoDestination(in ApplicationDestination) argocdv1alpha1.ApplicationDestination
+	ToArgoDestination(in v1alpha1.ApplicationDestination) argocdv1alpha1.ApplicationDestination
 
-	ToArgoApplicationSetSpec(in *ApplicationSetParameters) *argocdv1alpha1.ApplicationSetSpec
-	FromArgoApplicationSetSpec(in *argocdv1alpha1.ApplicationSetSpec) *ApplicationSetParameters
+	ToArgoApplicationSetSpec(in *v1alpha1.ApplicationSetParameters) *argocdv1alpha1.ApplicationSetSpec
+	FromArgoApplicationSetSpec(in *argocdv1alpha1.ApplicationSetSpec) *v1alpha1.ApplicationSetParameters
 
-	FromArgoApplicationSetStatus(in *argocdv1alpha1.ApplicationSetStatus) *ArgoApplicationSetStatus
-	ToArgoApplicationSetStatus(in *ArgoApplicationSetStatus) *argocdv1alpha1.ApplicationSetStatus
+	FromArgoApplicationSetStatus(in *argocdv1alpha1.ApplicationSetStatus) *v1alpha1.ArgoApplicationSetStatus
+	ToArgoApplicationSetStatus(in *v1alpha1.ArgoApplicationSetStatus) *argocdv1alpha1.ApplicationSetStatus
 }
 
 // ExtV1JSONToRuntimeRawExtension converts an extv1.JSON into a

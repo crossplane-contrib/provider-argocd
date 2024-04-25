@@ -6,11 +6,12 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/applicationsets"
 )
 
 // IsApplicationSetUpToDate converts ApplicationParameters to its ArgoCD Counterpart and returns if they equal
 func IsApplicationSetUpToDate(cr *v1alpha1.ApplicationSetParameters, remote *argocdv1alpha1.ApplicationSet) bool { // nolint:gocyclo
-	converter := v1alpha1.ConverterImpl{}
+	converter := applicationsets.ConverterImpl{}
 	cluster := converter.ToArgoApplicationSetSpec(cr)
 
 	opts := []cmp.Option{
