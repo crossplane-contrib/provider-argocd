@@ -366,10 +366,8 @@ func TestCreate(t *testing.T) {
 					}),
 					withExternalName(testProjectExternalName),
 				),
-				result: managed.ExternalCreation{
-					ExternalNameAssigned: true,
-				},
-				err: nil,
+				result: managed.ExternalCreation{},
+				err:    nil,
 			},
 		},
 		"CreateSystemFailed": {

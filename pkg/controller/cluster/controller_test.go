@@ -430,10 +430,8 @@ func TestCreate(t *testing.T) {
 						},
 					}),
 				),
-				result: managed.ExternalCreation{
-					ExternalNameAssigned: true,
-				},
-				err: nil,
+				result: managed.ExternalCreation{},
+				err:    nil,
 			},
 		},
 		"CreateSystemFailed": {
