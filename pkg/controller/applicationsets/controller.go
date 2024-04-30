@@ -140,7 +140,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func generateApplicationObservation(appset *argov1alpha1.ApplicationSet) v1alpha1.ArgoApplicationSetStatus {
-	converter := &v1alpha1.ConverterImpl{}
+	converter := &appsets.ConverterImpl{}
 	return *converter.FromArgoApplicationSetStatus(&appset.Status)
 }
 
@@ -158,7 +158,7 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (e *external) generateCreateApplicationSetRequest(cr *v1alpha1.ApplicationSet) *applicationset.ApplicationSetCreateRequest {
-	converter := &v1alpha1.ConverterImpl{}
+	converter := &appsets.ConverterImpl{}
 	targetSpec := converter.ToArgoApplicationSetSpec(&cr.Spec.ForProvider)
 
 	req := &applicationset.ApplicationSetCreateRequest{

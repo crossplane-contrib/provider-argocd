@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	"github.com/argoproj/gitops-engine/pkg/health"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -84,7 +83,7 @@ type SyncStatus struct {
 // HealthStatus contains information about the currently observed health state of an application or resource
 type HealthStatus struct {
 	// Status holds the status code of the application or resource
-	Status health.HealthStatusCode `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
+	Status string `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
 	// Message is a human-readable informational message describing the health status
 	Message *string `json:"message,omitempty" protobuf:"bytes,2,opt,name=message"`
 }
