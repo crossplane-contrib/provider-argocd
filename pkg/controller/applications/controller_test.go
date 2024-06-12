@@ -47,7 +47,8 @@ var (
 	chartPath                   = "charts/podinfo"
 	revision                    = "HEAD"
 	selfHealEnabled             = true
-	testApplicationAnnotations  = map[string]string{"annotation1": "value1"}
+	testApplicationAnnotations  = map[string]string{"annotation1": "value1", "annotation2": "value2"}
+	testApplicationFinalizers   = []string{"resources-finalizer.argocd.argoproj.io"}
 )
 
 type args struct {
@@ -126,6 +127,7 @@ func TestObserve(t *testing.T) {
 								ObjectMeta: metav1.ObjectMeta{
 									Name:        testApplicationExternalName,
 									Annotations: testApplicationAnnotations,
+									Finalizers:  testApplicationFinalizers,
 								},
 								Spec: argocdv1alpha1.ApplicationSpec{
 									Project: testProjectName,
@@ -165,6 +167,7 @@ func TestObserve(t *testing.T) {
 							},
 						},
 						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
 					}),
 				),
 			},
@@ -187,6 +190,7 @@ func TestObserve(t *testing.T) {
 							},
 						},
 						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
 					}),
 					withConditions(xpv1.Available()),
 					withObservation(initializedArgoAppStatus()),
@@ -216,6 +220,7 @@ func TestObserve(t *testing.T) {
 								ObjectMeta: metav1.ObjectMeta{
 									Name:        testApplicationExternalName,
 									Annotations: testApplicationAnnotations,
+									Finalizers:  testApplicationFinalizers,
 								},
 								Spec: argocdv1alpha1.ApplicationSpec{
 									Project: testProjectName,
@@ -250,6 +255,7 @@ func TestObserve(t *testing.T) {
 							},
 						},
 						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
 					}),
 				),
 			},
@@ -272,6 +278,7 @@ func TestObserve(t *testing.T) {
 							},
 						},
 						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
 					}),
 					withConditions(xpv1.Available()),
 					withObservation(initializedArgoAppStatus()),
@@ -505,6 +512,7 @@ func TestUpdate(t *testing.T) {
 								ObjectMeta: metav1.ObjectMeta{
 									Name:        testApplicationExternalName,
 									Annotations: testApplicationAnnotations,
+									Finalizers:  testApplicationFinalizers,
 								},
 								Spec: argocdv1alpha1.ApplicationSpec{
 									Project: testProjectName,
@@ -518,6 +526,7 @@ func TestUpdate(t *testing.T) {
 						ObjectMeta: metav1.ObjectMeta{
 							Name:        testApplicationExternalName,
 							Annotations: testApplicationAnnotations,
+							Finalizers:  testApplicationFinalizers,
 						},
 					}, nil)
 				}),
@@ -529,6 +538,7 @@ func TestUpdate(t *testing.T) {
 							Namespace: &testDestinationNamespace,
 						},
 						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
 					}),
 					withExternalName(testApplicationExternalName),
 				),
@@ -542,6 +552,7 @@ func TestUpdate(t *testing.T) {
 							Namespace: &testDestinationNamespace,
 						},
 						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
 					}),
 					withExternalName(testApplicationExternalName),
 				),
