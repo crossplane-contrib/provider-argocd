@@ -18,13 +18,17 @@ package projects
 
 import (
 	"context"
+	"fmt"
+	"time"
 
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/project"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 	"github.com/argoproj/argo-cd/v2/util/io"
+	atime "github.com/argoproj/pkg/time"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -43,12 +47,13 @@ import (
 )
 
 const (
-	errNotProject       = "managed resource is not a Argocd Project custom resource"
-	errGetFailed        = "cannot get Argocd Project"
-	errKubeUpdateFailed = "cannot update Argocd Project custom resource"
-	errCreateFailed     = "cannot create Argocd Project"
-	errUpdateFailed     = "cannot update Argocd Project"
-	errDeleteFailed     = "cannot delete Argocd Project"
+	errNotProject        = "managed resource is not a Argocd Project custom resource"
+	errGetFailed         = "cannot get Argocd Project"
+	errKubeUpdateFailed  = "cannot update Argocd Project custom resource"
+	errCreateFailed      = "cannot create Argocd Project"
+	errUpdateFailed      = "cannot update Argocd Project"
+	errDeleteFailed      = "cannot delete Argocd Project"
+	errCreateTokenFailed = "cannot create Argocd Project Token"
 )
 
 // SetupProject adds a controller that reconciles projects.
@@ -144,6 +149,23 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalCreation{}, errors.Wrap(err, errCreateFailed)
 	}
 
+	projTokenCreateRequests := generateTokenCreateRequests(resp.Name, cr.Spec.ForProvider.Roles)
+	tokens := make(map[string][]byte, len(projTokenCreateRequests))
+	for key, req := range projTokenCreateRequests {
+		res, errToken := e.client.CreateToken(ctx, req)
+		if errToken != nil {
+			return managed.ExternalCreation{}, errors.Wrap(err, errCreateTokenFailed)
+		}
+		tokens[key] = []byte(res.GetToken())
+	}
+
+	if len(tokens) > 0 {
+		errSecret := e.upsertConnectionSecret(ctx, cr, tokens)
+		if errSecret != nil {
+			return managed.ExternalCreation{}, errors.Wrap(errSecret, errCreateFailed)
+		}
+	}
+
 	meta.SetExternalName(cr, resp.Name)
 
 	return managed.ExternalCreation{}, errors.Wrap(nil, errKubeUpdateFailed)
@@ -166,6 +188,26 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	projUpdateRequest := generateUpdateProjectOptions(cr, proj)
 
 	_, err = e.client.Update(ctx, projUpdateRequest)
+	if err != nil {
+		return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateFailed)
+	}
+	projTokenUpdateRequests := generateTokenUpdateRequests(proj.Name, cr.Spec.ForProvider.Roles, cr.Status.AtProvider.JWTTokensByRole)
+
+	tokens := make(map[string][]byte, len(projTokenUpdateRequests))
+	for key, req := range projTokenUpdateRequests {
+		res, errToken := e.client.CreateToken(ctx, req)
+		if errToken != nil {
+			return managed.ExternalUpdate{}, errors.Wrap(err, errCreateTokenFailed)
+		}
+		tokens[key] = []byte(res.GetToken())
+	}
+
+	if len(tokens) > 0 {
+		err = e.upsertConnectionSecret(ctx, cr, tokens)
+		if err != nil {
+			return managed.ExternalUpdate{}, errors.Wrap(err, errCreateFailed)
+		}
+	}
 
 	return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateFailed)
 }
@@ -355,21 +397,10 @@ func generateProjectSpec(p *v1alpha1.ProjectParameters) argocdv1alpha1.AppProjec
 	if p.Roles != nil {
 		projSpec.Roles = make([]argocdv1alpha1.ProjectRole, len(p.Roles))
 		for i, r := range p.Roles {
-
-			jwtTokens := make([]argocdv1alpha1.JWTToken, len(r.JWTTokens))
-			for j, t := range r.JWTTokens {
-				jwtTokens[j] = argocdv1alpha1.JWTToken{
-					IssuedAt:  t.IssuedAt,
-					ExpiresAt: clients.Int64Value(t.ExpiresAt),
-					ID:        clients.StringValue(t.ID),
-				}
-			}
-
 			projSpec.Roles[i] = argocdv1alpha1.ProjectRole{
 				Name:        r.Name,
 				Description: clients.StringValue(r.Description),
 				Policies:    r.Policies,
-				JWTTokens:   jwtTokens,
 				Groups:      r.Groups,
 			}
 		}
@@ -444,6 +475,83 @@ func generateUpdateProjectOptions(p *v1alpha1.Project, current *argocdv1alpha1.A
 	return o
 }
 
+func createProjectTokenRequest(name, roleName, tokenID string, description *string, expiresIn int64) *project.ProjectTokenCreateRequest {
+	request := &project.ProjectTokenCreateRequest{
+		Id:        tokenID,
+		Project:   name,
+		Role:      roleName,
+		ExpiresIn: expiresIn,
+	}
+	if description != nil {
+		request.Description = *description
+	}
+	return request
+}
+
+func generateTokenCreateRequests(name string, roles []v1alpha1.ProjectRole) map[string]*project.ProjectTokenCreateRequest {
+	requests := make(map[string]*project.ProjectTokenCreateRequest)
+	for _, role := range roles {
+		for _, token := range role.Tokens {
+			expiresIn, _ := parseDuration(token.ExpiresIn)
+			request := createProjectTokenRequest(name, role.Name, token.ID, token.Description, expiresIn)
+			requests[fmt.Sprintf("%s.%s", role.Name, token.ID)] = request
+		}
+	}
+	return requests
+}
+
+func generateTokenUpdateRequests(name string, roles []v1alpha1.ProjectRole, existingTokens map[string]v1alpha1.JWTTokens) map[string]*project.ProjectTokenCreateRequest {
+	requests := make(map[string]*project.ProjectTokenCreateRequest)
+	now := time.Now().Unix()
+
+	for _, role := range roles {
+		for _, token := range role.Tokens {
+			tokenKey := fmt.Sprintf("%s.%s", role.Name, token.ID)
+			expiresIn, _ := parseDuration(token.ExpiresIn)
+
+			tokens, exists := existingTokens[role.Name]
+			if !exists {
+				requests[tokenKey] = createProjectTokenRequest(name, role.Name, token.ID, token.Description, expiresIn)
+				continue
+			}
+
+			var existingToken *v1alpha1.JWTToken
+			for i, t := range tokens.Items {
+				if *t.ID == token.ID {
+					existingToken = &tokens.Items[i]
+					break
+				}
+			}
+
+			if existingToken == nil {
+				requests[tokenKey] = createProjectTokenRequest(name, role.Name, token.ID, token.Description, expiresIn)
+				continue
+			}
+
+			if shouldRenewToken(token, existingToken, now) {
+				requests[tokenKey] = createProjectTokenRequest(name, role.Name, token.ID, token.Description, expiresIn)
+			}
+		}
+	}
+	return requests
+}
+
+func shouldRenewToken(token v1alpha1.ProjectToken, existingToken *v1alpha1.JWTToken, now int64) bool {
+	if token.RenewBefore != nil {
+		renewBefore, _ := parseDuration(token.RenewBefore)
+		if *existingToken.ExpiresAt-now < renewBefore {
+			return true
+		}
+	}
+	if token.RenewAfter != nil {
+		renewAfter, _ := parseDuration(token.RenewAfter)
+		if now-existingToken.IssuedAt > renewAfter {
+			return true
+		}
+	}
+	return false
+}
+
 func isProjectUpToDate(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppProject) bool { // nolint:gocyclo // checking all parameters can't be reduced
 	switch {
 	case !cmp.Equal(p.SourceRepos, r.Spec.SourceRepos),
@@ -475,28 +583,81 @@ func isEqualRoles(p []v1alpha1.ProjectRole, r []argocdv1alpha1.ProjectRole) bool
 			role.Description != nil && *role.Description != r[i].Description,
 			!cmp.Equal(role.Policies, r[i].Policies),
 			!cmp.Equal(role.Groups, r[i].Groups),
-			!isEqualJWTTokens(role.JWTTokens, r[i].JWTTokens):
+			!isEqualJWTTokens(role.Tokens, r[i].JWTTokens):
 			return false
 		}
 	}
 	return true
 }
 
-func isEqualJWTTokens(p []v1alpha1.JWTToken, r []argocdv1alpha1.JWTToken) bool {
+func isEqualJWTTokens(p []v1alpha1.ProjectToken, r []argocdv1alpha1.JWTToken) bool {
 	if p == nil && r == nil {
 		return true
 	}
 	if p == nil || r == nil || len(p) != len(r) {
 		return false
 	}
-	for i, jwtToken := range p {
-		switch {
-		case jwtToken.IssuedAt != r[i].IssuedAt,
-			jwtToken.ExpiresAt != nil && *jwtToken.ExpiresAt != r[i].ExpiresAt,
-			jwtToken.ID != nil && *jwtToken.ID != r[i].ID:
+
+	now := time.Now().Unix()
+
+	for i, token := range p {
+		if !isTokenEqual(token, r[i], now) {
 			return false
 		}
 	}
+	return true
+}
+
+func isTokenEqual(p v1alpha1.ProjectToken, r argocdv1alpha1.JWTToken, now int64) bool {
+	if p.ID != r.ID {
+		return false
+	}
+
+	if p.ExpiresIn == nil || *p.ExpiresIn == "0" {
+		return true
+	}
+
+	expiresIn, err := atime.ParseDuration(*p.ExpiresIn)
+	if err != nil {
+		return false
+	}
+
+	if int64(expiresIn.Seconds()) != r.ExpiresAt-r.IssuedAt {
+		return false
+	}
+
+	if r.ExpiresAt < now {
+		return false
+	}
+
+	if !isRenewalValid(p, r, now) {
+		return false
+	}
+
+	return true
+}
+
+func isRenewalValid(p v1alpha1.ProjectToken, r argocdv1alpha1.JWTToken, now int64) bool {
+	if p.RenewAfter != nil {
+		renewAfter, err := atime.ParseDuration(*p.RenewAfter)
+		if err != nil {
+			return false
+		}
+		if now-r.IssuedAt > int64(renewAfter.Seconds()) {
+			return false
+		}
+	}
+
+	if p.RenewBefore != nil {
+		renewBefore, err := atime.ParseDuration(*p.RenewBefore)
+		if err != nil {
+			return false
+		}
+		if r.ExpiresAt-now < int64(renewBefore.Seconds()) {
+			return false
+		}
+	}
+
 	return true
 }
 
@@ -586,4 +747,32 @@ func isEqualSyncWindows(p v1alpha1.SyncWindows, r argocdv1alpha1.SyncWindows) bo
 		}
 	}
 	return true
+}
+
+func parseDuration(durationStr *string) (int64, error) {
+	if durationStr == nil {
+		return 0, nil
+	}
+	duration, err := atime.ParseDuration(*durationStr)
+	if err != nil {
+		return 0, err
+	}
+	return int64(duration.Seconds()), nil
+}
+
+func (e *external) upsertConnectionSecret(ctx context.Context, project *v1alpha1.Project, tokens map[string][]byte) error {
+	secret := resource.ConnectionSecretFor(project, v1alpha1.ProjectGroupVersionKind)
+	secret.Data = tokens
+	if secret.Data != nil {
+		for k := range tokens {
+			secret.Data[k] = tokens[k]
+		}
+	}
+	if err := e.kube.Create(ctx, secret); err != nil {
+		if kerrors.IsAlreadyExists(err) {
+			return errors.Wrapf(e.kube.Update(ctx, secret), "failed to update secret: %s", secret.Name)
+		}
+		return errors.Wrapf(err, "failed to create secret: %s", secret.Name)
+	}
+	return nil
 }
