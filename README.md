@@ -77,7 +77,7 @@ kind: Provider
 metadata:
   name: provider-argocd
 spec:
-  package: xpkg.upbound.io/crossplane-contrib/provider-argocd:v0.2.0
+  package: xpkg.upbound.io/crossplane-contrib/provider-argocd:v0.8.0
 EOF
 ```
 Create a kubernetes secret from the JWT so `provider-argocd` is able to connect to Argo CD:
