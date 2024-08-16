@@ -17,10 +17,10 @@ limitations under the License.
 package config
 
 import (
+	xpcontroller "github.com/crossplane/crossplane-runtime/pkg/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/crossplane/crossplane-runtime/pkg/event"
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/providerconfig"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
@@ -29,7 +29,7 @@ import (
 
 // Setup adds a controller that reconciles ProviderConfigs by accounting for
 // their current usage.
-func Setup(mgr ctrl.Manager, l logging.Logger) error {
+func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 	name := providerconfig.ControllerName(v1alpha1.ProviderConfigGroupKind)
 
 	of := resource.ProviderConfigKinds{
@@ -42,6 +42,6 @@ func Setup(mgr ctrl.Manager, l logging.Logger) error {
 		For(&v1alpha1.ProviderConfig{}).
 		Watches(&v1alpha1.ProviderConfigUsage{}, &resource.EnqueueRequestForProviderConfig{}).
 		Complete(providerconfig.NewReconciler(mgr, of,
-			providerconfig.WithLogger(l.WithValues("controller", name)),
+			providerconfig.WithLogger(o.Logger.WithValues("controller", name)),
 			providerconfig.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))
 }

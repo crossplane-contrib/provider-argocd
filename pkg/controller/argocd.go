@@ -17,9 +17,8 @@ limitations under the License.
 package controller
 
 import (
+	xpcontroller "github.com/crossplane/crossplane-runtime/pkg/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/crossplane/crossplane-runtime/pkg/logging"
 
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applications"
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applicationsets"
@@ -31,8 +30,8 @@ import (
 
 // Setup creates all argocd API controllers with the supplied logger and adds
 // them to the supplied manager.
-func Setup(mgr ctrl.Manager, l logging.Logger) error {
-	for _, setup := range []func(ctrl.Manager, logging.Logger) error{
+func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
+	for _, setup := range []func(ctrl.Manager, xpcontroller.Options) error{
 		config.Setup,
 		repositories.SetupRepository,
 		projects.SetupProject,
@@ -40,7 +39,7 @@ func Setup(mgr ctrl.Manager, l logging.Logger) error {
 		applications.SetupApplication,
 		applicationsets.SetupApplicationSet,
 	} {
-		if err := setup(mgr, l); err != nil {
+		if err := setup(mgr, o); err != nil {
 			return err
 		}
 	}
