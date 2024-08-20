@@ -20,8 +20,8 @@ import "github.com/crossplane/crossplane-runtime/pkg/feature"
 
 // Feature flags.
 const (
-	// EnableAlphaManagementPolicies enables alpha support for
+	// EnableBetaManagementPolicies enables alpha support for
 	// Management Policies. See the below design for more details.
 	// https://github.com/crossplane/crossplane/pull/3531
-	EnableAlphaManagementPolicies feature.Flag = "EnableAlphaManagementPolicies"
+	EnableBetaManagementPolicies feature.Flag = "EnableBetaManagementPolicies"
 )
