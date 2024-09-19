@@ -40,8 +40,10 @@ import (
 )
 
 var (
-	errBoom                    = errors.New("boom")
-	errNotFound                = errors.New("code = NotFound desc = repo")
+	errBoom = errors.New("boom")
+	// Unused until issue https://github.com/argoproj/argo-cd/issues/20005 in Argo CD project is resolved
+	// errNotFound                = errors.New("code = NotFound desc = repo")
+	errPermissionDenied        = errors.New("code = PermissionDenied desc = permission denied")
 	testRepositoryExternalName = "testRepo"
 	testRepo                   = "https://gitlab.com/example-group/example-project.git"
 	testUsername               = "testUser"
@@ -206,7 +208,7 @@ func TestObserve(t *testing.T) {
 						&argocdRepository.RepoQuery{
 							Repo: testRepositoryExternalName,
 						},
-					).Return(nil, errNotFound)
+					).Return(nil, errPermissionDenied) // Switch to errNotFound when issue https://github.com/argoproj/argo-cd/issues/20005 in Argo CD is solved
 				}),
 				cr: Repository(
 					withExternalName(testRepositoryExternalName),
