@@ -114,37 +114,21 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}
 
 	observedRepository, err := e.client.Get(ctx, &repoQuery)
-	if err != nil {
-		return managed.ExternalObservation{}, resource.Ignore(repositories.IsErrorRepositoryNotFound, err)
+
+	if err != nil && repositories.IsErrorPermissionDenied(err) || repositories.IsErrorRepositoryNotFound(err) {
+		return managed.ExternalObservation{
+			ResourceExists: false,
+		}, nil
 	}
 
-	passwordSecretResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.PasswordRef)
-	if err != nil {
-		return managed.ExternalObservation{}, err
-	}
-	sshPrivateKeyResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.SSHPrivateKeyRef)
-	if err != nil {
-		return managed.ExternalObservation{}, err
-	}
-	tlsClientCertDataResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.TLSClientCertDataRef)
-	if err != nil {
-		return managed.ExternalObservation{}, err
-	}
-	tlsClientCertKeyResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.TLSClientCertKeyRef)
-	if err != nil {
-		return managed.ExternalObservation{}, err
-	}
-	githubAppPrivateKeyResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.GithubAppPrivateKeyRef)
 	if err != nil {
 		return managed.ExternalObservation{}, err
 	}
 
-	resourceVersions := secretResourceVersion{
-		Password:            passwordSecretResourceVersion,
-		SSHPrivateKey:       sshPrivateKeyResourceVersion,
-		TLSClientCertData:   tlsClientCertDataResourceVersion,
-		TLSClientCertKey:    tlsClientCertKeyResourceVersion,
-		GithubAppPrivateKey: githubAppPrivateKeyResourceVersion,
+	resourceVersions, err := e.getSecretResource(ctx, cr)
+
+	if err != nil {
+		return managed.ExternalObservation{}, err
 	}
 
 	current := cr.Spec.ForProvider.DeepCopy()
@@ -535,4 +519,36 @@ func (e *external) getPayload(ctx context.Context, ref *v1alpha1.SecretReference
 	}
 
 	return nil, nil
+}
+
+func (e *external) getSecretResource(ctx context.Context, cr *v1alpha1.Repository) (secretResourceVersion, error) {
+	passwordSecretResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.PasswordRef)
+	if err != nil {
+		return secretResourceVersion{}, err
+	}
+	sshPrivateKeyResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.SSHPrivateKeyRef)
+	if err != nil {
+		return secretResourceVersion{}, err
+	}
+	tlsClientCertDataResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.TLSClientCertDataRef)
+	if err != nil {
+		return secretResourceVersion{}, err
+	}
+	tlsClientCertKeyResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.TLSClientCertKeyRef)
+	if err != nil {
+		return secretResourceVersion{}, err
+	}
+	githubAppPrivateKeyResourceVersion, err := e.getSecretResourceVersion(ctx, cr.Spec.ForProvider.GithubAppPrivateKeyRef)
+	if err != nil {
+		return secretResourceVersion{}, err
+	}
+
+	return secretResourceVersion{
+		Password:            passwordSecretResourceVersion,
+		SSHPrivateKey:       sshPrivateKeyResourceVersion,
+		TLSClientCertData:   tlsClientCertDataResourceVersion,
+		TLSClientCertKey:    tlsClientCertKeyResourceVersion,
+		GithubAppPrivateKey: githubAppPrivateKeyResourceVersion,
+	}, nil
+
 }
