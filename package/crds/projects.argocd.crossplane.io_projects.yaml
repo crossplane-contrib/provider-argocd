@@ -334,6 +334,12 @@ spec:
                       - keyID
                       type: object
                     type: array
+                  sourceNamespaces:
+                    description: SourceNamespaces contains list of namespaces which
+                      are authorized in the project
+                    items:
+                      type: string
+                    type: array
                   sourceRepos:
                     description: SourceRepos contains list of repository URLs which
                       can be used for deployment

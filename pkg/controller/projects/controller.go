@@ -434,6 +434,10 @@ func generateProjectSpec(p *v1alpha1.ProjectParameters) argocdv1alpha1.AppProjec
 		projSpec.ClusterResourceBlacklist = p.ClusterResourceBlacklist
 	}
 
+	if p.SourceNamespaces != nil {
+		projSpec.SourceNamespaces = p.SourceNamespaces
+	}
+
 	return projSpec
 }
 

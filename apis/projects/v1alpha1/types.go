@@ -41,6 +41,9 @@ type ProjectParameters struct {
 	// Destinations contains list of destinations available for deployment
 	// +optional
 	Destinations []ApplicationDestination `json:"destinations,omitempty"`
+	// SourceNamespaces contains list of namespaces which are authorized in the project
+	// +optional
+	SourceNamespaces []string `json:"sourceNamespaces,omitempty"`
 	// Description contains optional project description
 	// +optional
 	Description *string `json:"description,omitempty"`
