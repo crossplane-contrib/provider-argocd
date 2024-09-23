@@ -278,6 +278,11 @@ func (in *ProjectParameters) DeepCopyInto(out *ProjectParameters) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.SourceNamespaces != nil {
+		in, out := &in.SourceNamespaces, &out.SourceNamespaces
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Description != nil {
 		in, out := &in.Description, &out.Description
 		*out = new(string)
