@@ -14,6 +14,7 @@ import (
 
 const (
 	errorRepositoryNotFound = "code = NotFound desc = repo"
+	errorPermissionDenied   = "code = PermissionDenied desc = permission denied"
 )
 
 // RepositoryServiceClient wraps the functions to connect to argocd repositories
@@ -42,4 +43,12 @@ func IsErrorRepositoryNotFound(err error) bool {
 		return false
 	}
 	return strings.Contains(err.Error(), errorRepositoryNotFound)
+}
+
+// IsErrorPermissionDenied helper function to test for errorPermissionDenied error.
+func IsErrorPermissionDenied(err error) bool {
+	if err == nil {
+		return false
+	}
+	return strings.Contains(err.Error(), errorPermissionDenied)
 }
