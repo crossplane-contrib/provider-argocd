@@ -237,7 +237,7 @@ func createRequest(cr *v1alpha1.Token, expiresIn int64) *project.ProjectTokenCre
 	return req
 }
 
-func isTokenUpToDate(p *v1alpha1.TokenParameters, r argocdv1alpha1.JWTToken) bool { // nolint:gocyclo // checking all parameters can't be reduced
+func isTokenUpToDate(p *v1alpha1.TokenParameters, r argocdv1alpha1.JWTToken) bool { //nolint:gocyclo // checking all parameters can't be reduced
 	if r.IssuedAt == 0 || p.ID != r.ID {
 		return false
 	}

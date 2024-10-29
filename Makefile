@@ -42,10 +42,10 @@ GOLANGCILINT_VERSION := $(shell grep 'GOLANGCI_VERSION' .github/workflows/ci.yml
 
 # ====================================================================================
 # Setup Kubernetes tools
-
 UP_VERSION = v0.27.0
 UP_CHANNEL = stable
-UPTEST_VERSION = v0.12.0
+UPTEST_VERSION = v1.1.2
+CRDDIFF_VERSION = v0.12.1
 
 -include build/makelib/k8s_tools.mk
 
@@ -152,6 +152,24 @@ dev-teardown: $(KIND) $(KUBECTL)
 	@$(KIND) delete cluster --name=$(PROJECT_NAME)-dev
 
 .PHONY: cobertura manifests submodules fallthrough test-integration run crds.clean
+
+
+crddiff:
+	@$(INFO) Checking breaking CRD schema changes
+	@for crd in $${MODIFIED_CRD_LIST}; do \
+		if ! git cat-file -e "$${GITHUB_BASE_REF}:$${crd}" 2>/dev/null; then \
+			echo "CRD $${crd} does not exist in the $${GITHUB_BASE_REF} branch. Skipping..." ; \
+			continue ; \
+		fi ; \
+		echo "Checking $${crd} for breaking API changes..." ; \
+		changes_detected=$$(go run github.com/upbound/uptest/cmd/crddiff@$(CRDDIFF_VERSION) revision --enable-upjet-extensions <(git cat-file -p "$${GITHUB_BASE_REF}:$${crd}") "$${crd}" 2>&1) ; \
+		if [[ $$? != 0 ]] ; then \
+			printf "\033[31m"; echo "Breaking change detected!"; printf "\033[0m" ; \
+			echo "$${changes_detected}" ; \
+			echo ; \
+		fi ; \
+	done
+	@$(OK) Checking breaking CRD schema changes
 
 # ====================================================================================
 # Special Targets

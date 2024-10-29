@@ -333,6 +333,16 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 		pBool3 := (*source).CommonAnnotationsEnvsubst
 		v1alpha1ApplicationSourceKustomize.CommonAnnotationsEnvsubst = &pBool3
 		v1alpha1ApplicationSourceKustomize.Replicas = c.v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas((*source).Replicas)
+		v1alpha1ApplicationSourceKustomize.Patches = c.v1alpha1KustomizePatchesToV1alpha1KustomizePatches((*source).Patches)
+		var stringList []string
+		if (*source).Components != nil {
+			stringList = make([]string, len((*source).Components))
+			for i := 0; i < len((*source).Components); i++ {
+				stringList[i] = (*source).Components[i]
+			}
+		}
+		v1alpha1ApplicationSourceKustomize.Components = stringList
+		v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = (*source).LabelWithoutSelector
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -388,6 +398,16 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 		}
 		v1alpha1ApplicationSourceKustomize.CommonAnnotationsEnvsubst = xbool3
 		v1alpha1ApplicationSourceKustomize.Replicas = c.v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas2((*source).Replicas)
+		v1alpha1ApplicationSourceKustomize.Patches = c.v1alpha1KustomizePatchesToV1alpha1KustomizePatches2((*source).Patches)
+		var stringList []string
+		if (*source).Components != nil {
+			stringList = make([]string, len((*source).Components))
+			for i := 0; i < len((*source).Components); i++ {
+				stringList[i] = (*source).Components[i]
+			}
+		}
+		v1alpha1ApplicationSourceKustomize.Components = stringList
+		v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = (*source).LabelWithoutSelector
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -542,6 +562,28 @@ func (c *ConverterImpl) pV1alpha1InfoToPV1alpha1Info(source *v1alpha1.Info) *v1a
 		pV1alpha1Info = &v1alpha1Info
 	}
 	return pV1alpha1Info
+}
+func (c *ConverterImpl) pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector(source *v1alpha1.KustomizeSelector) *v1alpha11.KustomizeSelector {
+	var pV1alpha1KustomizeSelector *v1alpha11.KustomizeSelector
+	if source != nil {
+		var v1alpha1KustomizeSelector v1alpha11.KustomizeSelector
+		v1alpha1KustomizeSelector.KustomizeResId = c.v1alpha1KustomizeResIdToV1alpha1KustomizeResId((*source).KustomizeResId)
+		v1alpha1KustomizeSelector.AnnotationSelector = (*source).AnnotationSelector
+		v1alpha1KustomizeSelector.LabelSelector = (*source).LabelSelector
+		pV1alpha1KustomizeSelector = &v1alpha1KustomizeSelector
+	}
+	return pV1alpha1KustomizeSelector
+}
+func (c *ConverterImpl) pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector2(source *v1alpha11.KustomizeSelector) *v1alpha1.KustomizeSelector {
+	var pV1alpha1KustomizeSelector *v1alpha1.KustomizeSelector
+	if source != nil {
+		var v1alpha1KustomizeSelector v1alpha1.KustomizeSelector
+		v1alpha1KustomizeSelector.KustomizeResId = c.v1alpha1KustomizeResIdToV1alpha1KustomizeResId2((*source).KustomizeResId)
+		v1alpha1KustomizeSelector.AnnotationSelector = (*source).AnnotationSelector
+		v1alpha1KustomizeSelector.LabelSelector = (*source).LabelSelector
+		pV1alpha1KustomizeSelector = &v1alpha1KustomizeSelector
+	}
+	return pV1alpha1KustomizeSelector
 }
 func (c *ConverterImpl) pV1alpha1ManagedNamespaceMetadataToPV1alpha1ManagedNamespaceMetadata(source *v1alpha11.ManagedNamespaceMetadata) *v1alpha1.ManagedNamespaceMetadata {
 	var pV1alpha1ManagedNamespaceMetadata *v1alpha1.ManagedNamespaceMetadata
@@ -1121,6 +1163,20 @@ func (c *ConverterImpl) v1alpha1JsonnetVarToV1alpha1JsonnetVar2(source v1alpha11
 	v1alpha1JsonnetVar.Code = xbool
 	return v1alpha1JsonnetVar
 }
+func (c *ConverterImpl) v1alpha1KustomizeGvkToV1alpha1KustomizeGvk(source v1alpha1.KustomizeGvk) v1alpha11.KustomizeGvk {
+	var v1alpha1KustomizeGvk v1alpha11.KustomizeGvk
+	v1alpha1KustomizeGvk.Group = source.Group
+	v1alpha1KustomizeGvk.Version = source.Version
+	v1alpha1KustomizeGvk.Kind = source.Kind
+	return v1alpha1KustomizeGvk
+}
+func (c *ConverterImpl) v1alpha1KustomizeGvkToV1alpha1KustomizeGvk2(source v1alpha11.KustomizeGvk) v1alpha1.KustomizeGvk {
+	var v1alpha1KustomizeGvk v1alpha1.KustomizeGvk
+	v1alpha1KustomizeGvk.Group = source.Group
+	v1alpha1KustomizeGvk.Version = source.Version
+	v1alpha1KustomizeGvk.Kind = source.Kind
+	return v1alpha1KustomizeGvk
+}
 func (c *ConverterImpl) v1alpha1KustomizeImagesToV1alpha1KustomizeImages(source v1alpha1.KustomizeImages) v1alpha11.KustomizeImages {
 	var v1alpha1KustomizeImages v1alpha11.KustomizeImages
 	if source != nil {
@@ -1140,6 +1196,50 @@ func (c *ConverterImpl) v1alpha1KustomizeImagesToV1alpha1KustomizeImages2(source
 		}
 	}
 	return v1alpha1KustomizeImages
+}
+func (c *ConverterImpl) v1alpha1KustomizePatchToV1alpha1KustomizePatch(source v1alpha1.KustomizePatch) v1alpha11.KustomizePatch {
+	var v1alpha1KustomizePatch v1alpha11.KustomizePatch
+	v1alpha1KustomizePatch.Path = source.Path
+	v1alpha1KustomizePatch.Patch = source.Patch
+	v1alpha1KustomizePatch.Target = c.pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector(source.Target)
+	mapStringBool := make(map[string]bool, len(source.Options))
+	for key, value := range source.Options {
+		mapStringBool[key] = value
+	}
+	v1alpha1KustomizePatch.Options = mapStringBool
+	return v1alpha1KustomizePatch
+}
+func (c *ConverterImpl) v1alpha1KustomizePatchToV1alpha1KustomizePatch2(source v1alpha11.KustomizePatch) v1alpha1.KustomizePatch {
+	var v1alpha1KustomizePatch v1alpha1.KustomizePatch
+	v1alpha1KustomizePatch.Path = source.Path
+	v1alpha1KustomizePatch.Patch = source.Patch
+	v1alpha1KustomizePatch.Target = c.pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector2(source.Target)
+	mapStringBool := make(map[string]bool, len(source.Options))
+	for key, value := range source.Options {
+		mapStringBool[key] = value
+	}
+	v1alpha1KustomizePatch.Options = mapStringBool
+	return v1alpha1KustomizePatch
+}
+func (c *ConverterImpl) v1alpha1KustomizePatchesToV1alpha1KustomizePatches(source v1alpha1.KustomizePatches) v1alpha11.KustomizePatches {
+	var v1alpha1KustomizePatches v1alpha11.KustomizePatches
+	if source != nil {
+		v1alpha1KustomizePatches = make(v1alpha11.KustomizePatches, len(source))
+		for i := 0; i < len(source); i++ {
+			v1alpha1KustomizePatches[i] = c.v1alpha1KustomizePatchToV1alpha1KustomizePatch(source[i])
+		}
+	}
+	return v1alpha1KustomizePatches
+}
+func (c *ConverterImpl) v1alpha1KustomizePatchesToV1alpha1KustomizePatches2(source v1alpha11.KustomizePatches) v1alpha1.KustomizePatches {
+	var v1alpha1KustomizePatches v1alpha1.KustomizePatches
+	if source != nil {
+		v1alpha1KustomizePatches = make(v1alpha1.KustomizePatches, len(source))
+		for i := 0; i < len(source); i++ {
+			v1alpha1KustomizePatches[i] = c.v1alpha1KustomizePatchToV1alpha1KustomizePatch2(source[i])
+		}
+	}
+	return v1alpha1KustomizePatches
 }
 func (c *ConverterImpl) v1alpha1KustomizeReplicaToV1alpha1KustomizeReplica(source v1alpha1.KustomizeReplica) v1alpha11.KustomizeReplica {
 	var v1alpha1KustomizeReplica v1alpha11.KustomizeReplica
@@ -1172,6 +1272,20 @@ func (c *ConverterImpl) v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas2(so
 		}
 	}
 	return v1alpha1KustomizeReplicas
+}
+func (c *ConverterImpl) v1alpha1KustomizeResIdToV1alpha1KustomizeResId(source v1alpha1.KustomizeResId) v1alpha11.KustomizeResId {
+	var v1alpha1KustomizeResId v1alpha11.KustomizeResId
+	v1alpha1KustomizeResId.KustomizeGvk = c.v1alpha1KustomizeGvkToV1alpha1KustomizeGvk(source.KustomizeGvk)
+	v1alpha1KustomizeResId.Name = source.Name
+	v1alpha1KustomizeResId.Namespace = source.Namespace
+	return v1alpha1KustomizeResId
+}
+func (c *ConverterImpl) v1alpha1KustomizeResIdToV1alpha1KustomizeResId2(source v1alpha11.KustomizeResId) v1alpha1.KustomizeResId {
+	var v1alpha1KustomizeResId v1alpha1.KustomizeResId
+	v1alpha1KustomizeResId.KustomizeGvk = c.v1alpha1KustomizeGvkToV1alpha1KustomizeGvk2(source.KustomizeGvk)
+	v1alpha1KustomizeResId.Name = source.Name
+	v1alpha1KustomizeResId.Namespace = source.Namespace
+	return v1alpha1KustomizeResId
 }
 func (c *ConverterImpl) v1alpha1OperationInitiatorToV1alpha1OperationInitiator(source v1alpha1.OperationInitiator) v1alpha11.OperationInitiator {
 	var v1alpha1OperationInitiator v1alpha11.OperationInitiator

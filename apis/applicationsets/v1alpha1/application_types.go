@@ -203,6 +203,12 @@ type ApplicationSourceKustomize struct {
 	CommonAnnotationsEnvsubst *bool `json:"commonAnnotationsEnvsubst,omitempty" protobuf:"bytes,10,opt,name=commonAnnotationsEnvsubst"`
 	// Replicas is a list of Kustomize Replicas override specifications
 	Replicas KustomizeReplicas `json:"replicas,omitempty" protobuf:"bytes,11,opt,name=replicas"`
+	// Patches is a list of Kustomize patches
+	Patches KustomizePatches `json:"patches,omitempty" protobuf:"bytes,12,opt,name=patches"`
+	// Components specifies a list of kustomize components to add to the kustomization before building
+	Components []string `json:"components,omitempty" protobuf:"bytes,13,rep,name=components"`
+	// LabelWithoutSelector specifies whether to apply common labels to resource selectors or not
+	LabelWithoutSelector bool `json:"labelWithoutSelector,omitempty" protobuf:"bytes,14,opt,name=labelWithoutSelector"`
 }
 
 // KustomizeReplica override specifications
@@ -226,6 +232,40 @@ type KustomizeImage string
 type Info struct {
 	Name  string `json:"name" protobuf:"bytes,1,name=name"`
 	Value string `json:"value" protobuf:"bytes,2,name=value"`
+}
+
+// KustomizePatches is a list of KustomizePatches
+type KustomizePatches []KustomizePatch
+
+// KustomizePatch is a kustomize patch
+type KustomizePatch struct {
+	Path    string             `json:"path,omitempty" yaml:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
+	Patch   string             `json:"patch,omitempty" yaml:"patch,omitempty" protobuf:"bytes,2,opt,name=patch"`
+	Target  *KustomizeSelector `json:"target,omitempty" yaml:"target,omitempty" protobuf:"bytes,3,opt,name=target"`
+	Options map[string]bool    `json:"options,omitempty" yaml:"options,omitempty" protobuf:"bytes,4,opt,name=options"`
+}
+
+// KustomizeSelector is a selector of a Kustomize Patch
+type KustomizeSelector struct {
+	KustomizeResId     `json:",inline,omitempty" yaml:",inline,omitempty" protobuf:"bytes,1,opt,name=resId"`
+	AnnotationSelector string `json:"annotationSelector,omitempty" yaml:"annotationSelector,omitempty" protobuf:"bytes,2,opt,name=annotationSelector"`
+	LabelSelector      string `json:"labelSelector,omitempty" yaml:"labelSelector,omitempty" protobuf:"bytes,3,opt,name=labelSelector"`
+}
+
+// KustomizeResId identifies a resource
+//
+//nolint:golint // KustomizeResId capitalization matches upstream ArgoCD type
+type KustomizeResId struct {
+	KustomizeGvk `json:",inline,omitempty" yaml:",inline,omitempty" protobuf:"bytes,1,opt,name=gvk"`
+	Name         string `json:"name,omitempty" yaml:"name,omitempty" protobuf:"bytes,2,opt,name=name"`
+	Namespace    string `json:"namespace,omitempty" yaml:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
+}
+
+// KustomizeGvk contains group/version/kind for a resource
+type KustomizeGvk struct {
+	Group   string `json:"group,omitempty" yaml:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
+	Version string `json:"version,omitempty" yaml:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
+	Kind    string `json:"kind,omitempty" yaml:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
 }
 
 // SyncOptions provide per-sync sync-options, e.g. Validate=false
