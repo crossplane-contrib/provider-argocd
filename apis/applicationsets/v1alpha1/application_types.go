@@ -209,12 +209,6 @@ type ApplicationSourceKustomize struct {
 	Components []string `json:"components,omitempty" protobuf:"bytes,13,rep,name=components"`
 	// LabelWithoutSelector specifies whether to apply common labels to resource selectors or not
 	LabelWithoutSelector bool `json:"labelWithoutSelector,omitempty" protobuf:"bytes,14,opt,name=labelWithoutSelector"`
-	// KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
-	// uses the Kubernetes version of the target cluster.
-	//KubeVersion string `json:"kubeVersion,omitempty" protobuf:"bytes,15,opt,name=kubeVersion"`
-	// APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,
-	// Argo CD uses the API versions of the target cluster. The format is [group/]version/kind.
-	//APIVersions []string `json:"apiVersions,omitempty" protobuf:"bytes,16,opt,name=apiVersions"`
 }
 
 // KustomizeReplica override specifications
