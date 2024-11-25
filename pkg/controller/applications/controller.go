@@ -18,6 +18,7 @@ package applications
 
 import (
 	"context"
+	"time"
 
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/application"
@@ -52,7 +53,7 @@ const (
 )
 
 // SetupApplication adds a controller that reconciles applications.
-func SetupApplication(mgr ctrl.Manager, o xpcontroller.Options) error {
+func SetupApplication(mgr ctrl.Manager, o xpcontroller.Options, reconciliationTimeout time.Duration) error {
 	name := managed.ControllerName(v1alpha1.ApplicationKind)
 
 	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
@@ -64,7 +65,7 @@ func SetupApplication(mgr ctrl.Manager, o xpcontroller.Options) error {
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 		managed.WithConnectionPublishers(cps...),
-		managed.WithTimeout(o.ReconciliationTimeout),
+		managed.WithTimeout(reconciliationTimeout),
 	}
 
 	if o.Features.Enabled(features.EnableBetaManagementPolicies) {

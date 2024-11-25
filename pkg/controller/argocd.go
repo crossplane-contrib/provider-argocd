@@ -19,6 +19,7 @@ package controller
 import (
 	xpcontroller "github.com/crossplane/crossplane-runtime/pkg/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"time"
 
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applications"
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applicationsets"
@@ -30,13 +31,17 @@ import (
 
 // Setup creates all argocd API controllers with the supplied logger and adds
 // them to the supplied manager.
-func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
+func Setup(mgr ctrl.Manager, o xpcontroller.Options, reconciliationTimeout time.Duration) error {
+	setupApplicationWithTimeout := func(mgr ctrl.Manager, o xpcontroller.Options) error {
+		return applications.SetupApplication(mgr, o, reconciliationTimeout)
+	}
+
 	for _, setup := range []func(ctrl.Manager, xpcontroller.Options) error{
 		config.Setup,
 		repositories.SetupRepository,
 		projects.SetupProject,
 		cluster.SetupCluster,
-		applications.SetupApplication,
+		setupApplicationWithTimeout,
 		applicationsets.SetupApplicationSet,
 	} {
 		if err := setup(mgr, o); err != nil {

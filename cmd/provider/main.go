@@ -81,9 +81,10 @@ func main() {
 		Logger:                  log,
 		MaxConcurrentReconciles: *maxReconcileRate,
 		PollInterval:            *pollInterval,
-		ReconciliationTimeout:   *reconciliationTimeout,
-		GlobalRateLimiter:       ratelimiter.NewGlobal(*maxReconcileRate),
-		Features:                &feature.Flags{},
+		// https://github.com/crossplane/crossplane-runtime/blob/main/pkg/controller/options.go there is no option yet
+		//ReconciliationTimeout:   *reconciliationTimeout,
+		GlobalRateLimiter: ratelimiter.NewGlobal(*maxReconcileRate),
+		Features:          &feature.Flags{},
 	}
 
 	if *enableManagementPolicies {
@@ -93,6 +94,6 @@ func main() {
 
 	kingpin.FatalIfError(err, "Cannot create controller manager")
 	kingpin.FatalIfError(apis.AddToScheme(mgr.GetScheme()), "Cannot add argocd APIs to scheme")
-	kingpin.FatalIfError(controller.Setup(mgr, o), "Cannot setup argocd controllers")
+	kingpin.FatalIfError(controller.Setup(mgr, o, *reconciliationTimeout), "Cannot setup argocd controllers")
 	kingpin.FatalIfError(mgr.Start(ctrl.SetupSignalHandler()), "Cannot start controller manager")
 }
