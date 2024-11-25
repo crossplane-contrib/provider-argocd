@@ -44,6 +44,7 @@ func main() {
 		enableManagementPolicies = app.Flag("enable-management-policies", "Enable support for Management Policies.").Default("false").Envar("ENABLE_MANAGEMENT_POLICIES").Bool()
 		maxReconcileRate         = app.Flag("max-reconcile-rate", "The global maximum rate per second at which resources may checked for drift from the desired state.").Default("10").Int()
 		pollInterval             = app.Flag("poll", "Poll interval controls how often an individual resource should be checked for drift.").Default("1m").Duration()
+		reconciliationTimeout    = app.Flag("reconciliation-timeout", "The timeout duration for the reconciliation process. In case the deadline exceeds, necessary calls to report errors will still be made.").Default("1m").Duration()
 	)
 	kingpin.MustParse(app.Parse(os.Args[1:]))
 
@@ -80,6 +81,7 @@ func main() {
 		Logger:                  log,
 		MaxConcurrentReconciles: *maxReconcileRate,
 		PollInterval:            *pollInterval,
+		ReconciliationTimeout:   *reconciliationTimeout,
 		GlobalRateLimiter:       ratelimiter.NewGlobal(*maxReconcileRate),
 		Features:                &feature.Flags{},
 	}

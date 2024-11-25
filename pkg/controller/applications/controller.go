@@ -64,6 +64,7 @@ func SetupApplication(mgr ctrl.Manager, o xpcontroller.Options) error {
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 		managed.WithConnectionPublishers(cps...),
+		managed.WithTimeout(o.ReconciliationTimeout),
 	}
 
 	if o.Features.Enabled(features.EnableBetaManagementPolicies) {
