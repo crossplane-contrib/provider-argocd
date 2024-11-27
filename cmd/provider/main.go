@@ -81,10 +81,8 @@ func main() {
 		Logger:                  log,
 		MaxConcurrentReconciles: *maxReconcileRate,
 		PollInterval:            *pollInterval,
-		// https://github.com/crossplane/crossplane-runtime/blob/main/pkg/controller/options.go there is no option yet
-		//ReconciliationTimeout:   *reconciliationTimeout,
-		GlobalRateLimiter: ratelimiter.NewGlobal(*maxReconcileRate),
-		Features:          &feature.Flags{},
+		GlobalRateLimiter:       ratelimiter.NewGlobal(*maxReconcileRate),
+		Features:                &feature.Flags{},
 	}
 
 	if *enableManagementPolicies {
