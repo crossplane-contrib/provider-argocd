@@ -18,6 +18,7 @@ package applications
 
 import (
 	"context"
+	"time"
 
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/application"
@@ -64,6 +65,7 @@ func SetupApplication(mgr ctrl.Manager, o xpcontroller.Options) error {
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 		managed.WithConnectionPublishers(cps...),
+		managed.WithTimeout(5 * time.Minute),
 	}
 
 	if o.Features.Enabled(features.EnableBetaManagementPolicies) {
