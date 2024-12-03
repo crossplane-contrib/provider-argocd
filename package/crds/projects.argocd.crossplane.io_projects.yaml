@@ -315,6 +315,38 @@ spec:
                           items:
                             type: string
                           type: array
+                        tokens:
+                          description: Tokens are a list of tokens to generate
+                          items:
+                            description: ProjectToken holds the configuration for
+                              a Token
+                            properties:
+                              description:
+                                description: Description is a description for the
+                                  token
+                                type: string
+                              expiresIn:
+                                description: Duration before the token will expire.
+                                  Valid time units are `s`, `m`, `h` and `d` E.g.
+                                  12h, 7d. No expiration if not set.
+                                type: string
+                              id:
+                                description: ID is an id for the token
+                                type: string
+                              renewAfter:
+                                description: Duration to control token regeneration
+                                  based on token age. Valid time units are `s`, `m`,
+                                  `h` and `d`.
+                                type: string
+                              renewBefore:
+                                description: Duration to control token regeneration
+                                  based on remaining token lifetime. Valid time units
+                                  are `s`, `m`, `h` and `d`.
+                                type: string
+                            required:
+                            - id
+                            type: object
+                          type: array
                       required:
                       - name
                       type: object

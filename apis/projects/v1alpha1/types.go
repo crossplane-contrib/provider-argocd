@@ -116,6 +116,27 @@ type ProjectRole struct {
 	// Groups are a list of OIDC group claims bound to this role
 	// +optional
 	Groups []string `json:"groups,omitempty"`
+	// Tokens are a list of tokens to generate
+	// +optional
+	Tokens []ProjectToken `json:"tokens,omitempty"`
+}
+
+// ProjectToken holds the configuration for a Token
+type ProjectToken struct {
+	// ID is an id for the token
+	ID string `json:"id"`
+	// Description is a description for the token
+	// +optional
+	Description *string `json:"description,omitempty"`
+	// Duration before the token will expire. Valid time units are `s`, `m`, `h` and `d` E.g. 12h, 7d. No expiration if not set.
+	// +optional
+	ExpiresIn *string `json:"expiresIn,omitempty"`
+	// Duration to control token regeneration based on token age. Valid time units are `s`, `m`, `h` and `d`.
+	// +optional
+	RenewAfter *string `json:"renewAfter,omitempty"`
+	// Duration to control token regeneration based on remaining token lifetime. Valid time units are `s`, `m`, `h` and `d`.
+	// +optional
+	RenewBefore *string `json:"renewBefore,omitempty"`
 }
 
 // JWTToken holds the issuedAt and expiresAt values of a token

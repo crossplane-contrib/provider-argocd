@@ -57,6 +57,26 @@ func (mr *MockProjectServiceClientMockRecorder) Create(ctx, in interface{}, opts
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockProjectServiceClient)(nil).Create), varargs...)
 }
 
+// CreateToken mocks base method.
+func (m *MockProjectServiceClient) CreateToken(ctx context.Context, in *project.ProjectTokenCreateRequest, opts ...grpc.CallOption) (*project.ProjectTokenResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CreateToken", varargs...)
+	ret0, _ := ret[0].(*project.ProjectTokenResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateToken indicates an expected call of CreateToken.
+func (mr *MockProjectServiceClientMockRecorder) CreateToken(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateToken", reflect.TypeOf((*MockProjectServiceClient)(nil).CreateToken), varargs...)
+}
+
 // Delete mocks base method.
 func (m *MockProjectServiceClient) Delete(ctx context.Context, in *project.ProjectQuery, opts ...grpc.CallOption) (*project.EmptyResponse, error) {
 	m.ctrl.T.Helper()
@@ -75,6 +95,26 @@ func (mr *MockProjectServiceClientMockRecorder) Delete(ctx, in interface{}, opts
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockProjectServiceClient)(nil).Delete), varargs...)
+}
+
+// DeleteToken mocks base method.
+func (m *MockProjectServiceClient) DeleteToken(ctx context.Context, in *project.ProjectTokenDeleteRequest, opts ...grpc.CallOption) (*project.EmptyResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteToken", varargs...)
+	ret0, _ := ret[0].(*project.EmptyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteToken indicates an expected call of DeleteToken.
+func (mr *MockProjectServiceClientMockRecorder) DeleteToken(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteToken", reflect.TypeOf((*MockProjectServiceClient)(nil).DeleteToken), varargs...)
 }
 
 // Get mocks base method.
