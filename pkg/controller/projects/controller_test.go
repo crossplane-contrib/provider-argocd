@@ -19,6 +19,9 @@ package projects
 import (
 	"context"
 	"testing"
+	"time"
+
+	"k8s.io/utils/ptr"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
@@ -705,6 +708,259 @@ func TestDelete(t *testing.T) {
 			}
 			if diff := cmp.Diff(tc.want.cr, tc.args.cr, test.EquateConditions()); diff != "" {
 				t.Errorf("r: -want, +got:\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestIsEqualJWTTokens(t *testing.T) {
+	now := time.Now().Unix()
+	tests := []struct {
+		name string
+		p    []v1alpha1.ProjectToken
+		r    []argocdv1alpha1.JWTToken
+		want bool
+	}{
+		{
+			name: "EqualTokens",
+			p: []v1alpha1.ProjectToken{{
+				ID:        "token1",
+				ExpiresIn: ptr.To("1h"),
+			}},
+			r: []argocdv1alpha1.JWTToken{{
+				ID:        "token1",
+				IssuedAt:  now,
+				ExpiresAt: now + 3600,
+			}},
+			want: true,
+		},
+		{
+			name: "DifferentIDs",
+			p: []v1alpha1.ProjectToken{{
+				ID:        "token1",
+				ExpiresIn: ptr.To("1h"),
+			}},
+			r: []argocdv1alpha1.JWTToken{{
+				ID:        "token2",
+				IssuedAt:  now,
+				ExpiresAt: now + 3600,
+			}},
+			want: false,
+		},
+		{
+			name: "DifferentExpiration",
+			p: []v1alpha1.ProjectToken{{
+				ID:        "token1",
+				ExpiresIn: ptr.To("2h"),
+			}},
+			r: []argocdv1alpha1.JWTToken{{
+				ID:        "token1",
+				IssuedAt:  now,
+				ExpiresAt: now + 3600,
+			}},
+			want: false,
+		},
+		{
+			name: "TokenExpired",
+			p: []v1alpha1.ProjectToken{{
+				ID:        "token1",
+				ExpiresIn: ptr.To("1h"),
+			}},
+			r: []argocdv1alpha1.JWTToken{{
+				ID:        "token1",
+				IssuedAt:  now - 7200,
+				ExpiresAt: now - 3600,
+			}},
+			want: false,
+		},
+		{
+			name: "DifferentLengths",
+			p: []v1alpha1.ProjectToken{{
+				ID:        "token1",
+				ExpiresIn: ptr.To("1h"),
+			}},
+			r: []argocdv1alpha1.JWTToken{{
+				ID:        "token1",
+				IssuedAt:  now,
+				ExpiresAt: now + 3600,
+			}, {
+				ID:        "token2",
+				IssuedAt:  now,
+				ExpiresAt: now + 7200,
+			}},
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isEqualJWTTokens(tt.p, tt.r); got != tt.want {
+				t.Errorf("isEqualJWTTokens() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestGenerateTokenUpdateRequests(t *testing.T) {
+	now := time.Now().Unix()
+	tests := []struct {
+		name           string
+		projectName    string
+		roles          []v1alpha1.ProjectRole
+		existingTokens map[string]v1alpha1.JWTTokens
+		want           map[string]*project.ProjectTokenCreateRequest
+	}{
+		{
+			name:        "NoExistingTokens",
+			projectName: "test-project",
+			roles: []v1alpha1.ProjectRole{{
+				Name: "role1",
+				Tokens: []v1alpha1.ProjectToken{{
+					ID:          "token1",
+					ExpiresIn:   ptr.To("1h"),
+					Description: ptr.To("Test token"),
+				}},
+			}},
+			existingTokens: map[string]v1alpha1.JWTTokens{},
+			want: map[string]*project.ProjectTokenCreateRequest{
+				"role1.token1": {
+					Project:     "test-project",
+					Role:        "role1",
+					Description: "Test token",
+					ExpiresIn:   3600,
+					Id:          "token1",
+				},
+			},
+		},
+		{
+			name:        "ExistingTokenOK",
+			projectName: "test-project",
+			roles: []v1alpha1.ProjectRole{{
+				Name: "role1",
+				Tokens: []v1alpha1.ProjectToken{{
+					ID:        "token1",
+					ExpiresIn: ptr.To("1h"),
+				}},
+			}},
+			existingTokens: map[string]v1alpha1.JWTTokens{
+				"role1": {
+					Items: []v1alpha1.JWTToken{{
+						ID:        ptr.To("token1"),
+						IssuedAt:  now - 4000,
+						ExpiresAt: ptr.To(now + 3600),
+					}},
+				},
+			},
+			want: map[string]*project.ProjectTokenCreateRequest{},
+		},
+		{
+			name:        "TokenNeedsRenewalBefore",
+			projectName: "test-project",
+			roles: []v1alpha1.ProjectRole{{
+				Name: "role1",
+				Tokens: []v1alpha1.ProjectToken{{
+					ID:          "token1",
+					ExpiresIn:   ptr.To("1h"),
+					RenewBefore: ptr.To("30m"),
+				}},
+			}},
+			existingTokens: map[string]v1alpha1.JWTTokens{
+				"role1": {
+					Items: []v1alpha1.JWTToken{{
+						ID:        ptr.To("token1"),
+						IssuedAt:  now - 3000,
+						ExpiresAt: ptr.To(now + 600),
+					}},
+				},
+			},
+			want: map[string]*project.ProjectTokenCreateRequest{
+				"role1.token1": {
+					Project:   "test-project",
+					Role:      "role1",
+					ExpiresIn: 3600,
+					Id:        "token1",
+				},
+			},
+		},
+		{
+			name:        "TokenNeedsRenewalAfter",
+			projectName: "test-project",
+			roles: []v1alpha1.ProjectRole{{
+				Name: "role1",
+				Tokens: []v1alpha1.ProjectToken{{
+					ID:         "token1",
+					ExpiresIn:  ptr.To("1h"),
+					RenewAfter: ptr.To("30m"),
+				}},
+			}},
+			existingTokens: map[string]v1alpha1.JWTTokens{
+				"role1": {
+					Items: []v1alpha1.JWTToken{{
+						ID:        ptr.To("token1"),
+						IssuedAt:  now - 3000,
+						ExpiresAt: ptr.To(now + 600),
+					}},
+				},
+			},
+			want: map[string]*project.ProjectTokenCreateRequest{
+				"role1.token1": {
+					Project:   "test-project",
+					Role:      "role1",
+					ExpiresIn: 3600,
+					Id:        "token1",
+				},
+			},
+		},
+		{
+			name:        "MultipleTokensOneNeedsRenewal",
+			projectName: "test-project",
+			roles: []v1alpha1.ProjectRole{{
+				Name: "role1",
+				Tokens: []v1alpha1.ProjectToken{
+					{
+						ID:          "token1",
+						ExpiresIn:   ptr.To("1h"),
+						RenewBefore: ptr.To("30m"),
+					},
+					{
+						ID:          "token2",
+						ExpiresIn:   ptr.To("1h"),
+						RenewBefore: ptr.To("30m"),
+					},
+				},
+			}},
+			existingTokens: map[string]v1alpha1.JWTTokens{
+				"role1": {
+					Items: []v1alpha1.JWTToken{
+						{
+							ID:        ptr.To("token1"),
+							IssuedAt:  now - 3000,
+							ExpiresAt: ptr.To(now + 600),
+						},
+						{
+							ID:        ptr.To("token2"),
+							IssuedAt:  now - 100,
+							ExpiresAt: ptr.To(now + 3500),
+						},
+					},
+				},
+			},
+			want: map[string]*project.ProjectTokenCreateRequest{
+				"role1.token1": {
+					Project:   "test-project",
+					Role:      "role1",
+					ExpiresIn: 3600,
+					Id:        "token1",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := generateTokenUpdateRequests(tt.projectName, tt.roles, tt.existingTokens)
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("generateTokenUpdateRequests() mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
