@@ -13,4 +13,4 @@ guidelines and responsibilities for the steering committee and maintainers.
 * Jan Willies ([janwillies](https://github.com/janwillies))
 * Maximilian Blatt ([MisterMX](https://github.com/MisterMX))
 * Ana Garlau ([anagarlau](https://github.com/anagarlau))
-* Christopher Junk ([christopherj](https://github.com/christopherj))
+* Christopher Junk ([christophrj](https://github.com/christophrj))
