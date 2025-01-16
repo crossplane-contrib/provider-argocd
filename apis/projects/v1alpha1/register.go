@@ -43,8 +43,13 @@ var (
 	ProjectGroupKind        = schema.GroupKind{Group: Group, Kind: ProjectKind}.String()
 	ProjectKindAPIVersion   = ProjectKind + "." + SchemeGroupVersion.String()
 	ProjectGroupVersionKind = SchemeGroupVersion.WithKind(ProjectKind)
+	TokenKind               = reflect.TypeOf(Token{}).Name()
+	TokenGroupKind          = schema.GroupKind{Group: Group, Kind: TokenKind}.String()
+	TokenKindAPIVersion     = TokenKind + "." + SchemeGroupVersion.String()
+	TokenGroupVersionKind   = SchemeGroupVersion.WithKind(TokenKind)
 )
 
 func init() {
 	SchemeBuilder.Register(&Project{}, &ProjectList{})
+	SchemeBuilder.Register(&Token{}, &TokenList{})
 }
