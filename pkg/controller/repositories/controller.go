@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package repositories implements the controller manager setup for ArgoCD repositories
 package repositories
 
 import (
@@ -95,7 +96,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	return &external{kube: c.kube, client: argocdClient}, nil
 }
 
-func (c *connector) Disconnect(ctx context.Context) error {
+func (c *connector) Disconnect(_ context.Context) error {
 	return c.conn.Close()
 }
 
@@ -520,7 +521,7 @@ func (e *external) getPayload(ctx context.Context, ref *v1alpha1.SecretReference
 	if ref.Key != "" {
 		val, ok := sc.Data[ref.Key]
 		if !ok {
-			return nil, errors.New(fmt.Sprintf(errFmtKeyNotFound, ref.Key))
+			return nil, fmt.Errorf(errFmtKeyNotFound, ref.Key)
 		}
 		return val, nil
 	}

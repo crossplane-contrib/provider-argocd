@@ -236,7 +236,7 @@ func TestObserve(t *testing.T) {
 		},
 		"NeedsCreationNoExternalName": {
 			args: args{
-				client: withMockClient(t, func(mcs *mockclient.MockRepositoryServiceClient) {}),
+				client: withMockClient(t, func(_ *mockclient.MockRepositoryServiceClient) {}),
 
 				cr: Repository(
 					withSpec(v1alpha1.RepositoryParameters{

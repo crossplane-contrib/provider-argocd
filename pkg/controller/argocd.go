@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package controller implements the controller managers for ArgoCD Managed Resources
 package controller
 
 import (

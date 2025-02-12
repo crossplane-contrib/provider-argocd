@@ -252,7 +252,7 @@ func TestObserve(t *testing.T) {
 		},
 		"No external name, needsCreate": {
 			args: args{
-				client: withMockClient(t, func(m *mockclient.MockServiceClient) {}),
+				client: withMockClient(t, func(_ *mockclient.MockServiceClient) {}),
 				cr: ApplicationSet(
 					withName(testApplicationSetExternalName),
 					withSpec(simpleApplicationSetParameters()),

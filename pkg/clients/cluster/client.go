@@ -1,3 +1,4 @@
+// Package cluster contains APIs for ArgoCD clusters
 package cluster
 
 import (

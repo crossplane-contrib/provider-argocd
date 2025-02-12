@@ -1,3 +1,4 @@
+// Package projects contains APIs related to ArgoCD projects
 package projects
 
 import (

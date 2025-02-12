@@ -99,7 +99,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	return &external{kube: c.kube, client: argocdClient}, nil
 }
 
-func (c *connector) Disconnect(ctx context.Context) error {
+func (c *connector) Disconnect(_ context.Context) error {
 	return c.conn.Close()
 }
 

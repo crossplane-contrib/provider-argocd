@@ -1,3 +1,4 @@
+// Package applications contains APIs related to ArgoCD applications
 package applications
 
 import (

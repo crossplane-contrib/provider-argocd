@@ -14,6 +14,7 @@
  limitations under the License.
 */
 
+// Package features contains feature flags
 package features
 
 import "github.com/crossplane/crossplane-runtime/pkg/feature"

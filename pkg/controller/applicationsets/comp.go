@@ -1,3 +1,4 @@
+// Package applicationsets contains APIs related to ArgoCD applicationsets
 package applicationsets
 
 import (

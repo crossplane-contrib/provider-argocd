@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package projects implements the controller manager setup for ArgoCD projects
 package projects
 
 import (
@@ -94,7 +95,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	return &external{kube: c.kube, client: argocdClient}, nil
 }
 
-func (c *connector) Disconnect(ctx context.Context) error {
+func (c *connector) Disconnect(_ context.Context) error {
 	return c.conn.Close()
 }
 

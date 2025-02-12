@@ -1,3 +1,4 @@
+// Package repositories contains APIs related to ArgoCD repositories
 package repositories
 
 import (
