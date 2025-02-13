@@ -145,7 +145,14 @@ func TestObserve(t *testing.T) {
 										},
 									},
 								},
-								Status: argocdv1alpha1.ApplicationStatus{},
+								Status: argocdv1alpha1.ApplicationStatus{
+									Health: argocdv1alpha1.HealthStatus{
+										Status: "Healthy",
+									},
+									Sync: argocdv1alpha1.SyncStatus{
+										Status: "Synced",
+									},
+								},
 							}},
 						}, nil)
 				}),
@@ -193,7 +200,33 @@ func TestObserve(t *testing.T) {
 						Finalizers:  testApplicationFinalizers,
 					}),
 					withConditions(xpv1.Available()),
-					withObservation(initializedArgoAppStatus()),
+					withObservation(v1alpha1.ArgoApplicationStatus{
+						Resources: nil,
+						Sync: v1alpha1.SyncStatus{
+							Status:   "Synced",
+							Revision: &emptyString,
+							ComparedTo: v1alpha1.ComparedTo{
+								Source: v1alpha1.ApplicationSource{
+									Path:           &emptyString,
+									TargetRevision: &emptyString,
+									Chart:          &emptyString,
+									Ref:            &emptyString,
+								},
+								Destination: v1alpha1.ApplicationDestination{
+									Server:    &emptyString,
+									Namespace: &emptyString,
+									Name:      &emptyString,
+								},
+							},
+						},
+						Health: v1alpha1.HealthStatus{
+							Status:  "Healthy",
+							Message: &emptyString,
+						},
+						SourceType:           "",
+						Summary:              v1alpha1.ApplicationSummary{},
+						ResourceHealthSource: "",
+					}),
 				),
 				result: managed.ExternalObservation{
 					ResourceExists:          true,
@@ -233,7 +266,14 @@ func TestObserve(t *testing.T) {
 										Namespace: testDestinationNamespace,
 									},
 								},
-								Status: argocdv1alpha1.ApplicationStatus{},
+								Status: argocdv1alpha1.ApplicationStatus{
+									Health: argocdv1alpha1.HealthStatus{
+										Status: "Missing",
+									},
+									Sync: argocdv1alpha1.SyncStatus{
+										Status: "OutOfSync",
+									},
+								},
 							}},
 						}, nil)
 				}),
@@ -280,7 +320,7 @@ func TestObserve(t *testing.T) {
 						Annotations: testApplicationAnnotations,
 						Finalizers:  testApplicationFinalizers,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv1.Available().WithMessage("Application created but not yet deployed (auto-sync disabled)")),
 					withObservation(initializedArgoAppStatus()),
 				),
 				result: managed.ExternalObservation{
@@ -383,6 +423,7 @@ func initializedArgoAppStatus() v1alpha1.ArgoApplicationStatus {
 	return v1alpha1.ArgoApplicationStatus{
 		Resources: nil,
 		Sync: v1alpha1.SyncStatus{
+			Status:   "OutOfSync",
 			Revision: &emptyString,
 			ComparedTo: v1alpha1.ComparedTo{
 				Source: v1alpha1.ApplicationSource{
@@ -399,6 +440,7 @@ func initializedArgoAppStatus() v1alpha1.ArgoApplicationStatus {
 			},
 		},
 		Health: v1alpha1.HealthStatus{
+			Status:  "Missing",
 			Message: &emptyString,
 		},
 		SourceType:           "",
