@@ -10,7 +10,7 @@ import (
 )
 
 // IsApplicationSetUpToDate converts ApplicationParameters to its ArgoCD Counterpart and returns if they equal
-func IsApplicationSetUpToDate(cr *v1alpha1.ApplicationSetParameters, remote *argocdv1alpha1.ApplicationSet) bool { // nolint:gocyclo
+func IsApplicationSetUpToDate(cr *v1alpha1.ApplicationSetParameters, remote *argocdv1alpha1.ApplicationSet) bool {
 	converter := applicationsets.ConverterImpl{}
 	cluster := converter.ToArgoApplicationSetSpec(cr)
 

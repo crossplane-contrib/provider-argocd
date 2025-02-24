@@ -20,23 +20,20 @@ import (
 	"context"
 	"testing"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/repositories"
-
+	argocdRepository "github.com/argoproj/argo-cd/v2/pkg/apiclient/repository"
+	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/pkg/meta"
+	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
+	"github.com/crossplane/crossplane-runtime/pkg/test"
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	"k8s.io/utils/ptr"
 
-	argocdRepository "github.com/argoproj/argo-cd/v2/pkg/apiclient/repository"
-	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
-
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/crossplane/crossplane-runtime/pkg/meta"
-	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
-	"github.com/crossplane/crossplane-runtime/pkg/test"
-
+	"github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
 	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/mock/repositories"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/repositories"
 )
 
 var (

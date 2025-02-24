@@ -25,7 +25,7 @@ echo_success(){
     printf "\n${GRN}%s${NOC}\n" "$1"
 }
 echo_warn(){
-    printf "\n${YLW}%s${NOC}\n" "$1"
+    printf "\n${YLW}%s${NOC}" "$1"
 }
 echo_error(){
     printf "\n${RED}%s${NOC}" "$1"
@@ -131,13 +131,13 @@ echo "${PVC_YAML}" | "${KUBECTL}" create -f -
 
 # install crossplane from stable channel
 echo_step "installing crossplane from stable channel"
-"${HELM3}" repo add crossplane-stable https://charts.crossplane.io/stable/
-chart_version="$("${HELM3}" search repo crossplane-stable/crossplane | awk 'FNR == 2 {print $2}')"
+"${HELM}" repo add crossplane-stable https://charts.crossplane.io/stable/
+chart_version="1.14.5"
 echo_info "using crossplane version ${chart_version}"
 echo
 # we replace empty dir with our PVC so that the /cache dir in the kind node
 # container is exposed to the crossplane pod
-"${HELM3}" install crossplane --namespace crossplane-system crossplane-stable/crossplane --version "${chart_version}" --wait --set packageCache.pvc=package-cache
+"${HELM}" install crossplane --namespace crossplane-system crossplane-stable/crossplane --version ${chart_version} --wait --set packageCache.pvc=package-cache
 
 # ----------- integration tests
 echo_step "--- INTEGRATION TESTS ---"

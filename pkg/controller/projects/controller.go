@@ -23,19 +23,18 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/project"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 	"github.com/argoproj/argo-cd/v2/util/io"
-	"github.com/google/go-cmp/cmp"
-	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/ptr"
-	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	xpcontroller "github.com/crossplane/crossplane-runtime/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	"github.com/google/go-cmp/cmp"
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
@@ -193,7 +192,7 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 	return errors.Wrap(err, errDeleteFailed)
 }
 
-func lateInitializeProject(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppProjectSpec) { // nolint:gocyclo // checking all parameters can't be reduced
+func lateInitializeProject(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppProjectSpec) { //nolint:gocyclo // checking all parameters can't be reduced
 	if r == nil {
 		return
 	}
@@ -342,7 +341,7 @@ func generateCreateProjectOptions(p *v1alpha1.Project) *project.ProjectCreateReq
 	return projectCreateRequest
 }
 
-func generateProjectSpec(p *v1alpha1.ProjectParameters) argocdv1alpha1.AppProjectSpec { // nolint:gocyclo // checking all parameters can't be reduced
+func generateProjectSpec(p *v1alpha1.ProjectParameters) argocdv1alpha1.AppProjectSpec { //nolint:gocyclo // checking all parameters can't be reduced
 	projSpec := argocdv1alpha1.AppProjectSpec{}
 
 	if p.SourceRepos != nil {
@@ -457,7 +456,7 @@ func generateUpdateProjectOptions(p *v1alpha1.Project, current *argocdv1alpha1.A
 	return o
 }
 
-func isProjectUpToDate(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppProject) bool { // nolint:gocyclo // checking all parameters can't be reduced
+func isProjectUpToDate(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppProject) bool {
 	switch {
 	case !cmp.Equal(p.SourceRepos, r.Spec.SourceRepos),
 		!isEqualDestinations(p.Destinations, r.Spec.Destinations),
@@ -475,7 +474,7 @@ func isProjectUpToDate(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppProje
 	return true
 }
 
-func isEqualRoles(p []v1alpha1.ProjectRole, r []argocdv1alpha1.ProjectRole) bool { // nolint:gocyclo // checking all parameters can't be reduced
+func isEqualRoles(p []v1alpha1.ProjectRole, r []argocdv1alpha1.ProjectRole) bool {
 	if p == nil && r == nil {
 		return true
 	}
@@ -513,7 +512,7 @@ func isEqualJWTTokens(p []v1alpha1.JWTToken, r []argocdv1alpha1.JWTToken) bool {
 	return true
 }
 
-func isEqualDestinations(p []v1alpha1.ApplicationDestination, r []argocdv1alpha1.ApplicationDestination) bool { // nolint:gocyclo // checking all parameters can't be reduced
+func isEqualDestinations(p []v1alpha1.ApplicationDestination, r []argocdv1alpha1.ApplicationDestination) bool { //nolint:gocyclo // checking all parameters can't be reduced
 	if p == nil && r == nil {
 		return true
 	}
@@ -531,7 +530,7 @@ func isEqualDestinations(p []v1alpha1.ApplicationDestination, r []argocdv1alpha1
 	return true
 }
 
-func isEqualOrphanedResources(p *v1alpha1.OrphanedResourcesMonitorSettings, r *argocdv1alpha1.OrphanedResourcesMonitorSettings) bool { // nolint:gocyclo // checking all parameters can't be reduced
+func isEqualOrphanedResources(p *v1alpha1.OrphanedResourcesMonitorSettings, r *argocdv1alpha1.OrphanedResourcesMonitorSettings) bool {
 	if p == nil && r == nil {
 		return true
 	}
@@ -546,7 +545,7 @@ func isEqualOrphanedResources(p *v1alpha1.OrphanedResourcesMonitorSettings, r *a
 	return true
 }
 
-func isEqualOrphanedResourceKeys(p []v1alpha1.OrphanedResourceKey, r []argocdv1alpha1.OrphanedResourceKey) bool { // nolint:gocyclo // checking all parameters can't be reduced
+func isEqualOrphanedResourceKeys(p []v1alpha1.OrphanedResourceKey, r []argocdv1alpha1.OrphanedResourceKey) bool { //nolint:gocyclo // checking all parameters can't be reduced
 	if p == nil && r == nil {
 		return true
 	}
@@ -579,7 +578,7 @@ func isEqualSignatureKeys(p []v1alpha1.SignatureKey, r []argocdv1alpha1.Signatur
 	return true
 }
 
-func isEqualSyncWindows(p v1alpha1.SyncWindows, r argocdv1alpha1.SyncWindows) bool { // nolint:gocyclo // checking all parameters can't be reduced
+func isEqualSyncWindows(p v1alpha1.SyncWindows, r argocdv1alpha1.SyncWindows) bool { //nolint:gocyclo // checking all parameters can't be reduced
 	if len(p) == 0 && r == nil {
 		return true
 	}
