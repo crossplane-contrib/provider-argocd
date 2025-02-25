@@ -192,18 +192,18 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	return managed.ExternalUpdate{}, err
 }
 
-func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
+func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*v1alpha1.ApplicationSet)
 	if !ok {
-		return errors.New(errNotApplicationSet)
+		return managed.ExternalDelete{}, errors.New(errNotApplicationSet)
 	}
 
 	_, err := e.client.Delete(ctx, &applicationset.ApplicationSetDeleteRequest{
 		Name: meta.GetExternalName(cr),
 	})
-	if err != nil {
-		return err
-	}
+	return managed.ExternalDelete{}, err
+}
 
+func (e *external) Disconnect(ctx context.Context) error {
 	return nil
 }

@@ -145,8 +145,8 @@ type ApplicationSourceHelm struct {
 	Parameters []HelmParameter `json:"parameters,omitempty" protobuf:"bytes,2,opt,name=parameters"`
 	// ReleaseName is the Helm release name to use. If omitted it will use the application name
 	ReleaseName *string `json:"releaseName,omitempty" protobuf:"bytes,3,opt,name=releaseName"`
-	// Values specifies Helm values to be passed to helm template, typically defined as a block
-	Values *string `json:"values,omitempty" protobuf:"bytes,4,opt,name=values"`
+	// Values specifies Helm values to be passed to helm template, typically defined as a block. ValuesObject takes precedence over Values, so use one or the other.
+	Values *string `json:"values,omitempty" patchStrategy:"replace" protobuf:"bytes,4,opt,name=values"`
 	// FileParameters are file parameters to the helm template
 	FileParameters []HelmFileParameter `json:"fileParameters,omitempty" protobuf:"bytes,5,opt,name=fileParameters"`
 	// Version is the Helm version to use for templating ("3")
@@ -159,6 +159,14 @@ type ApplicationSourceHelm struct {
 	SkipCrds *bool `json:"skipCrds,omitempty" protobuf:"bytes,9,opt,name=skipCrds"`
 	// ValuesObject specifies Helm values to be passed to helm template, defined as a map. This takes precedence over Values.
 	ValuesObject extv1.JSON `json:"valuesObject,omitempty" protobuf:"bytes,10,opt,name=valuesObject"`
+	// Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.
+	Namespace *string `json:"namespace,omitempty" protobuf:"bytes,11,opt,name=namespace"`
+	// KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
+	// uses the Kubernetes version of the target cluster.
+	KubeVersion *string `json:"kubeVersion,omitempty" protobuf:"bytes,12,opt,name=kubeVersion"`
+	// APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,
+	// Argo CD uses the API versions of the target cluster. The format is [group/]version/kind.
+	APIVersions []string `json:"apiVersions,omitempty" protobuf:"bytes,13,opt,name=apiVersions"`
 }
 
 // HelmParameter is a parameter that's passed to helm template during manifest generation
@@ -203,6 +211,18 @@ type ApplicationSourceKustomize struct {
 	CommonAnnotationsEnvsubst *bool `json:"commonAnnotationsEnvsubst,omitempty" protobuf:"bytes,10,opt,name=commonAnnotationsEnvsubst"`
 	// Replicas is a list of Kustomize Replicas override specifications
 	Replicas KustomizeReplicas `json:"replicas,omitempty" protobuf:"bytes,11,opt,name=replicas"`
+	// Patches is a list of Kustomize patches
+	Patches KustomizePatches `json:"patches,omitempty" protobuf:"bytes,12,opt,name=patches"`
+	// Components specifies a list of kustomize components to add to the kustomization before building
+	Components []string `json:"components,omitempty" protobuf:"bytes,13,rep,name=components"`
+	// LabelWithoutSelector specifies whether to apply common labels to resource selectors or not
+	LabelWithoutSelector *bool `json:"labelWithoutSelector,omitempty" protobuf:"bytes,14,opt,name=labelWithoutSelector"`
+	// KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
+	// uses the Kubernetes version of the target cluster.
+	KubeVersion *string `json:"kubeVersion,omitempty" protobuf:"bytes,15,opt,name=kubeVersion"`
+	// APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,
+	// Argo CD uses the API versions of the target cluster. The format is [group/]version/kind.
+	APIVersions []string `json:"apiVersions,omitempty" protobuf:"bytes,16,opt,name=apiVersions"`
 }
 
 // KustomizeReplica override specifications
@@ -215,6 +235,33 @@ type KustomizeReplica struct {
 
 // KustomizeReplicas is a list of KustomizeReplica override specifications
 type KustomizeReplicas []KustomizeReplica
+
+type KustomizePatches []KustomizePatch
+
+type KustomizePatch struct {
+	Path    *string            `json:"path,omitempty" yaml:"path,omitempty" protobuf:"bytes,1,opt,name=path"`
+	Patch   *string            `json:"patch,omitempty" yaml:"patch,omitempty" protobuf:"bytes,2,opt,name=patch"`
+	Target  *KustomizeSelector `json:"target,omitempty" yaml:"target,omitempty" protobuf:"bytes,3,opt,name=target"`
+	Options map[string]bool    `json:"options,omitempty" yaml:"options,omitempty" protobuf:"bytes,4,opt,name=options"`
+}
+
+type KustomizeSelector struct {
+	KustomizeResId     `json:",inline,omitempty" yaml:",inline,omitempty" protobuf:"bytes,1,opt,name=resId"`
+	AnnotationSelector *string `json:"annotationSelector,omitempty" yaml:"annotationSelector,omitempty" protobuf:"bytes,2,opt,name=annotationSelector"`
+	LabelSelector      *string `json:"labelSelector,omitempty" yaml:"labelSelector,omitempty" protobuf:"bytes,3,opt,name=labelSelector"`
+}
+
+type KustomizeResId struct {
+	KustomizeGvk `json:",inline,omitempty" yaml:",inline,omitempty" protobuf:"bytes,1,opt,name=gvk"`
+	Name         *string `json:"name,omitempty" yaml:"name,omitempty" protobuf:"bytes,2,opt,name=name"`
+	Namespace    *string `json:"namespace,omitempty" yaml:"namespace,omitempty" protobuf:"bytes,3,opt,name=namespace"`
+}
+
+type KustomizeGvk struct {
+	Group   string `json:"group,omitempty" yaml:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
+	Version string `json:"version,omitempty" yaml:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
+	Kind    string `json:"kind,omitempty" yaml:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
+}
 
 // KustomizeImages is a list of Kustomize images
 type KustomizeImages []KustomizeImage

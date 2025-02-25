@@ -35,12 +35,26 @@ type ApplicationSetParameters struct {
 	PreservedFields   *ApplicationPreservedFields `json:"preservedFields,omitempty" protobuf:"bytes,6,opt,name=preservedFields"`
 	GoTemplateOptions []string                    `json:"goTemplateOptions,omitempty" protobuf:"bytes,7,opt,name=goTemplateOptions"`
 	// ApplyNestedSelectors enables selectors defined within the generators of two level-nested matrix or merge generators
-	ApplyNestedSelectors bool `json:"applyNestedSelectors,omitempty" protobuf:"bytes,8,name=applyNestedSelectors"`
+	ApplyNestedSelectors         bool                            `json:"applyNestedSelectors,omitempty" protobuf:"bytes,8,name=applyNestedSelectors"`
+	IgnoreApplicationDifferences ApplicationSetIgnoreDifferences `json:"ignoreApplicationDifferences,omitempty" protobuf:"bytes,9,name=ignoreApplicationDifferences"`
+	TemplatePatch                *string                         `json:"templatePatch,omitempty" protobuf:"bytes,10,name=templatePatch"`
+}
+
+type ApplicationSetIgnoreDifferences []ApplicationSetResourceIgnoreDifferences
+
+type ApplicationSetResourceIgnoreDifferences struct {
+	// Name is the name of the application to ignore differences for. If not specified, the rule applies to all applications.
+	Name string `json:"name,omitempty" protobuf:"bytes,1,name=name"`
+	// JSONPointers is a list of JSON pointers to fields to ignore differences for.
+	JSONPointers []string `json:"jsonPointers,omitempty" protobuf:"bytes,2,name=jsonPointers"`
+	// JQPathExpressions is a list of JQ path expressions to fields to ignore differences for.
+	JQPathExpressions []string `json:"jqPathExpressions,omitempty" protobuf:"bytes,3,name=jqExpressions"`
 }
 
 // ApplicationPreservedFields ApplicationSetObservation are the preseverable fields on an Application
 type ApplicationPreservedFields struct {
 	Annotations []string `json:"annotations,omitempty" protobuf:"bytes,1,name=annotations"`
+	Labels      []string `json:"labels,omitempty" protobuf:"bytes,2,name=labels"`
 }
 
 // ApplicationSetStrategy configures how generated Applications are updated in sequence.
@@ -308,6 +322,17 @@ type SCMProviderGeneratorGitlab struct {
 	AllBranches bool `json:"allBranches,omitempty" protobuf:"varint,5,opt,name=allBranches"`
 	// Skips validating the SCM provider's TLS certificate - useful for self-signed certificates.; default: false
 	Insecure bool `json:"insecure,omitempty" protobuf:"varint,6,opt,name=insecure"`
+	// When recursing through subgroups, also include shared Projects (true) or scan only the subgroups under same path (false).  Defaults to "true"
+	IncludeSharedProjects *bool `json:"includeSharedProjects,omitempty" protobuf:"varint,7,opt,name=includeSharedProjects"`
+	// Filter repos list based on Gitlab Topic.
+	Topic *string `json:"topic,omitempty" protobuf:"bytes,8,opt,name=topic"`
+	// ConfigMap key holding the trusted certificates
+	CARef *ConfigMapKeyRef `json:"caRef,omitempty" protobuf:"bytes,9,opt,name=caRef"`
+}
+
+type ConfigMapKeyRef struct {
+	ConfigMapName string `json:"configMapName" protobuf:"bytes,1,opt,name=configMapName"`
+	Key           string `json:"key" protobuf:"bytes,2,opt,name=key"`
 }
 
 // SCMProviderGeneratorBitbucket defines connection info specific to Bitbucket Cloud (API version 2).
@@ -331,7 +356,18 @@ type SCMProviderGeneratorBitbucketServer struct {
 	// Credentials for Basic auth
 	BasicAuth *BasicAuthBitbucketServer `json:"basicAuth,omitempty" protobuf:"bytes,3,opt,name=basicAuth"`
 	// Scan all branches instead of just the default branch.
-	AllBranches bool `json:"allBranches,omitempty" protobuf:"varint,4,opt,name=allBranches"`
+	AllBranches *bool `json:"allBranches,omitempty" protobuf:"varint,4,opt,name=allBranches"`
+	// Credentials for AccessToken (Bearer auth)
+	BearerToken *BearerTokenBitbucket `json:"bearerToken,omitempty" protobuf:"bytes,5,opt,name=bearerToken"`
+	// Allow self-signed TLS / Certificates; default: false
+	Insecure *bool `json:"insecure,omitempty" protobuf:"varint,6,opt,name=insecure"`
+	// ConfigMap key holding the trusted certificates
+	CARef *ConfigMapKeyRef `json:"caRef,omitempty" protobuf:"bytes,7,opt,name=caRef"`
+}
+
+type BearerTokenBitbucket struct {
+	// Password (or personal access token) reference.
+	TokenRef *SecretRef `json:"tokenRef" protobuf:"bytes,1,opt,name=tokenRef"`
 }
 
 // SCMProviderGeneratorAzureDevOps defines connection info specific to Azure DevOps.
@@ -452,15 +488,17 @@ type PullRequestGeneratorGitLab struct {
 	// GitLab project to scan. Required.
 	Project string `json:"project" protobuf:"bytes,1,opt,name=project"`
 	// The GitLab API URL to talk to. If blank, uses https://gitlab.com/.
-	API string `json:"api,omitempty" protobuf:"bytes,2,opt,name=api"`
+	API *string `json:"api,omitempty" protobuf:"bytes,2,opt,name=api"`
 	// Authentication token reference.
 	TokenRef *SecretRef `json:"tokenRef,omitempty" protobuf:"bytes,3,opt,name=tokenRef"`
 	// Labels is used to filter the MRs that you want to target
 	Labels []string `json:"labels,omitempty" protobuf:"bytes,4,rep,name=labels"`
 	// PullRequestState is an additional MRs filter to get only those with a certain state. Default: "" (all states)
-	PullRequestState string `json:"pullRequestState,omitempty" protobuf:"bytes,5,rep,name=pullRequestState"`
+	PullRequestState *string `json:"pullRequestState,omitempty" protobuf:"bytes,5,rep,name=pullRequestState"`
 	// Skips validating the SCM provider's TLS certificate - useful for self-signed certificates.; default: false
-	Insecure bool `json:"insecure,omitempty" protobuf:"varint,6,opt,name=insecure"`
+	Insecure *bool `json:"insecure,omitempty" protobuf:"varint,6,opt,name=insecure"`
+	// ConfigMap key holding the trusted certificates
+	CARef *ConfigMapKeyRef `json:"caRef,omitempty" protobuf:"bytes,7,opt,name=caRef"`
 }
 
 // PullRequestGeneratorBitbucketServer defines connection info specific to BitbucketServer.
@@ -473,6 +511,12 @@ type PullRequestGeneratorBitbucketServer struct {
 	API string `json:"api" protobuf:"bytes,3,opt,name=api"`
 	// Credentials for Basic auth
 	BasicAuth *BasicAuthBitbucketServer `json:"basicAuth,omitempty" protobuf:"bytes,4,opt,name=basicAuth"`
+	// Credentials for AccessToken (Bearer auth)
+	BearerToken *BearerTokenBitbucket `json:"bearerToken,omitempty" protobuf:"bytes,5,opt,name=bearerToken"`
+	// Allow self-signed TLS / Certificates; default: false
+	Insecure *bool `json:"insecure,omitempty" protobuf:"varint,6,opt,name=insecure"`
+	// ConfigMap key holding the trusted certificates
+	CARef *ConfigMapKeyRef `json:"caRef,omitempty" protobuf:"bytes,7,opt,name=caRef"`
 }
 
 // PullRequestGeneratorBitbucket defines connection info specific to Bitbucket.
