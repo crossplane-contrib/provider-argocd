@@ -14,6 +14,7 @@ import (
 // goverter:useZeroValueOnPointerInconsistency
 // goverter:ignoreUnexported
 // goverter:extend ExtV1JSONToRuntimeRawExtension
+// goverter:enum:unknown @ignore
 // goverter:struct:comment // +k8s:deepcopy-gen=false
 // goverter:output:file ./zz_generated.conversion.go
 // goverter:output:package github.com/crossplane-contrib/provider-argocd/pkg/clients/applicationsets
