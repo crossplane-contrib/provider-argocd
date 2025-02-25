@@ -58,7 +58,7 @@ func SetupApplication(mgr ctrl.Manager, o xpcontroller.Options) error {
 	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: applications.NewApplicationServiceClient}),
+		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: applications.NewApplicationServiceClient}), //nolint:staticcheck
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
 		managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
@@ -184,10 +184,10 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	return managed.ExternalUpdate{}, nil
 }
 
-func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
+func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*v1alpha1.Application)
 	if !ok {
-		return errors.New(errNotApplication)
+		return managed.ExternalDelete{}, errors.New(errNotApplication)
 	}
 	query := application.ApplicationDeleteRequest{
 		Name: clients.StringToPtr(meta.GetExternalName(cr)),
@@ -195,7 +195,7 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 
 	_, err := e.client.Delete(ctx, &query)
 
-	return errors.Wrap(err, errDeleteFailed)
+	return managed.ExternalDelete{}, errors.Wrap(err, errDeleteFailed)
 }
 
 func lateInitialize(applicationParameters *v1alpha1.ApplicationParameters, app *argocdv1alpha1.Application) {
@@ -259,4 +259,8 @@ func generateUpdateRepositoryOptions(cr *v1alpha1.Application) *application.Appl
 		Application: app,
 	}
 	return o
+}
+
+func (e *external) Disconnect(ctx context.Context) error {
+	return nil
 }

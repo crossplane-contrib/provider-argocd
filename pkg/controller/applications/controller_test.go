@@ -26,9 +26,9 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/test"
-	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
+	"go.uber.org/mock/gomock"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1"
@@ -621,6 +621,7 @@ func TestDelete(t *testing.T) {
 	type want struct {
 		cr  *v1alpha1.Application
 		err error
+		res managed.ExternalDelete
 	}
 
 	cases := map[string]struct {
@@ -678,8 +679,11 @@ func TestDelete(t *testing.T) {
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			e := &external{client: tc.client}
-			err := e.Delete(context.Background(), tc.args.cr)
+			got, err := e.Delete(context.Background(), tc.args.cr)
 
+			if diff := cmp.Diff(tc.want.res, got); diff != "" {
+				t.Errorf("res: -want +got:\n%s", diff)
+			}
 			if diff := cmp.Diff(tc.want.err, err, test.EquateErrors()); diff != "" {
 				t.Errorf("r: -want, +got:\n%s", diff)
 			}

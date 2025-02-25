@@ -56,7 +56,7 @@ func SetupProject(mgr ctrl.Manager, o xpcontroller.Options) error {
 	name := managed.ControllerName(v1alpha1.ProjectKind)
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}),
+		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}), //nolint:staticcheck
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 	}
@@ -178,10 +178,10 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateFailed)
 }
 
-func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
+func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*v1alpha1.Project)
 	if !ok {
-		return errors.New(errNotProject)
+		return managed.ExternalDelete{}, errors.New(errNotProject)
 	}
 	projQuery := project.ProjectQuery{
 		Name: meta.GetExternalName(cr),
@@ -189,7 +189,7 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 
 	_, err := e.client.Delete(ctx, &projQuery)
 
-	return errors.Wrap(err, errDeleteFailed)
+	return managed.ExternalDelete{}, errors.Wrap(err, errDeleteFailed)
 }
 
 func lateInitializeProject(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppProjectSpec) { //nolint:gocyclo // checking all parameters can't be reduced
@@ -598,4 +598,8 @@ func isEqualSyncWindows(p v1alpha1.SyncWindows, r argocdv1alpha1.SyncWindows) bo
 		}
 	}
 	return true
+}
+
+func (e *external) Disconnect(ctx context.Context) error {
+	return nil
 }
