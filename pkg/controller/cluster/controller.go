@@ -24,6 +24,12 @@ import (
 	argocdcluster "github.com/argoproj/argo-cd/v2/pkg/apiclient/cluster"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 	"github.com/argoproj/argo-cd/v2/util/io"
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	xpcontroller "github.com/crossplane/crossplane-runtime/pkg/controller"
+	"github.com/crossplane/crossplane-runtime/pkg/event"
+	"github.com/crossplane/crossplane-runtime/pkg/meta"
+	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
+	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -33,13 +39,6 @@ import (
 	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	xpcontroller "github.com/crossplane/crossplane-runtime/pkg/controller"
-	"github.com/crossplane/crossplane-runtime/pkg/event"
-	"github.com/crossplane/crossplane-runtime/pkg/meta"
-	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
-	"github.com/crossplane/crossplane-runtime/pkg/resource"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
@@ -106,7 +105,7 @@ type external struct {
 	client cluster.ServiceClient
 }
 
-func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) { // nolint: gocyclo
+func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
 	cr, ok := mg.(*v1alpha1.Cluster)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotCluster)
@@ -223,7 +222,7 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 	return errors.Wrap(err, errDeleteFailed)
 }
 
-func lateInitializeCluster(p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) { // nolint:gocyclo // checking all parameters can't be reduced
+func lateInitializeCluster(p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) {
 	if r == nil {
 		return
 	}
@@ -283,7 +282,7 @@ func (e *external) generateCreateClusterOptions(ctx context.Context, p *v1alpha1
 	return clusterCreateRequest, err
 }
 
-func (e *external) convertClusterTypes(ctx context.Context, p *v1alpha1.ClusterParameters) (argocdv1alpha1.Cluster, error) { // nolint:gocyclo // checking all parameters can't be reduced
+func (e *external) convertClusterTypes(ctx context.Context, p *v1alpha1.ClusterParameters) (argocdv1alpha1.Cluster, error) { //nolint:gocyclo // checking all parameters can't be reduced
 	argoCluster := argocdv1alpha1.Cluster{
 		Config: argocdv1alpha1.ClusterConfig{},
 	}
@@ -377,7 +376,7 @@ func (e *external) generateUpdateClusterOptions(ctx context.Context, p *v1alpha1
 	return o, err
 }
 
-func isClusterUpToDate(cr *v1alpha1.Cluster, o *v1alpha1.ClusterObservation, r *argocdv1alpha1.Cluster) bool { // nolint:gocyclo // checking all parameters can't be reduced
+func isClusterUpToDate(cr *v1alpha1.Cluster, o *v1alpha1.ClusterObservation, r *argocdv1alpha1.Cluster) bool {
 	p := cr.Spec.ForProvider
 	if (p.Project != nil && !cmp.Equal(*p.Project, r.Project)) || (p.Project == nil && r.Project != "") {
 		return false
@@ -465,7 +464,7 @@ func isEqualExecProviderConfig(p *v1alpha1.ExecProviderConfig, r *argocdv1alpha1
 	return true
 }
 
-func (e *external) resolveReferences(ctx context.Context, cr *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) error { // nolint:gocyclo // checking all parameters can't be reduced
+func (e *external) resolveReferences(ctx context.Context, cr *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) error { //nolint:gocyclo // checking all parameters can't be reduced
 	if cr.Config.PasswordSecretRef != nil {
 		payload, err := e.getPayload(ctx, cr.Config.PasswordSecretRef)
 		if err != nil {
