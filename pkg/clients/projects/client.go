@@ -25,6 +25,10 @@ type ProjectServiceClient interface {
 	Update(ctx context.Context, in *project.ProjectUpdateRequest, opts ...grpc.CallOption) (*v1alpha1.AppProject, error)
 	// Delete deletes a project
 	Delete(ctx context.Context, in *project.ProjectQuery, opts ...grpc.CallOption) (*project.EmptyResponse, error)
+	// CreateToken a new project token
+	CreateToken(ctx context.Context, in *project.ProjectTokenCreateRequest, opts ...grpc.CallOption) (*project.ProjectTokenResponse, error)
+	// DeleteToken a new project token
+	DeleteToken(ctx context.Context, in *project.ProjectTokenDeleteRequest, opts ...grpc.CallOption) (*project.EmptyResponse, error)
 }
 
 // NewProjectServiceClient creates a new API client from a set of config options, or fails fatally if the new client creation fails.

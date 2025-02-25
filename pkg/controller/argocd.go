@@ -26,6 +26,7 @@ import (
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/config"
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/projects"
 	"github.com/crossplane-contrib/provider-argocd/pkg/controller/repositories"
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller/tokens"
 )
 
 // Setup creates all argocd API controllers with the supplied logger and adds
@@ -38,6 +39,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 		cluster.SetupCluster,
 		applications.SetupApplication,
 		applicationsets.SetupApplicationSet,
+		tokens.SetupToken,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err
