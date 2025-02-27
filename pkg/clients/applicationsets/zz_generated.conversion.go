@@ -5,6 +5,7 @@ package applicationsets
 
 import (
 	v1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	health "github.com/argoproj/gitops-engine/pkg/health"
 	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,6 +43,13 @@ func (c *ConverterImpl) FromArgoApplicationSetSpec(source *v1alpha1.ApplicationS
 		}
 		v1alpha1ApplicationSetParameters.GoTemplateOptions = stringList
 		v1alpha1ApplicationSetParameters.ApplyNestedSelectors = (*source).ApplyNestedSelectors
+		v1alpha1ApplicationSetParameters.IgnoreApplicationDifferences = c.v1alpha1ApplicationSetIgnoreDifferencesToV1alpha1ApplicationSetIgnoreDifferences((*source).IgnoreApplicationDifferences)
+		var pString *string
+		if (*source).TemplatePatch != nil {
+			xstring := *(*source).TemplatePatch
+			pString = &xstring
+		}
+		v1alpha1ApplicationSetParameters.TemplatePatch = pString
 		pV1alpha1ApplicationSetParameters = &v1alpha1ApplicationSetParameters
 	}
 	return pV1alpha1ApplicationSetParameters
@@ -66,6 +74,14 @@ func (c *ConverterImpl) FromArgoApplicationSetStatus(source *v1alpha1.Applicatio
 			}
 		}
 		v1alpha1ArgoApplicationSetStatus.ApplicationStatus = v1alpha1ApplicationSetApplicationStatusList
+		var v1alpha1ResourceStatusList []v1alpha11.ResourceStatus
+		if (*source).Resources != nil {
+			v1alpha1ResourceStatusList = make([]v1alpha11.ResourceStatus, len((*source).Resources))
+			for k := 0; k < len((*source).Resources); k++ {
+				v1alpha1ResourceStatusList[k] = c.v1alpha1ResourceStatusToV1alpha1ResourceStatus((*source).Resources[k])
+			}
+		}
+		v1alpha1ArgoApplicationSetStatus.Resources = v1alpha1ResourceStatusList
 		pV1alpha1ArgoApplicationSetStatus = &v1alpha1ArgoApplicationSetStatus
 	}
 	return pV1alpha1ArgoApplicationSetStatus
@@ -106,6 +122,13 @@ func (c *ConverterImpl) ToArgoApplicationSetSpec(source *v1alpha11.ApplicationSe
 		}
 		v1alpha1ApplicationSetSpec.GoTemplateOptions = stringList
 		v1alpha1ApplicationSetSpec.ApplyNestedSelectors = (*source).ApplyNestedSelectors
+		v1alpha1ApplicationSetSpec.IgnoreApplicationDifferences = c.v1alpha1ApplicationSetIgnoreDifferencesToV1alpha1ApplicationSetIgnoreDifferences2((*source).IgnoreApplicationDifferences)
+		var pString *string
+		if (*source).TemplatePatch != nil {
+			xstring := *(*source).TemplatePatch
+			pString = &xstring
+		}
+		v1alpha1ApplicationSetSpec.TemplatePatch = pString
 		pV1alpha1ApplicationSetSpec = &v1alpha1ApplicationSetSpec
 	}
 	return pV1alpha1ApplicationSetSpec
@@ -130,6 +153,14 @@ func (c *ConverterImpl) ToArgoApplicationSetStatus(source *v1alpha11.ArgoApplica
 			}
 		}
 		v1alpha1ApplicationSetStatus.ApplicationStatus = v1alpha1ApplicationSetApplicationStatusList
+		var v1alpha1ResourceStatusList []v1alpha1.ResourceStatus
+		if (*source).Resources != nil {
+			v1alpha1ResourceStatusList = make([]v1alpha1.ResourceStatus, len((*source).Resources))
+			for k := 0; k < len((*source).Resources); k++ {
+				v1alpha1ResourceStatusList[k] = c.v1alpha1ResourceStatusToV1alpha1ResourceStatus2((*source).Resources[k])
+			}
+		}
+		v1alpha1ApplicationSetStatus.Resources = v1alpha1ResourceStatusList
 		pV1alpha1ApplicationSetStatus = &v1alpha1ApplicationSetStatus
 	}
 	return pV1alpha1ApplicationSetStatus
@@ -221,6 +252,14 @@ func (c *ConverterImpl) pV1alpha1ApplicationPreservedFieldsToPV1alpha1Applicatio
 			}
 		}
 		v1alpha1ApplicationPreservedFields.Annotations = stringList
+		var stringList2 []string
+		if (*source).Labels != nil {
+			stringList2 = make([]string, len((*source).Labels))
+			for j := 0; j < len((*source).Labels); j++ {
+				stringList2[j] = (*source).Labels[j]
+			}
+		}
+		v1alpha1ApplicationPreservedFields.Labels = stringList2
 		pV1alpha1ApplicationPreservedFields = &v1alpha1ApplicationPreservedFields
 	}
 	return pV1alpha1ApplicationPreservedFields
@@ -237,6 +276,14 @@ func (c *ConverterImpl) pV1alpha1ApplicationPreservedFieldsToPV1alpha1Applicatio
 			}
 		}
 		v1alpha1ApplicationPreservedFields.Annotations = stringList
+		var stringList2 []string
+		if (*source).Labels != nil {
+			stringList2 = make([]string, len((*source).Labels))
+			for j := 0; j < len((*source).Labels); j++ {
+				stringList2[j] = (*source).Labels[j]
+			}
+		}
+		v1alpha1ApplicationPreservedFields.Labels = stringList2
 		pV1alpha1ApplicationPreservedFields = &v1alpha1ApplicationPreservedFields
 	}
 	return pV1alpha1ApplicationPreservedFields
@@ -500,6 +547,16 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 		pBool3 := (*source).CommonAnnotationsEnvsubst
 		v1alpha1ApplicationSourceKustomize.CommonAnnotationsEnvsubst = &pBool3
 		v1alpha1ApplicationSourceKustomize.Replicas = c.v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas((*source).Replicas)
+		v1alpha1ApplicationSourceKustomize.Patches = c.v1alpha1KustomizePatchesToV1alpha1KustomizePatches((*source).Patches)
+		var stringList []string
+		if (*source).Components != nil {
+			stringList = make([]string, len((*source).Components))
+			for i := 0; i < len((*source).Components); i++ {
+				stringList[i] = (*source).Components[i]
+			}
+		}
+		v1alpha1ApplicationSourceKustomize.Components = stringList
+		v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = (*source).LabelWithoutSelector
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -555,6 +612,16 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 		}
 		v1alpha1ApplicationSourceKustomize.CommonAnnotationsEnvsubst = xbool3
 		v1alpha1ApplicationSourceKustomize.Replicas = c.v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas2((*source).Replicas)
+		v1alpha1ApplicationSourceKustomize.Patches = c.v1alpha1KustomizePatchesToV1alpha1KustomizePatches2((*source).Patches)
+		var stringList []string
+		if (*source).Components != nil {
+			stringList = make([]string, len((*source).Components))
+			for i := 0; i < len((*source).Components); i++ {
+				stringList[i] = (*source).Components[i]
+			}
+		}
+		v1alpha1ApplicationSourceKustomize.Components = stringList
+		v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = (*source).LabelWithoutSelector
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -893,6 +960,48 @@ func (c *ConverterImpl) pV1alpha1GitGeneratorToPV1alpha1GitGenerator2(source *v1
 		pV1alpha1GitGenerator = &v1alpha1GitGenerator
 	}
 	return pV1alpha1GitGenerator
+}
+func (c *ConverterImpl) pV1alpha1HealthStatusToPV1alpha1HealthStatus(source *v1alpha1.HealthStatus) *v1alpha11.HealthStatus {
+	var pV1alpha1HealthStatus *v1alpha11.HealthStatus
+	if source != nil {
+		var v1alpha1HealthStatus v1alpha11.HealthStatus
+		v1alpha1HealthStatus.Status = health.HealthStatusCode((*source).Status)
+		v1alpha1HealthStatus.Message = (*source).Message
+		pV1alpha1HealthStatus = &v1alpha1HealthStatus
+	}
+	return pV1alpha1HealthStatus
+}
+func (c *ConverterImpl) pV1alpha1HealthStatusToPV1alpha1HealthStatus2(source *v1alpha11.HealthStatus) *v1alpha1.HealthStatus {
+	var pV1alpha1HealthStatus *v1alpha1.HealthStatus
+	if source != nil {
+		var v1alpha1HealthStatus v1alpha1.HealthStatus
+		v1alpha1HealthStatus.Status = health.HealthStatusCode((*source).Status)
+		v1alpha1HealthStatus.Message = (*source).Message
+		pV1alpha1HealthStatus = &v1alpha1HealthStatus
+	}
+	return pV1alpha1HealthStatus
+}
+func (c *ConverterImpl) pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector(source *v1alpha1.KustomizeSelector) *v1alpha11.KustomizeSelector {
+	var pV1alpha1KustomizeSelector *v1alpha11.KustomizeSelector
+	if source != nil {
+		var v1alpha1KustomizeSelector v1alpha11.KustomizeSelector
+		v1alpha1KustomizeSelector.KustomizeResId = c.v1alpha1KustomizeResIdToV1alpha1KustomizeResId((*source).KustomizeResId)
+		v1alpha1KustomizeSelector.AnnotationSelector = (*source).AnnotationSelector
+		v1alpha1KustomizeSelector.LabelSelector = (*source).LabelSelector
+		pV1alpha1KustomizeSelector = &v1alpha1KustomizeSelector
+	}
+	return pV1alpha1KustomizeSelector
+}
+func (c *ConverterImpl) pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector2(source *v1alpha11.KustomizeSelector) *v1alpha1.KustomizeSelector {
+	var pV1alpha1KustomizeSelector *v1alpha1.KustomizeSelector
+	if source != nil {
+		var v1alpha1KustomizeSelector v1alpha1.KustomizeSelector
+		v1alpha1KustomizeSelector.KustomizeResId = c.v1alpha1KustomizeResIdToV1alpha1KustomizeResId2((*source).KustomizeResId)
+		v1alpha1KustomizeSelector.AnnotationSelector = (*source).AnnotationSelector
+		v1alpha1KustomizeSelector.LabelSelector = (*source).LabelSelector
+		pV1alpha1KustomizeSelector = &v1alpha1KustomizeSelector
+	}
+	return pV1alpha1KustomizeSelector
 }
 func (c *ConverterImpl) pV1alpha1ListGeneratorToPV1alpha1ListGenerator(source *v1alpha1.ListGenerator) *v1alpha11.ListGenerator {
 	var pV1alpha1ListGenerator *v1alpha11.ListGenerator
@@ -1611,6 +1720,13 @@ func (c *ConverterImpl) pV1alpha1SCMProviderGeneratorGitlabToPV1alpha1SCMProvide
 		v1alpha1SCMProviderGeneratorGitlab.TokenRef = c.pV1alpha1SecretRefToPV1alpha1SecretRef((*source).TokenRef)
 		v1alpha1SCMProviderGeneratorGitlab.AllBranches = (*source).AllBranches
 		v1alpha1SCMProviderGeneratorGitlab.Insecure = (*source).Insecure
+		var pBool *bool
+		if (*source).IncludeSharedProjects != nil {
+			xbool := *(*source).IncludeSharedProjects
+			pBool = &xbool
+		}
+		v1alpha1SCMProviderGeneratorGitlab.IncludeSharedProjects = pBool
+		v1alpha1SCMProviderGeneratorGitlab.Topic = (*source).Topic
 		pV1alpha1SCMProviderGeneratorGitlab = &v1alpha1SCMProviderGeneratorGitlab
 	}
 	return pV1alpha1SCMProviderGeneratorGitlab
@@ -1625,6 +1741,13 @@ func (c *ConverterImpl) pV1alpha1SCMProviderGeneratorGitlabToPV1alpha1SCMProvide
 		v1alpha1SCMProviderGeneratorGitlab.TokenRef = c.pV1alpha1SecretRefToPV1alpha1SecretRef2((*source).TokenRef)
 		v1alpha1SCMProviderGeneratorGitlab.AllBranches = (*source).AllBranches
 		v1alpha1SCMProviderGeneratorGitlab.Insecure = (*source).Insecure
+		var pBool *bool
+		if (*source).IncludeSharedProjects != nil {
+			xbool := *(*source).IncludeSharedProjects
+			pBool = &xbool
+		}
+		v1alpha1SCMProviderGeneratorGitlab.IncludeSharedProjects = pBool
+		v1alpha1SCMProviderGeneratorGitlab.Topic = (*source).Topic
 		pV1alpha1SCMProviderGeneratorGitlab = &v1alpha1SCMProviderGeneratorGitlab
 	}
 	return pV1alpha1SCMProviderGeneratorGitlab
@@ -1885,6 +2008,14 @@ func (c *ConverterImpl) v1alpha1ApplicationSetApplicationStatusToV1alpha1Applica
 	v1alpha1ApplicationSetApplicationStatus.Message = source.Message
 	v1alpha1ApplicationSetApplicationStatus.Status = source.Status
 	v1alpha1ApplicationSetApplicationStatus.Step = source.Step
+	var stringList []string
+	if source.TargetRevisions != nil {
+		stringList = make([]string, len(source.TargetRevisions))
+		for i := 0; i < len(source.TargetRevisions); i++ {
+			stringList[i] = source.TargetRevisions[i]
+		}
+	}
+	v1alpha1ApplicationSetApplicationStatus.TargetRevisions = stringList
 	return v1alpha1ApplicationSetApplicationStatus
 }
 func (c *ConverterImpl) v1alpha1ApplicationSetApplicationStatusToV1alpha1ApplicationSetApplicationStatus2(source v1alpha11.ApplicationSetApplicationStatus) v1alpha1.ApplicationSetApplicationStatus {
@@ -1894,6 +2025,14 @@ func (c *ConverterImpl) v1alpha1ApplicationSetApplicationStatusToV1alpha1Applica
 	v1alpha1ApplicationSetApplicationStatus.Message = source.Message
 	v1alpha1ApplicationSetApplicationStatus.Status = source.Status
 	v1alpha1ApplicationSetApplicationStatus.Step = source.Step
+	var stringList []string
+	if source.TargetRevisions != nil {
+		stringList = make([]string, len(source.TargetRevisions))
+		for i := 0; i < len(source.TargetRevisions); i++ {
+			stringList[i] = source.TargetRevisions[i]
+		}
+	}
+	v1alpha1ApplicationSetApplicationStatus.TargetRevisions = stringList
 	return v1alpha1ApplicationSetApplicationStatus
 }
 func (c *ConverterImpl) v1alpha1ApplicationSetConditionToV1alpha1ApplicationSetCondition(source v1alpha1.ApplicationSetCondition) v1alpha11.ApplicationSetCondition {
@@ -1942,6 +2081,26 @@ func (c *ConverterImpl) v1alpha1ApplicationSetGeneratorToV1alpha1ApplicationSetG
 	v1alpha1ApplicationSetGenerator.Plugin = c.pV1alpha1PluginGeneratorToPV1alpha1PluginGenerator2(source.Plugin)
 	return v1alpha1ApplicationSetGenerator
 }
+func (c *ConverterImpl) v1alpha1ApplicationSetIgnoreDifferencesToV1alpha1ApplicationSetIgnoreDifferences(source v1alpha1.ApplicationSetIgnoreDifferences) v1alpha11.ApplicationSetIgnoreDifferences {
+	var v1alpha1ApplicationSetIgnoreDifferences v1alpha11.ApplicationSetIgnoreDifferences
+	if source != nil {
+		v1alpha1ApplicationSetIgnoreDifferences = make(v1alpha11.ApplicationSetIgnoreDifferences, len(source))
+		for i := 0; i < len(source); i++ {
+			v1alpha1ApplicationSetIgnoreDifferences[i] = c.v1alpha1ApplicationSetResourceIgnoreDifferencesToV1alpha1ApplicationSetResourceIgnoreDifferences(source[i])
+		}
+	}
+	return v1alpha1ApplicationSetIgnoreDifferences
+}
+func (c *ConverterImpl) v1alpha1ApplicationSetIgnoreDifferencesToV1alpha1ApplicationSetIgnoreDifferences2(source v1alpha11.ApplicationSetIgnoreDifferences) v1alpha1.ApplicationSetIgnoreDifferences {
+	var v1alpha1ApplicationSetIgnoreDifferences v1alpha1.ApplicationSetIgnoreDifferences
+	if source != nil {
+		v1alpha1ApplicationSetIgnoreDifferences = make(v1alpha1.ApplicationSetIgnoreDifferences, len(source))
+		for i := 0; i < len(source); i++ {
+			v1alpha1ApplicationSetIgnoreDifferences[i] = c.v1alpha1ApplicationSetResourceIgnoreDifferencesToV1alpha1ApplicationSetResourceIgnoreDifferences2(source[i])
+		}
+	}
+	return v1alpha1ApplicationSetIgnoreDifferences
+}
 func (c *ConverterImpl) v1alpha1ApplicationSetNestedGeneratorToV1alpha1ApplicationSetNestedGenerator(source v1alpha1.ApplicationSetNestedGenerator) v1alpha11.ApplicationSetNestedGenerator {
 	var v1alpha1ApplicationSetNestedGenerator v1alpha11.ApplicationSetNestedGenerator
 	v1alpha1ApplicationSetNestedGenerator.List = c.pV1alpha1ListGeneratorToPV1alpha1ListGenerator(source.List)
@@ -1969,6 +2128,48 @@ func (c *ConverterImpl) v1alpha1ApplicationSetNestedGeneratorToV1alpha1Applicati
 	v1alpha1ApplicationSetNestedGenerator.Selector = c.pV1LabelSelectorToPV1LabelSelector(source.Selector)
 	v1alpha1ApplicationSetNestedGenerator.Plugin = c.pV1alpha1PluginGeneratorToPV1alpha1PluginGenerator2(source.Plugin)
 	return v1alpha1ApplicationSetNestedGenerator
+}
+func (c *ConverterImpl) v1alpha1ApplicationSetResourceIgnoreDifferencesToV1alpha1ApplicationSetResourceIgnoreDifferences(source v1alpha1.ApplicationSetResourceIgnoreDifferences) v1alpha11.ApplicationSetResourceIgnoreDifferences {
+	var v1alpha1ApplicationSetResourceIgnoreDifferences v1alpha11.ApplicationSetResourceIgnoreDifferences
+	v1alpha1ApplicationSetResourceIgnoreDifferences.Name = source.Name
+	var stringList []string
+	if source.JSONPointers != nil {
+		stringList = make([]string, len(source.JSONPointers))
+		for i := 0; i < len(source.JSONPointers); i++ {
+			stringList[i] = source.JSONPointers[i]
+		}
+	}
+	v1alpha1ApplicationSetResourceIgnoreDifferences.JSONPointers = stringList
+	var stringList2 []string
+	if source.JQPathExpressions != nil {
+		stringList2 = make([]string, len(source.JQPathExpressions))
+		for j := 0; j < len(source.JQPathExpressions); j++ {
+			stringList2[j] = source.JQPathExpressions[j]
+		}
+	}
+	v1alpha1ApplicationSetResourceIgnoreDifferences.JQPathExpressions = stringList2
+	return v1alpha1ApplicationSetResourceIgnoreDifferences
+}
+func (c *ConverterImpl) v1alpha1ApplicationSetResourceIgnoreDifferencesToV1alpha1ApplicationSetResourceIgnoreDifferences2(source v1alpha11.ApplicationSetResourceIgnoreDifferences) v1alpha1.ApplicationSetResourceIgnoreDifferences {
+	var v1alpha1ApplicationSetResourceIgnoreDifferences v1alpha1.ApplicationSetResourceIgnoreDifferences
+	v1alpha1ApplicationSetResourceIgnoreDifferences.Name = source.Name
+	var stringList []string
+	if source.JSONPointers != nil {
+		stringList = make([]string, len(source.JSONPointers))
+		for i := 0; i < len(source.JSONPointers); i++ {
+			stringList[i] = source.JSONPointers[i]
+		}
+	}
+	v1alpha1ApplicationSetResourceIgnoreDifferences.JSONPointers = stringList
+	var stringList2 []string
+	if source.JQPathExpressions != nil {
+		stringList2 = make([]string, len(source.JQPathExpressions))
+		for j := 0; j < len(source.JQPathExpressions); j++ {
+			stringList2[j] = source.JQPathExpressions[j]
+		}
+	}
+	v1alpha1ApplicationSetResourceIgnoreDifferences.JQPathExpressions = stringList2
+	return v1alpha1ApplicationSetResourceIgnoreDifferences
 }
 func (c *ConverterImpl) v1alpha1ApplicationSetRolloutStepToV1alpha1ApplicationSetRolloutStep(source v1alpha1.ApplicationSetRolloutStep) v1alpha11.ApplicationSetRolloutStep {
 	var v1alpha1ApplicationSetRolloutStep v1alpha11.ApplicationSetRolloutStep
@@ -2411,6 +2612,20 @@ func (c *ConverterImpl) v1alpha1JsonnetVarToV1alpha1JsonnetVar2(source v1alpha11
 	v1alpha1JsonnetVar.Code = xbool
 	return v1alpha1JsonnetVar
 }
+func (c *ConverterImpl) v1alpha1KustomizeGvkToV1alpha1KustomizeGvk(source v1alpha1.KustomizeGvk) v1alpha11.KustomizeGvk {
+	var v1alpha1KustomizeGvk v1alpha11.KustomizeGvk
+	v1alpha1KustomizeGvk.Group = source.Group
+	v1alpha1KustomizeGvk.Version = source.Version
+	v1alpha1KustomizeGvk.Kind = source.Kind
+	return v1alpha1KustomizeGvk
+}
+func (c *ConverterImpl) v1alpha1KustomizeGvkToV1alpha1KustomizeGvk2(source v1alpha11.KustomizeGvk) v1alpha1.KustomizeGvk {
+	var v1alpha1KustomizeGvk v1alpha1.KustomizeGvk
+	v1alpha1KustomizeGvk.Group = source.Group
+	v1alpha1KustomizeGvk.Version = source.Version
+	v1alpha1KustomizeGvk.Kind = source.Kind
+	return v1alpha1KustomizeGvk
+}
 func (c *ConverterImpl) v1alpha1KustomizeImagesToV1alpha1KustomizeImages(source v1alpha1.KustomizeImages) v1alpha11.KustomizeImages {
 	var v1alpha1KustomizeImages v1alpha11.KustomizeImages
 	if source != nil {
@@ -2430,6 +2645,50 @@ func (c *ConverterImpl) v1alpha1KustomizeImagesToV1alpha1KustomizeImages2(source
 		}
 	}
 	return v1alpha1KustomizeImages
+}
+func (c *ConverterImpl) v1alpha1KustomizePatchToV1alpha1KustomizePatch(source v1alpha1.KustomizePatch) v1alpha11.KustomizePatch {
+	var v1alpha1KustomizePatch v1alpha11.KustomizePatch
+	v1alpha1KustomizePatch.Path = source.Path
+	v1alpha1KustomizePatch.Patch = source.Patch
+	v1alpha1KustomizePatch.Target = c.pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector(source.Target)
+	mapStringBool := make(map[string]bool, len(source.Options))
+	for key, value := range source.Options {
+		mapStringBool[key] = value
+	}
+	v1alpha1KustomizePatch.Options = mapStringBool
+	return v1alpha1KustomizePatch
+}
+func (c *ConverterImpl) v1alpha1KustomizePatchToV1alpha1KustomizePatch2(source v1alpha11.KustomizePatch) v1alpha1.KustomizePatch {
+	var v1alpha1KustomizePatch v1alpha1.KustomizePatch
+	v1alpha1KustomizePatch.Path = source.Path
+	v1alpha1KustomizePatch.Patch = source.Patch
+	v1alpha1KustomizePatch.Target = c.pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector2(source.Target)
+	mapStringBool := make(map[string]bool, len(source.Options))
+	for key, value := range source.Options {
+		mapStringBool[key] = value
+	}
+	v1alpha1KustomizePatch.Options = mapStringBool
+	return v1alpha1KustomizePatch
+}
+func (c *ConverterImpl) v1alpha1KustomizePatchesToV1alpha1KustomizePatches(source v1alpha1.KustomizePatches) v1alpha11.KustomizePatches {
+	var v1alpha1KustomizePatches v1alpha11.KustomizePatches
+	if source != nil {
+		v1alpha1KustomizePatches = make(v1alpha11.KustomizePatches, len(source))
+		for i := 0; i < len(source); i++ {
+			v1alpha1KustomizePatches[i] = c.v1alpha1KustomizePatchToV1alpha1KustomizePatch(source[i])
+		}
+	}
+	return v1alpha1KustomizePatches
+}
+func (c *ConverterImpl) v1alpha1KustomizePatchesToV1alpha1KustomizePatches2(source v1alpha11.KustomizePatches) v1alpha1.KustomizePatches {
+	var v1alpha1KustomizePatches v1alpha1.KustomizePatches
+	if source != nil {
+		v1alpha1KustomizePatches = make(v1alpha1.KustomizePatches, len(source))
+		for i := 0; i < len(source); i++ {
+			v1alpha1KustomizePatches[i] = c.v1alpha1KustomizePatchToV1alpha1KustomizePatch2(source[i])
+		}
+	}
+	return v1alpha1KustomizePatches
 }
 func (c *ConverterImpl) v1alpha1KustomizeReplicaToV1alpha1KustomizeReplica(source v1alpha1.KustomizeReplica) v1alpha11.KustomizeReplica {
 	var v1alpha1KustomizeReplica v1alpha11.KustomizeReplica
@@ -2462,6 +2721,20 @@ func (c *ConverterImpl) v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas2(so
 		}
 	}
 	return v1alpha1KustomizeReplicas
+}
+func (c *ConverterImpl) v1alpha1KustomizeResIdToV1alpha1KustomizeResId(source v1alpha1.KustomizeResId) v1alpha11.KustomizeResId {
+	var v1alpha1KustomizeResId v1alpha11.KustomizeResId
+	v1alpha1KustomizeResId.KustomizeGvk = c.v1alpha1KustomizeGvkToV1alpha1KustomizeGvk(source.KustomizeGvk)
+	v1alpha1KustomizeResId.Name = source.Name
+	v1alpha1KustomizeResId.Namespace = source.Namespace
+	return v1alpha1KustomizeResId
+}
+func (c *ConverterImpl) v1alpha1KustomizeResIdToV1alpha1KustomizeResId2(source v1alpha11.KustomizeResId) v1alpha1.KustomizeResId {
+	var v1alpha1KustomizeResId v1alpha1.KustomizeResId
+	v1alpha1KustomizeResId.KustomizeGvk = c.v1alpha1KustomizeGvkToV1alpha1KustomizeGvk2(source.KustomizeGvk)
+	v1alpha1KustomizeResId.Name = source.Name
+	v1alpha1KustomizeResId.Namespace = source.Namespace
+	return v1alpha1KustomizeResId
 }
 func (c *ConverterImpl) v1alpha1PluginConfigMapRefToV1alpha1PluginConfigMapRef(source v1alpha1.PluginConfigMapRef) v1alpha11.PluginConfigMapRef {
 	var v1alpha1PluginConfigMapRef v1alpha11.PluginConfigMapRef
@@ -2602,6 +2875,34 @@ func (c *ConverterImpl) v1alpha1ResourceIgnoreDifferencesToV1alpha1ResourceIgnor
 	}
 	v1alpha1ResourceIgnoreDifferences.ManagedFieldsManagers = stringList3
 	return v1alpha1ResourceIgnoreDifferences
+}
+func (c *ConverterImpl) v1alpha1ResourceStatusToV1alpha1ResourceStatus(source v1alpha1.ResourceStatus) v1alpha11.ResourceStatus {
+	var v1alpha1ResourceStatus v1alpha11.ResourceStatus
+	v1alpha1ResourceStatus.Group = source.Group
+	v1alpha1ResourceStatus.Version = source.Version
+	v1alpha1ResourceStatus.Kind = source.Kind
+	v1alpha1ResourceStatus.Namespace = source.Namespace
+	v1alpha1ResourceStatus.Name = source.Name
+	v1alpha1ResourceStatus.Status = v1alpha11.SyncStatusCode(source.Status)
+	v1alpha1ResourceStatus.Health = c.pV1alpha1HealthStatusToPV1alpha1HealthStatus(source.Health)
+	v1alpha1ResourceStatus.Hook = source.Hook
+	v1alpha1ResourceStatus.RequiresPruning = source.RequiresPruning
+	v1alpha1ResourceStatus.SyncWave = source.SyncWave
+	return v1alpha1ResourceStatus
+}
+func (c *ConverterImpl) v1alpha1ResourceStatusToV1alpha1ResourceStatus2(source v1alpha11.ResourceStatus) v1alpha1.ResourceStatus {
+	var v1alpha1ResourceStatus v1alpha1.ResourceStatus
+	v1alpha1ResourceStatus.Group = source.Group
+	v1alpha1ResourceStatus.Version = source.Version
+	v1alpha1ResourceStatus.Kind = source.Kind
+	v1alpha1ResourceStatus.Namespace = source.Namespace
+	v1alpha1ResourceStatus.Name = source.Name
+	v1alpha1ResourceStatus.Status = v1alpha1.SyncStatusCode(source.Status)
+	v1alpha1ResourceStatus.Health = c.pV1alpha1HealthStatusToPV1alpha1HealthStatus2(source.Health)
+	v1alpha1ResourceStatus.Hook = source.Hook
+	v1alpha1ResourceStatus.RequiresPruning = source.RequiresPruning
+	v1alpha1ResourceStatus.SyncWave = source.SyncWave
+	return v1alpha1ResourceStatus
 }
 func (c *ConverterImpl) v1alpha1SCMProviderGeneratorFilterToV1alpha1SCMProviderGeneratorFilter(source v1alpha1.SCMProviderGeneratorFilter) v1alpha11.SCMProviderGeneratorFilter {
 	var v1alpha1SCMProviderGeneratorFilter v1alpha11.SCMProviderGeneratorFilter

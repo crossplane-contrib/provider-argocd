@@ -483,6 +483,12 @@ spec:
                             description: CommonLabels is a list of additional labels
                               to add to rendered manifests
                             type: object
+                          components:
+                            description: Components specifies a list of kustomize
+                              components to add to the kustomization before building
+                            items:
+                              type: string
+                            type: array
                           forceCommonAnnotations:
                             description: ForceCommonAnnotations specifies whether
                               to force applying common annotations to resources for
@@ -500,6 +506,10 @@ spec:
                                 definition in the format [old_image_name=]<image_name>:<image_tag>
                               type: string
                             type: array
+                          labelWithoutSelector:
+                            description: LabelWithoutSelector specifies whether to
+                              apply common labels to resource selectors or not
+                            type: boolean
                           namePrefix:
                             description: NamePrefix is a prefix appended to resources
                               for Kustomize apps
@@ -512,6 +522,40 @@ spec:
                             description: Namespace sets the namespace that Kustomize
                               adds to all resources
                             type: string
+                          patches:
+                            description: Patches is a list of Kustomize patches
+                            items:
+                              description: KustomizePatch is a kustomize patch
+                              properties:
+                                options:
+                                  additionalProperties:
+                                    type: boolean
+                                  type: object
+                                patch:
+                                  type: string
+                                path:
+                                  type: string
+                                target:
+                                  description: KustomizeSelector is a selector of
+                                    a Kustomize Patch
+                                  properties:
+                                    annotationSelector:
+                                      type: string
+                                    group:
+                                      type: string
+                                    kind:
+                                      type: string
+                                    labelSelector:
+                                      type: string
+                                    name:
+                                      type: string
+                                    namespace:
+                                      type: string
+                                    version:
+                                      type: string
+                                  type: object
+                              type: object
+                            type: array
                           replicas:
                             description: Replicas is a list of Kustomize Replicas
                               override specifications
@@ -783,6 +827,12 @@ spec:
                               description: CommonLabels is a list of additional labels
                                 to add to rendered manifests
                               type: object
+                            components:
+                              description: Components specifies a list of kustomize
+                                components to add to the kustomization before building
+                              items:
+                                type: string
+                              type: array
                             forceCommonAnnotations:
                               description: ForceCommonAnnotations specifies whether
                                 to force applying common annotations to resources
@@ -801,6 +851,10 @@ spec:
                                   image definition in the format [old_image_name=]<image_name>:<image_tag>
                                 type: string
                               type: array
+                            labelWithoutSelector:
+                              description: LabelWithoutSelector specifies whether
+                                to apply common labels to resource selectors or not
+                              type: boolean
                             namePrefix:
                               description: NamePrefix is a prefix appended to resources
                                 for Kustomize apps
@@ -813,6 +867,40 @@ spec:
                               description: Namespace sets the namespace that Kustomize
                                 adds to all resources
                               type: string
+                            patches:
+                              description: Patches is a list of Kustomize patches
+                              items:
+                                description: KustomizePatch is a kustomize patch
+                                properties:
+                                  options:
+                                    additionalProperties:
+                                      type: boolean
+                                    type: object
+                                  patch:
+                                    type: string
+                                  path:
+                                    type: string
+                                  target:
+                                    description: KustomizeSelector is a selector of
+                                      a Kustomize Patch
+                                    properties:
+                                      annotationSelector:
+                                        type: string
+                                      group:
+                                        type: string
+                                      kind:
+                                        type: string
+                                      labelSelector:
+                                        type: string
+                                      name:
+                                        type: string
+                                      namespace:
+                                        type: string
+                                      version:
+                                        type: string
+                                    type: object
+                                type: object
+                              type: array
                             replicas:
                               description: Replicas is a list of Kustomize Replicas
                                 override specifications
@@ -1410,6 +1498,13 @@ spec:
                                   description: CommonLabels is a list of additional
                                     labels to add to rendered manifests
                                   type: object
+                                components:
+                                  description: Components specifies a list of kustomize
+                                    components to add to the kustomization before
+                                    building
+                                  items:
+                                    type: string
+                                  type: array
                                 forceCommonAnnotations:
                                   description: ForceCommonAnnotations specifies whether
                                     to force applying common annotations to resources
@@ -1428,6 +1523,11 @@ spec:
                                       image definition in the format [old_image_name=]<image_name>:<image_tag>
                                     type: string
                                   type: array
+                                labelWithoutSelector:
+                                  description: LabelWithoutSelector specifies whether
+                                    to apply common labels to resource selectors or
+                                    not
+                                  type: boolean
                                 namePrefix:
                                   description: NamePrefix is a prefix appended to
                                     resources for Kustomize apps
@@ -1440,6 +1540,40 @@ spec:
                                   description: Namespace sets the namespace that Kustomize
                                     adds to all resources
                                   type: string
+                                patches:
+                                  description: Patches is a list of Kustomize patches
+                                  items:
+                                    description: KustomizePatch is a kustomize patch
+                                    properties:
+                                      options:
+                                        additionalProperties:
+                                          type: boolean
+                                        type: object
+                                      patch:
+                                        type: string
+                                      path:
+                                        type: string
+                                      target:
+                                        description: KustomizeSelector is a selector
+                                          of a Kustomize Patch
+                                        properties:
+                                          annotationSelector:
+                                            type: string
+                                          group:
+                                            type: string
+                                          kind:
+                                            type: string
+                                          labelSelector:
+                                            type: string
+                                          name:
+                                            type: string
+                                          namespace:
+                                            type: string
+                                          version:
+                                            type: string
+                                        type: object
+                                    type: object
+                                  type: array
                                 replicas:
                                   description: Replicas is a list of Kustomize Replicas
                                     override specifications
@@ -1727,6 +1861,13 @@ spec:
                                     description: CommonLabels is a list of additional
                                       labels to add to rendered manifests
                                     type: object
+                                  components:
+                                    description: Components specifies a list of kustomize
+                                      components to add to the kustomization before
+                                      building
+                                    items:
+                                      type: string
+                                    type: array
                                   forceCommonAnnotations:
                                     description: ForceCommonAnnotations specifies
                                       whether to force applying common annotations
@@ -1745,6 +1886,11 @@ spec:
                                         image definition in the format [old_image_name=]<image_name>:<image_tag>
                                       type: string
                                     type: array
+                                  labelWithoutSelector:
+                                    description: LabelWithoutSelector specifies whether
+                                      to apply common labels to resource selectors
+                                      or not
+                                    type: boolean
                                   namePrefix:
                                     description: NamePrefix is a prefix appended to
                                       resources for Kustomize apps
@@ -1757,6 +1903,40 @@ spec:
                                     description: Namespace sets the namespace that
                                       Kustomize adds to all resources
                                     type: string
+                                  patches:
+                                    description: Patches is a list of Kustomize patches
+                                    items:
+                                      description: KustomizePatch is a kustomize patch
+                                      properties:
+                                        options:
+                                          additionalProperties:
+                                            type: boolean
+                                          type: object
+                                        patch:
+                                          type: string
+                                        path:
+                                          type: string
+                                        target:
+                                          description: KustomizeSelector is a selector
+                                            of a Kustomize Patch
+                                          properties:
+                                            annotationSelector:
+                                              type: string
+                                            group:
+                                              type: string
+                                            kind:
+                                              type: string
+                                            labelSelector:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                            version:
+                                              type: string
+                                          type: object
+                                      type: object
+                                    type: array
                                   replicas:
                                     description: Replicas is a list of Kustomize Replicas
                                       override specifications
@@ -2183,6 +2363,13 @@ spec:
                                         description: CommonLabels is a list of additional
                                           labels to add to rendered manifests
                                         type: object
+                                      components:
+                                        description: Components specifies a list of
+                                          kustomize components to add to the kustomization
+                                          before building
+                                        items:
+                                          type: string
+                                        type: array
                                       forceCommonAnnotations:
                                         description: ForceCommonAnnotations specifies
                                           whether to force applying common annotations
@@ -2202,6 +2389,11 @@ spec:
                                             [old_image_name=]<image_name>:<image_tag>
                                           type: string
                                         type: array
+                                      labelWithoutSelector:
+                                        description: LabelWithoutSelector specifies
+                                          whether to apply common labels to resource
+                                          selectors or not
+                                        type: boolean
                                       namePrefix:
                                         description: NamePrefix is a prefix appended
                                           to resources for Kustomize apps
@@ -2214,6 +2406,42 @@ spec:
                                         description: Namespace sets the namespace
                                           that Kustomize adds to all resources
                                         type: string
+                                      patches:
+                                        description: Patches is a list of Kustomize
+                                          patches
+                                        items:
+                                          description: KustomizePatch is a kustomize
+                                            patch
+                                          properties:
+                                            options:
+                                              additionalProperties:
+                                                type: boolean
+                                              type: object
+                                            patch:
+                                              type: string
+                                            path:
+                                              type: string
+                                            target:
+                                              description: KustomizeSelector is a
+                                                selector of a Kustomize Patch
+                                              properties:
+                                                annotationSelector:
+                                                  type: string
+                                                group:
+                                                  type: string
+                                                kind:
+                                                  type: string
+                                                labelSelector:
+                                                  type: string
+                                                name:
+                                                  type: string
+                                                namespace:
+                                                  type: string
+                                                version:
+                                                  type: string
+                                              type: object
+                                          type: object
+                                        type: array
                                       replicas:
                                         description: Replicas is a list of Kustomize
                                           Replicas override specifications
@@ -2512,6 +2740,13 @@ spec:
                                           description: CommonLabels is a list of additional
                                             labels to add to rendered manifests
                                           type: object
+                                        components:
+                                          description: Components specifies a list
+                                            of kustomize components to add to the
+                                            kustomization before building
+                                          items:
+                                            type: string
+                                          type: array
                                         forceCommonAnnotations:
                                           description: ForceCommonAnnotations specifies
                                             whether to force applying common annotations
@@ -2531,6 +2766,11 @@ spec:
                                               format [old_image_name=]<image_name>:<image_tag>
                                             type: string
                                           type: array
+                                        labelWithoutSelector:
+                                          description: LabelWithoutSelector specifies
+                                            whether to apply common labels to resource
+                                            selectors or not
+                                          type: boolean
                                         namePrefix:
                                           description: NamePrefix is a prefix appended
                                             to resources for Kustomize apps
@@ -2543,6 +2783,42 @@ spec:
                                           description: Namespace sets the namespace
                                             that Kustomize adds to all resources
                                           type: string
+                                        patches:
+                                          description: Patches is a list of Kustomize
+                                            patches
+                                          items:
+                                            description: KustomizePatch is a kustomize
+                                              patch
+                                            properties:
+                                              options:
+                                                additionalProperties:
+                                                  type: boolean
+                                                type: object
+                                              patch:
+                                                type: string
+                                              path:
+                                                type: string
+                                              target:
+                                                description: KustomizeSelector is
+                                                  a selector of a Kustomize Patch
+                                                properties:
+                                                  annotationSelector:
+                                                    type: string
+                                                  group:
+                                                    type: string
+                                                  kind:
+                                                    type: string
+                                                  labelSelector:
+                                                    type: string
+                                                  name:
+                                                    type: string
+                                                  namespace:
+                                                    type: string
+                                                  version:
+                                                    type: string
+                                                type: object
+                                            type: object
+                                          type: array
                                         replicas:
                                           description: Replicas is a list of Kustomize
                                             Replicas override specifications
@@ -2951,6 +3227,13 @@ spec:
                                     description: CommonLabels is a list of additional
                                       labels to add to rendered manifests
                                     type: object
+                                  components:
+                                    description: Components specifies a list of kustomize
+                                      components to add to the kustomization before
+                                      building
+                                    items:
+                                      type: string
+                                    type: array
                                   forceCommonAnnotations:
                                     description: ForceCommonAnnotations specifies
                                       whether to force applying common annotations
@@ -2969,6 +3252,11 @@ spec:
                                         image definition in the format [old_image_name=]<image_name>:<image_tag>
                                       type: string
                                     type: array
+                                  labelWithoutSelector:
+                                    description: LabelWithoutSelector specifies whether
+                                      to apply common labels to resource selectors
+                                      or not
+                                    type: boolean
                                   namePrefix:
                                     description: NamePrefix is a prefix appended to
                                       resources for Kustomize apps
@@ -2981,6 +3269,40 @@ spec:
                                     description: Namespace sets the namespace that
                                       Kustomize adds to all resources
                                     type: string
+                                  patches:
+                                    description: Patches is a list of Kustomize patches
+                                    items:
+                                      description: KustomizePatch is a kustomize patch
+                                      properties:
+                                        options:
+                                          additionalProperties:
+                                            type: boolean
+                                          type: object
+                                        patch:
+                                          type: string
+                                        path:
+                                          type: string
+                                        target:
+                                          description: KustomizeSelector is a selector
+                                            of a Kustomize Patch
+                                          properties:
+                                            annotationSelector:
+                                              type: string
+                                            group:
+                                              type: string
+                                            kind:
+                                              type: string
+                                            labelSelector:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                            version:
+                                              type: string
+                                          type: object
+                                      type: object
+                                    type: array
                                   replicas:
                                     description: Replicas is a list of Kustomize Replicas
                                       override specifications
@@ -3271,6 +3593,13 @@ spec:
                                       description: CommonLabels is a list of additional
                                         labels to add to rendered manifests
                                       type: object
+                                    components:
+                                      description: Components specifies a list of
+                                        kustomize components to add to the kustomization
+                                        before building
+                                      items:
+                                        type: string
+                                      type: array
                                     forceCommonAnnotations:
                                       description: ForceCommonAnnotations specifies
                                         whether to force applying common annotations
@@ -3289,6 +3618,11 @@ spec:
                                           image definition in the format [old_image_name=]<image_name>:<image_tag>
                                         type: string
                                       type: array
+                                    labelWithoutSelector:
+                                      description: LabelWithoutSelector specifies
+                                        whether to apply common labels to resource
+                                        selectors or not
+                                      type: boolean
                                     namePrefix:
                                       description: NamePrefix is a prefix appended
                                         to resources for Kustomize apps
@@ -3301,6 +3635,42 @@ spec:
                                       description: Namespace sets the namespace that
                                         Kustomize adds to all resources
                                       type: string
+                                    patches:
+                                      description: Patches is a list of Kustomize
+                                        patches
+                                      items:
+                                        description: KustomizePatch is a kustomize
+                                          patch
+                                        properties:
+                                          options:
+                                            additionalProperties:
+                                              type: boolean
+                                            type: object
+                                          patch:
+                                            type: string
+                                          path:
+                                            type: string
+                                          target:
+                                            description: KustomizeSelector is a selector
+                                              of a Kustomize Patch
+                                            properties:
+                                              annotationSelector:
+                                                type: string
+                                              group:
+                                                type: string
+                                              kind:
+                                                type: string
+                                              labelSelector:
+                                                type: string
+                                              name:
+                                                type: string
+                                              namespace:
+                                                type: string
+                                              version:
+                                                type: string
+                                            type: object
+                                        type: object
+                                      type: array
                                     replicas:
                                       description: Replicas is a list of Kustomize
                                         Replicas override specifications
@@ -3848,6 +4218,13 @@ spec:
                                     description: CommonLabels is a list of additional
                                       labels to add to rendered manifests
                                     type: object
+                                  components:
+                                    description: Components specifies a list of kustomize
+                                      components to add to the kustomization before
+                                      building
+                                    items:
+                                      type: string
+                                    type: array
                                   forceCommonAnnotations:
                                     description: ForceCommonAnnotations specifies
                                       whether to force applying common annotations
@@ -3866,6 +4243,11 @@ spec:
                                         image definition in the format [old_image_name=]<image_name>:<image_tag>
                                       type: string
                                     type: array
+                                  labelWithoutSelector:
+                                    description: LabelWithoutSelector specifies whether
+                                      to apply common labels to resource selectors
+                                      or not
+                                    type: boolean
                                   namePrefix:
                                     description: NamePrefix is a prefix appended to
                                       resources for Kustomize apps
@@ -3878,6 +4260,40 @@ spec:
                                     description: Namespace sets the namespace that
                                       Kustomize adds to all resources
                                     type: string
+                                  patches:
+                                    description: Patches is a list of Kustomize patches
+                                    items:
+                                      description: KustomizePatch is a kustomize patch
+                                      properties:
+                                        options:
+                                          additionalProperties:
+                                            type: boolean
+                                          type: object
+                                        patch:
+                                          type: string
+                                        path:
+                                          type: string
+                                        target:
+                                          description: KustomizeSelector is a selector
+                                            of a Kustomize Patch
+                                          properties:
+                                            annotationSelector:
+                                              type: string
+                                            group:
+                                              type: string
+                                            kind:
+                                              type: string
+                                            labelSelector:
+                                              type: string
+                                            name:
+                                              type: string
+                                            namespace:
+                                              type: string
+                                            version:
+                                              type: string
+                                          type: object
+                                      type: object
+                                    type: array
                                   replicas:
                                     description: Replicas is a list of Kustomize Replicas
                                       override specifications
@@ -4168,6 +4584,13 @@ spec:
                                       description: CommonLabels is a list of additional
                                         labels to add to rendered manifests
                                       type: object
+                                    components:
+                                      description: Components specifies a list of
+                                        kustomize components to add to the kustomization
+                                        before building
+                                      items:
+                                        type: string
+                                      type: array
                                     forceCommonAnnotations:
                                       description: ForceCommonAnnotations specifies
                                         whether to force applying common annotations
@@ -4186,6 +4609,11 @@ spec:
                                           image definition in the format [old_image_name=]<image_name>:<image_tag>
                                         type: string
                                       type: array
+                                    labelWithoutSelector:
+                                      description: LabelWithoutSelector specifies
+                                        whether to apply common labels to resource
+                                        selectors or not
+                                      type: boolean
                                     namePrefix:
                                       description: NamePrefix is a prefix appended
                                         to resources for Kustomize apps
@@ -4198,6 +4626,42 @@ spec:
                                       description: Namespace sets the namespace that
                                         Kustomize adds to all resources
                                       type: string
+                                    patches:
+                                      description: Patches is a list of Kustomize
+                                        patches
+                                      items:
+                                        description: KustomizePatch is a kustomize
+                                          patch
+                                        properties:
+                                          options:
+                                            additionalProperties:
+                                              type: boolean
+                                            type: object
+                                          patch:
+                                            type: string
+                                          path:
+                                            type: string
+                                          target:
+                                            description: KustomizeSelector is a selector
+                                              of a Kustomize Patch
+                                            properties:
+                                              annotationSelector:
+                                                type: string
+                                              group:
+                                                type: string
+                                              kind:
+                                                type: string
+                                              labelSelector:
+                                                type: string
+                                              name:
+                                                type: string
+                                              namespace:
+                                                type: string
+                                              version:
+                                                type: string
+                                            type: object
+                                        type: object
+                                      type: array
                                     replicas:
                                       description: Replicas is a list of Kustomize
                                         Replicas override specifications
