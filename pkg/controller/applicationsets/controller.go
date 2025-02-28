@@ -52,7 +52,7 @@ func SetupApplicationSet(mgr ctrl.Manager, o xpcontroller.Options) error {
 
 	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: appsets.NewApplicationSetServiceClient}),
+		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: appsets.NewApplicationSetServiceClient}), //nolint:staticcheck
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
 		managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
@@ -192,18 +192,18 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	return managed.ExternalUpdate{}, err
 }
 
-func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
+func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*v1alpha1.ApplicationSet)
 	if !ok {
-		return errors.New(errNotApplicationSet)
+		return managed.ExternalDelete{}, errors.New(errNotApplicationSet)
 	}
 
 	_, err := e.client.Delete(ctx, &applicationset.ApplicationSetDeleteRequest{
 		Name: meta.GetExternalName(cr),
 	})
-	if err != nil {
-		return err
-	}
+	return managed.ExternalDelete{}, err
+}
 
+func (e *external) Disconnect(ctx context.Context) error {
 	return nil
 }

@@ -59,7 +59,7 @@ func SetupRepository(mgr ctrl.Manager, o xpcontroller.Options) error {
 	name := managed.ControllerName(v1alpha1.RepositoryKind)
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: repositories.NewRepositoryServiceClient}),
+		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: repositories.NewRepositoryServiceClient}), //nolint:staticcheck
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 	}
@@ -257,10 +257,10 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	return managed.ExternalUpdate{}, nil
 }
 
-func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
+func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*v1alpha1.Repository)
 	if !ok {
-		return errors.New(errNotRepository)
+		return managed.ExternalDelete{}, errors.New(errNotRepository)
 	}
 	repoQuery := repository.RepoQuery{
 		Repo: meta.GetExternalName(cr),
@@ -268,7 +268,7 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 
 	_, err := e.client.DeleteRepository(ctx, &repoQuery)
 
-	return errors.Wrap(err, errDeleteFailed)
+	return managed.ExternalDelete{}, errors.Wrap(err, errDeleteFailed)
 }
 
 func lateInitializeRepository(p *v1alpha1.RepositoryParameters, r *argocdv1alpha1.Repository) {
@@ -557,4 +557,8 @@ func (e *external) getSecretResource(ctx context.Context, cr *v1alpha1.Repositor
 		GithubAppPrivateKey: githubAppPrivateKeyResourceVersion,
 	}, nil
 
+}
+
+func (e *external) Disconnect(ctx context.Context) error {
+	return nil
 }
