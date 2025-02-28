@@ -1,11 +1,52 @@
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	"github.com/argoproj/gitops-engine/pkg/health"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // ArgoApplicationSetStatus are the observable fields of a ApplicationSet.
 type ArgoApplicationSetStatus struct {
 	Conditions        []ApplicationSetCondition         `json:"conditions,omitempty" protobuf:"bytes,1,name=conditions"`
 	ApplicationStatus []ApplicationSetApplicationStatus `json:"applicationStatus,omitempty" protobuf:"bytes,2,name=applicationStatus"`
+	// Resources is a list of Applications resources managed by this application set.
+	Resources []ResourceStatus `json:"resources,omitempty" protobuf:"bytes,3,opt,name=resources"`
+}
+
+// ResourceStatus holds the current sync and health status of a resource
+// TODO: describe members of this type
+type ResourceStatus struct {
+	Group           string         `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
+	Version         string         `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
+	Kind            string         `json:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
+	Namespace       string         `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	Name            string         `json:"name,omitempty" protobuf:"bytes,5,opt,name=name"`
+	Status          SyncStatusCode `json:"status,omitempty" protobuf:"bytes,6,opt,name=status"`
+	Health          *HealthStatus  `json:"health,omitempty" protobuf:"bytes,7,opt,name=health"`
+	Hook            bool           `json:"hook,omitempty" protobuf:"bytes,8,opt,name=hook"`
+	RequiresPruning bool           `json:"requiresPruning,omitempty" protobuf:"bytes,9,opt,name=requiresPruning"`
+	SyncWave        int64          `json:"syncWave,omitempty" protobuf:"bytes,10,opt,name=syncWave"`
+}
+
+// SyncStatusCode is a type which represents possible comparison results
+type SyncStatusCode string
+
+// Possible comparison results
+const (
+	// SyncStatusCodeUnknown indicates that the status of a sync could not be reliably determined
+	SyncStatusCodeUnknown SyncStatusCode = "Unknown"
+	// SyncStatusCodeSynced indicates that desired and live states match
+	SyncStatusCodeSynced SyncStatusCode = "Synced"
+	// SyncStatusCodeOutOfSync indicates that there is a drift between desired and live states
+	SyncStatusCodeOutOfSync SyncStatusCode = "OutOfSync"
+)
+
+// HealthStatus contains information about the currently observed health state of an application or resource
+type HealthStatus struct {
+	// Status holds the status code of the application or resource
+	Status health.HealthStatusCode `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
+	// Message is a human-readable informational message describing the health status
+	Message string `json:"message,omitempty" protobuf:"bytes,2,opt,name=message"`
 }
 
 // ApplicationSetCondition contains details about an applicationset condition, which is usually an error or warning
@@ -34,6 +75,8 @@ type ApplicationSetApplicationStatus struct {
 	Status string `json:"status" protobuf:"bytes,4,opt,name=status"`
 	// Step tracks which step this Application should be updated in
 	Step string `json:"step" protobuf:"bytes,5,opt,name=step"`
+	// TargetRevision tracks the desired revisions the Application should be synced to.
+	TargetRevisions []string `json:"targetRevisions" protobuf:"bytes,6,opt,name=targetrevisions"`
 }
 
 // ApplicationSetConditionStatus is a type which represents possible comparison results
