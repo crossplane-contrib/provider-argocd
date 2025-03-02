@@ -10,6 +10,7 @@ import (
 
 	"github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/applications"
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 )
 
 // IsApplicationUpToDate converts ApplicationParameters to its ArgoCD Counterpart and returns if they equal
@@ -28,4 +29,29 @@ func IsApplicationUpToDate(cr *v1alpha1.ApplicationParameters, remote *argocdv1a
 	slices.Sort(remote.Finalizers)
 
 	return cmp.Equal(*cluster, remote.Spec, opts...) && maps.Equal(cr.Annotations, remote.Annotations) && slices.Equal(cr.Finalizers, remote.Finalizers)
+}
+
+// GetApplicationCondition evaluates the application status and returns appropriate Crossplane ready state
+func GetApplicationCondition(status *v1alpha1.ArgoApplicationStatus) xpv1.Condition {
+	if status == nil {
+		return xpv1.Unavailable()
+	}
+
+	// If there's an operation in progress, check if it succeeded
+	if status.OperationState != nil {
+		if status.OperationState.Phase != "Succeeded" {
+			return xpv1.Unavailable()
+		}
+	}
+
+	healthOK := true
+	if status.Health.Status != "" && status.Health.Status != "Healthy" {
+		healthOK = false
+	}
+
+	if healthOK {
+		return xpv1.Available()
+	}
+
+	return xpv1.Unavailable()
 }
