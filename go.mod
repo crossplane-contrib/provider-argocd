@@ -16,7 +16,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
-	github.com/jmattheis/goverter v1.3.0
+	github.com/jmattheis/goverter v1.8.0
 	github.com/pkg/errors v0.9.1
 	google.golang.org/grpc v1.61.0
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
