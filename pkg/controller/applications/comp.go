@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
@@ -28,4 +29,29 @@ func IsApplicationUpToDate(cr *v1alpha1.ApplicationParameters, remote *argocdv1a
 	slices.Sort(remote.Finalizers)
 
 	return cmp.Equal(*cluster, remote.Spec, opts...) && maps.Equal(cr.Annotations, remote.Annotations) && slices.Equal(cr.Finalizers, remote.Finalizers)
+}
+
+// getApplicationCondition evaluates the application status and returns appropriate Crossplane ready state
+func getApplicationCondition(status *v1alpha1.ArgoApplicationStatus) xpv1.Condition {
+	if status == nil {
+		return xpv1.Unavailable()
+	}
+
+	// If there's an operation in progress, check if it succeeded
+	if status.OperationState != nil {
+		if status.OperationState.Phase != "Succeeded" {
+			return xpv1.Unavailable()
+		}
+	}
+
+	healthOK := true
+	if status.Health.Status != "" && status.Health.Status != "Healthy" {
+		healthOK = false
+	}
+
+	if healthOK {
+		return xpv1.Available()
+	}
+
+	return xpv1.Unavailable()
 }
