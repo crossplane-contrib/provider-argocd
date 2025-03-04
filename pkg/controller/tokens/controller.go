@@ -42,7 +42,7 @@ func SetupToken(mgr ctrl.Manager, o xpcontroller.Options) error {
 	name := managed.ControllerName(v1alpha1.ProjectKind)
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}),
+		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}), //nolint:staticcheck
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 	}
@@ -205,10 +205,10 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	return managed.ExternalUpdate{}, nil
 }
 
-func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
+func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*v1alpha1.Token)
 	if !ok {
-		return errors.New(errNotToken)
+		return managed.ExternalDelete{}, errors.New(errNotToken)
 	}
 
 	req := &project.ProjectTokenDeleteRequest{
@@ -218,7 +218,7 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 	}
 
 	_, err := e.client.DeleteToken(ctx, req)
-	return errors.Wrap(err, errDeleteFailed)
+	return managed.ExternalDelete{}, errors.Wrap(err, errDeleteFailed)
 }
 
 func createRequest(cr *v1alpha1.Token, expiresIn int64) *project.ProjectTokenCreateRequest {
@@ -305,5 +305,9 @@ func (e *external) upsertConnectionSecret(ctx context.Context, token *v1alpha1.T
 		}
 		return errors.Wrapf(err, "failed to create secret: %s", secret.Name)
 	}
+	return nil
+}
+
+func (e *external) Disconnect(ctx context.Context) error {
 	return nil
 }
