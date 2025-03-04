@@ -24,7 +24,6 @@ import (
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/application"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
 	"github.com/argoproj/argo-cd/v2/util/io"
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	xpcontroller "github.com/crossplane/crossplane-runtime/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/meta"
@@ -145,7 +144,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	lateInitialize(&cr.Spec.ForProvider, app)
 
 	cr.Status.AtProvider = generateApplicationObservation(app)
-	cr.Status.SetConditions(xpv1.Available())
+	cr.Status.SetConditions(getApplicationCondition(&cr.Status.AtProvider))
 
 	return managed.ExternalObservation{
 		ResourceExists:          true,
