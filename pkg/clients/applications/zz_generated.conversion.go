@@ -21,39 +21,33 @@ func (c *ConverterImpl) FromArgoApplicationStatus(source *v1alpha1.ApplicationSt
 	var pV1alpha1ArgoApplicationStatus *v1alpha11.ArgoApplicationStatus
 	if source != nil {
 		var v1alpha1ArgoApplicationStatus v1alpha11.ArgoApplicationStatus
-		var v1alpha1ResourceStatusList []v1alpha11.ResourceStatus
 		if (*source).Resources != nil {
-			v1alpha1ResourceStatusList = make([]v1alpha11.ResourceStatus, len((*source).Resources))
+			v1alpha1ArgoApplicationStatus.Resources = make([]v1alpha11.ResourceStatus, len((*source).Resources))
 			for i := 0; i < len((*source).Resources); i++ {
-				v1alpha1ResourceStatusList[i] = c.v1alpha1ResourceStatusToV1alpha1ResourceStatus((*source).Resources[i])
+				v1alpha1ArgoApplicationStatus.Resources[i] = c.v1alpha1ResourceStatusToV1alpha1ResourceStatus((*source).Resources[i])
 			}
 		}
-		v1alpha1ArgoApplicationStatus.Resources = v1alpha1ResourceStatusList
 		v1alpha1ArgoApplicationStatus.Sync = c.v1alpha1SyncStatusToV1alpha1SyncStatus((*source).Sync)
 		v1alpha1ArgoApplicationStatus.Health = c.v1alpha1HealthStatusToV1alpha1HealthStatus((*source).Health)
 		v1alpha1ArgoApplicationStatus.History = c.v1alpha1RevisionHistoriesToV1alpha1RevisionHistories((*source).History)
-		var v1alpha1ApplicationConditionList []v1alpha11.ApplicationCondition
 		if (*source).Conditions != nil {
-			v1alpha1ApplicationConditionList = make([]v1alpha11.ApplicationCondition, len((*source).Conditions))
+			v1alpha1ArgoApplicationStatus.Conditions = make([]v1alpha11.ApplicationCondition, len((*source).Conditions))
 			for j := 0; j < len((*source).Conditions); j++ {
-				v1alpha1ApplicationConditionList[j] = c.v1alpha1ApplicationConditionToV1alpha1ApplicationCondition((*source).Conditions[j])
+				v1alpha1ArgoApplicationStatus.Conditions[j] = c.v1alpha1ApplicationConditionToV1alpha1ApplicationCondition((*source).Conditions[j])
 			}
 		}
-		v1alpha1ArgoApplicationStatus.Conditions = v1alpha1ApplicationConditionList
 		v1alpha1ArgoApplicationStatus.ReconciledAt = c.pV1TimeToPV1Time((*source).ReconciledAt)
 		v1alpha1ArgoApplicationStatus.OperationState = c.pV1alpha1OperationStateToPV1alpha1OperationState((*source).OperationState)
 		v1alpha1ArgoApplicationStatus.ObservedAt = c.pV1TimeToPV1Time((*source).ObservedAt)
 		v1alpha1ArgoApplicationStatus.SourceType = c.v1alpha1ApplicationSourceTypeToV1alpha1ApplicationSourceType((*source).SourceType)
 		v1alpha1ArgoApplicationStatus.Summary = c.v1alpha1ApplicationSummaryToV1alpha1ApplicationSummary((*source).Summary)
 		v1alpha1ArgoApplicationStatus.ResourceHealthSource = string((*source).ResourceHealthSource)
-		var v1alpha1ApplicationSourceTypeList []v1alpha11.ApplicationSourceType
 		if (*source).SourceTypes != nil {
-			v1alpha1ApplicationSourceTypeList = make([]v1alpha11.ApplicationSourceType, len((*source).SourceTypes))
+			v1alpha1ArgoApplicationStatus.SourceTypes = make([]v1alpha11.ApplicationSourceType, len((*source).SourceTypes))
 			for k := 0; k < len((*source).SourceTypes); k++ {
-				v1alpha1ApplicationSourceTypeList[k] = c.v1alpha1ApplicationSourceTypeToV1alpha1ApplicationSourceType((*source).SourceTypes[k])
+				v1alpha1ArgoApplicationStatus.SourceTypes[k] = c.v1alpha1ApplicationSourceTypeToV1alpha1ApplicationSourceType((*source).SourceTypes[k])
 			}
 		}
-		v1alpha1ArgoApplicationStatus.SourceTypes = v1alpha1ApplicationSourceTypeList
 		pV1alpha1ArgoApplicationStatus = &v1alpha1ArgoApplicationStatus
 	}
 	return pV1alpha1ArgoApplicationStatus
@@ -77,20 +71,16 @@ func (c *ConverterImpl) ToArgoApplicationSpec(source *v1alpha11.ApplicationParam
 		v1alpha1ApplicationSpec.Project = (*source).Project
 		v1alpha1ApplicationSpec.SyncPolicy = c.pV1alpha1SyncPolicyToPV1alpha1SyncPolicy((*source).SyncPolicy)
 		v1alpha1ApplicationSpec.IgnoreDifferences = c.v1alpha1ResourceIgnoreDifferencesListToV1alpha1IgnoreDifferences((*source).IgnoreDifferences)
-		var v1alpha1InfoList []v1alpha1.Info
 		if (*source).Info != nil {
-			v1alpha1InfoList = make([]v1alpha1.Info, len((*source).Info))
+			v1alpha1ApplicationSpec.Info = make([]v1alpha1.Info, len((*source).Info))
 			for i := 0; i < len((*source).Info); i++ {
-				v1alpha1InfoList[i] = c.v1alpha1InfoToV1alpha1Info((*source).Info[i])
+				v1alpha1ApplicationSpec.Info[i] = c.v1alpha1InfoToV1alpha1Info((*source).Info[i])
 			}
 		}
-		v1alpha1ApplicationSpec.Info = v1alpha1InfoList
-		var pInt64 *int64
 		if (*source).RevisionHistoryLimit != nil {
 			xint64 := *(*source).RevisionHistoryLimit
-			pInt64 = &xint64
+			v1alpha1ApplicationSpec.RevisionHistoryLimit = &xint64
 		}
-		v1alpha1ApplicationSpec.RevisionHistoryLimit = pInt64
 		v1alpha1ApplicationSpec.Sources = c.v1alpha1ApplicationSourcesToV1alpha1ApplicationSources2((*source).Sources)
 		pV1alpha1ApplicationSpec = &v1alpha1ApplicationSpec
 	}
@@ -98,21 +88,15 @@ func (c *ConverterImpl) ToArgoApplicationSpec(source *v1alpha11.ApplicationParam
 }
 func (c *ConverterImpl) ToArgoDestination(source v1alpha11.ApplicationDestination) v1alpha1.ApplicationDestination {
 	var v1alpha1ApplicationDestination v1alpha1.ApplicationDestination
-	var xstring string
 	if source.Server != nil {
-		xstring = *source.Server
+		v1alpha1ApplicationDestination.Server = *source.Server
 	}
-	v1alpha1ApplicationDestination.Server = xstring
-	var xstring2 string
 	if source.Namespace != nil {
-		xstring2 = *source.Namespace
+		v1alpha1ApplicationDestination.Namespace = *source.Namespace
 	}
-	v1alpha1ApplicationDestination.Namespace = xstring2
-	var xstring3 string
 	if source.Name != nil {
-		xstring3 = *source.Name
+		v1alpha1ApplicationDestination.Name = *source.Name
 	}
-	v1alpha1ApplicationDestination.Name = xstring3
 	return v1alpha1ApplicationDestination
 }
 func (c *ConverterImpl) commonHookTypeToString(source common.HookType) string {
@@ -126,23 +110,32 @@ func (c *ConverterImpl) commonSyncPhaseToString(source common.SyncPhase) string 
 }
 func (c *ConverterImpl) intstrIntOrStringToIntstrIntOrString(source intstr.IntOrString) intstr.IntOrString {
 	var intstrIntOrString intstr.IntOrString
-	intstrIntOrString.Type = intstr.Type(source.Type)
+	intstrIntOrString.Type = c.intstrTypeToIntstrType(source.Type)
 	intstrIntOrString.IntVal = source.IntVal
 	intstrIntOrString.StrVal = source.StrVal
 	return intstrIntOrString
+}
+func (c *ConverterImpl) intstrTypeToIntstrType(source intstr.Type) intstr.Type {
+	var intstrType intstr.Type
+	switch source {
+	case intstr.Int:
+		intstrType = intstr.Int
+	case intstr.String:
+		intstrType = intstr.String
+	default: // ignored
+	}
+	return intstrType
 }
 func (c *ConverterImpl) pRuntimeRawExtensionToV1JSON(source *runtime.RawExtension) v1.JSON {
 	var v1JSON v1.JSON
 	if source != nil {
 		var v1JSON2 v1.JSON
-		var byteList []uint8
 		if (*source).Raw != nil {
-			byteList = make([]uint8, len((*source).Raw))
+			v1JSON2.Raw = make([]uint8, len((*source).Raw))
 			for i := 0; i < len((*source).Raw); i++ {
-				byteList[i] = (*source).Raw[i]
+				v1JSON2.Raw[i] = (*source).Raw[i]
 			}
 		}
-		v1JSON2.Raw = byteList
 		v1JSON = v1JSON2
 	}
 	return v1JSON
@@ -175,22 +168,16 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceDirectoryToPV1alpha1Applicatio
 	var pV1alpha1ApplicationSourceDirectory *v1alpha1.ApplicationSourceDirectory
 	if source != nil {
 		var v1alpha1ApplicationSourceDirectory v1alpha1.ApplicationSourceDirectory
-		var xbool bool
 		if (*source).Recurse != nil {
-			xbool = *(*source).Recurse
+			v1alpha1ApplicationSourceDirectory.Recurse = *(*source).Recurse
 		}
-		v1alpha1ApplicationSourceDirectory.Recurse = xbool
 		v1alpha1ApplicationSourceDirectory.Jsonnet = c.v1alpha1ApplicationSourceJsonnetToV1alpha1ApplicationSourceJsonnet2((*source).Jsonnet)
-		var xstring string
 		if (*source).Exclude != nil {
-			xstring = *(*source).Exclude
+			v1alpha1ApplicationSourceDirectory.Exclude = *(*source).Exclude
 		}
-		v1alpha1ApplicationSourceDirectory.Exclude = xstring
-		var xstring2 string
 		if (*source).Include != nil {
-			xstring2 = *(*source).Include
+			v1alpha1ApplicationSourceDirectory.Include = *(*source).Include
 		}
-		v1alpha1ApplicationSourceDirectory.Include = xstring2
 		pV1alpha1ApplicationSourceDirectory = &v1alpha1ApplicationSourceDirectory
 	}
 	return pV1alpha1ApplicationSourceDirectory
@@ -199,34 +186,28 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSour
 	var pV1alpha1ApplicationSourceHelm *v1alpha11.ApplicationSourceHelm
 	if source != nil {
 		var v1alpha1ApplicationSourceHelm v1alpha11.ApplicationSourceHelm
-		var stringList []string
 		if (*source).ValueFiles != nil {
-			stringList = make([]string, len((*source).ValueFiles))
+			v1alpha1ApplicationSourceHelm.ValueFiles = make([]string, len((*source).ValueFiles))
 			for i := 0; i < len((*source).ValueFiles); i++ {
-				stringList[i] = (*source).ValueFiles[i]
+				v1alpha1ApplicationSourceHelm.ValueFiles[i] = (*source).ValueFiles[i]
 			}
 		}
-		v1alpha1ApplicationSourceHelm.ValueFiles = stringList
-		var v1alpha1HelmParameterList []v1alpha11.HelmParameter
 		if (*source).Parameters != nil {
-			v1alpha1HelmParameterList = make([]v1alpha11.HelmParameter, len((*source).Parameters))
+			v1alpha1ApplicationSourceHelm.Parameters = make([]v1alpha11.HelmParameter, len((*source).Parameters))
 			for j := 0; j < len((*source).Parameters); j++ {
-				v1alpha1HelmParameterList[j] = c.v1alpha1HelmParameterToV1alpha1HelmParameter((*source).Parameters[j])
+				v1alpha1ApplicationSourceHelm.Parameters[j] = c.v1alpha1HelmParameterToV1alpha1HelmParameter((*source).Parameters[j])
 			}
 		}
-		v1alpha1ApplicationSourceHelm.Parameters = v1alpha1HelmParameterList
 		pString := (*source).ReleaseName
 		v1alpha1ApplicationSourceHelm.ReleaseName = &pString
 		pString2 := (*source).Values
 		v1alpha1ApplicationSourceHelm.Values = &pString2
-		var v1alpha1HelmFileParameterList []v1alpha11.HelmFileParameter
 		if (*source).FileParameters != nil {
-			v1alpha1HelmFileParameterList = make([]v1alpha11.HelmFileParameter, len((*source).FileParameters))
+			v1alpha1ApplicationSourceHelm.FileParameters = make([]v1alpha11.HelmFileParameter, len((*source).FileParameters))
 			for k := 0; k < len((*source).FileParameters); k++ {
-				v1alpha1HelmFileParameterList[k] = c.v1alpha1HelmFileParameterToV1alpha1HelmFileParameter((*source).FileParameters[k])
+				v1alpha1ApplicationSourceHelm.FileParameters[k] = c.v1alpha1HelmFileParameterToV1alpha1HelmFileParameter((*source).FileParameters[k])
 			}
 		}
-		v1alpha1ApplicationSourceHelm.FileParameters = v1alpha1HelmFileParameterList
 		pString3 := (*source).Version
 		v1alpha1ApplicationSourceHelm.Version = &pString3
 		pBool := (*source).PassCredentials
@@ -236,6 +217,16 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSour
 		pBool3 := (*source).SkipCrds
 		v1alpha1ApplicationSourceHelm.SkipCrds = &pBool3
 		v1alpha1ApplicationSourceHelm.ValuesObject = c.pRuntimeRawExtensionToV1JSON((*source).ValuesObject)
+		pString4 := (*source).Namespace
+		v1alpha1ApplicationSourceHelm.Namespace = &pString4
+		pString5 := (*source).KubeVersion
+		v1alpha1ApplicationSourceHelm.KubeVersion = &pString5
+		if (*source).APIVersions != nil {
+			v1alpha1ApplicationSourceHelm.APIVersions = make([]string, len((*source).APIVersions))
+			for l := 0; l < len((*source).APIVersions); l++ {
+				v1alpha1ApplicationSourceHelm.APIVersions[l] = (*source).APIVersions[l]
+			}
+		}
 		pV1alpha1ApplicationSourceHelm = &v1alpha1ApplicationSourceHelm
 	}
 	return pV1alpha1ApplicationSourceHelm
@@ -244,61 +235,55 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSour
 	var pV1alpha1ApplicationSourceHelm *v1alpha1.ApplicationSourceHelm
 	if source != nil {
 		var v1alpha1ApplicationSourceHelm v1alpha1.ApplicationSourceHelm
-		var stringList []string
 		if (*source).ValueFiles != nil {
-			stringList = make([]string, len((*source).ValueFiles))
+			v1alpha1ApplicationSourceHelm.ValueFiles = make([]string, len((*source).ValueFiles))
 			for i := 0; i < len((*source).ValueFiles); i++ {
-				stringList[i] = (*source).ValueFiles[i]
+				v1alpha1ApplicationSourceHelm.ValueFiles[i] = (*source).ValueFiles[i]
 			}
 		}
-		v1alpha1ApplicationSourceHelm.ValueFiles = stringList
-		var v1alpha1HelmParameterList []v1alpha1.HelmParameter
 		if (*source).Parameters != nil {
-			v1alpha1HelmParameterList = make([]v1alpha1.HelmParameter, len((*source).Parameters))
+			v1alpha1ApplicationSourceHelm.Parameters = make([]v1alpha1.HelmParameter, len((*source).Parameters))
 			for j := 0; j < len((*source).Parameters); j++ {
-				v1alpha1HelmParameterList[j] = c.v1alpha1HelmParameterToV1alpha1HelmParameter2((*source).Parameters[j])
+				v1alpha1ApplicationSourceHelm.Parameters[j] = c.v1alpha1HelmParameterToV1alpha1HelmParameter2((*source).Parameters[j])
 			}
 		}
-		v1alpha1ApplicationSourceHelm.Parameters = v1alpha1HelmParameterList
-		var xstring string
 		if (*source).ReleaseName != nil {
-			xstring = *(*source).ReleaseName
+			v1alpha1ApplicationSourceHelm.ReleaseName = *(*source).ReleaseName
 		}
-		v1alpha1ApplicationSourceHelm.ReleaseName = xstring
-		var xstring2 string
 		if (*source).Values != nil {
-			xstring2 = *(*source).Values
+			v1alpha1ApplicationSourceHelm.Values = *(*source).Values
 		}
-		v1alpha1ApplicationSourceHelm.Values = xstring2
-		var v1alpha1HelmFileParameterList []v1alpha1.HelmFileParameter
 		if (*source).FileParameters != nil {
-			v1alpha1HelmFileParameterList = make([]v1alpha1.HelmFileParameter, len((*source).FileParameters))
+			v1alpha1ApplicationSourceHelm.FileParameters = make([]v1alpha1.HelmFileParameter, len((*source).FileParameters))
 			for k := 0; k < len((*source).FileParameters); k++ {
-				v1alpha1HelmFileParameterList[k] = c.v1alpha1HelmFileParameterToV1alpha1HelmFileParameter2((*source).FileParameters[k])
+				v1alpha1ApplicationSourceHelm.FileParameters[k] = c.v1alpha1HelmFileParameterToV1alpha1HelmFileParameter2((*source).FileParameters[k])
 			}
 		}
-		v1alpha1ApplicationSourceHelm.FileParameters = v1alpha1HelmFileParameterList
-		var xstring3 string
 		if (*source).Version != nil {
-			xstring3 = *(*source).Version
+			v1alpha1ApplicationSourceHelm.Version = *(*source).Version
 		}
-		v1alpha1ApplicationSourceHelm.Version = xstring3
-		var xbool bool
 		if (*source).PassCredentials != nil {
-			xbool = *(*source).PassCredentials
+			v1alpha1ApplicationSourceHelm.PassCredentials = *(*source).PassCredentials
 		}
-		v1alpha1ApplicationSourceHelm.PassCredentials = xbool
-		var xbool2 bool
 		if (*source).IgnoreMissingValueFiles != nil {
-			xbool2 = *(*source).IgnoreMissingValueFiles
+			v1alpha1ApplicationSourceHelm.IgnoreMissingValueFiles = *(*source).IgnoreMissingValueFiles
 		}
-		v1alpha1ApplicationSourceHelm.IgnoreMissingValueFiles = xbool2
-		var xbool3 bool
 		if (*source).SkipCrds != nil {
-			xbool3 = *(*source).SkipCrds
+			v1alpha1ApplicationSourceHelm.SkipCrds = *(*source).SkipCrds
 		}
-		v1alpha1ApplicationSourceHelm.SkipCrds = xbool3
 		v1alpha1ApplicationSourceHelm.ValuesObject = ExtV1JSONToRuntimeRawExtension((*source).ValuesObject)
+		if (*source).Namespace != nil {
+			v1alpha1ApplicationSourceHelm.Namespace = *(*source).Namespace
+		}
+		if (*source).KubeVersion != nil {
+			v1alpha1ApplicationSourceHelm.KubeVersion = *(*source).KubeVersion
+		}
+		if (*source).APIVersions != nil {
+			v1alpha1ApplicationSourceHelm.APIVersions = make([]string, len((*source).APIVersions))
+			for l := 0; l < len((*source).APIVersions); l++ {
+				v1alpha1ApplicationSourceHelm.APIVersions[l] = (*source).APIVersions[l]
+			}
+		}
 		pV1alpha1ApplicationSourceHelm = &v1alpha1ApplicationSourceHelm
 	}
 	return pV1alpha1ApplicationSourceHelm
@@ -312,18 +297,20 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 		pString2 := (*source).NameSuffix
 		v1alpha1ApplicationSourceKustomize.NameSuffix = &pString2
 		v1alpha1ApplicationSourceKustomize.Images = c.v1alpha1KustomizeImagesToV1alpha1KustomizeImages((*source).Images)
-		mapStringString := make(map[string]string, len((*source).CommonLabels))
-		for key, value := range (*source).CommonLabels {
-			mapStringString[key] = value
+		if (*source).CommonLabels != nil {
+			v1alpha1ApplicationSourceKustomize.CommonLabels = make(map[string]string, len((*source).CommonLabels))
+			for key, value := range (*source).CommonLabels {
+				v1alpha1ApplicationSourceKustomize.CommonLabels[key] = value
+			}
 		}
-		v1alpha1ApplicationSourceKustomize.CommonLabels = mapStringString
 		pString3 := (*source).Version
 		v1alpha1ApplicationSourceKustomize.Version = &pString3
-		mapStringString2 := make(map[string]string, len((*source).CommonAnnotations))
-		for key2, value2 := range (*source).CommonAnnotations {
-			mapStringString2[key2] = value2
+		if (*source).CommonAnnotations != nil {
+			v1alpha1ApplicationSourceKustomize.CommonAnnotations = make(map[string]string, len((*source).CommonAnnotations))
+			for key2, value2 := range (*source).CommonAnnotations {
+				v1alpha1ApplicationSourceKustomize.CommonAnnotations[key2] = value2
+			}
 		}
-		v1alpha1ApplicationSourceKustomize.CommonAnnotations = mapStringString2
 		pBool := (*source).ForceCommonLabels
 		v1alpha1ApplicationSourceKustomize.ForceCommonLabels = &pBool
 		pBool2 := (*source).ForceCommonAnnotations
@@ -334,15 +321,22 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 		v1alpha1ApplicationSourceKustomize.CommonAnnotationsEnvsubst = &pBool3
 		v1alpha1ApplicationSourceKustomize.Replicas = c.v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas((*source).Replicas)
 		v1alpha1ApplicationSourceKustomize.Patches = c.v1alpha1KustomizePatchesToV1alpha1KustomizePatches((*source).Patches)
-		var stringList []string
 		if (*source).Components != nil {
-			stringList = make([]string, len((*source).Components))
+			v1alpha1ApplicationSourceKustomize.Components = make([]string, len((*source).Components))
 			for i := 0; i < len((*source).Components); i++ {
-				stringList[i] = (*source).Components[i]
+				v1alpha1ApplicationSourceKustomize.Components[i] = (*source).Components[i]
 			}
 		}
-		v1alpha1ApplicationSourceKustomize.Components = stringList
-		v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = (*source).LabelWithoutSelector
+		pBool4 := (*source).LabelWithoutSelector
+		v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = &pBool4
+		pString5 := (*source).KubeVersion
+		v1alpha1ApplicationSourceKustomize.KubeVersion = &pString5
+		if (*source).APIVersions != nil {
+			v1alpha1ApplicationSourceKustomize.APIVersions = make([]string, len((*source).APIVersions))
+			for j := 0; j < len((*source).APIVersions); j++ {
+				v1alpha1ApplicationSourceKustomize.APIVersions[j] = (*source).APIVersions[j]
+			}
+		}
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -351,63 +345,60 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 	var pV1alpha1ApplicationSourceKustomize *v1alpha1.ApplicationSourceKustomize
 	if source != nil {
 		var v1alpha1ApplicationSourceKustomize v1alpha1.ApplicationSourceKustomize
-		var xstring string
 		if (*source).NamePrefix != nil {
-			xstring = *(*source).NamePrefix
+			v1alpha1ApplicationSourceKustomize.NamePrefix = *(*source).NamePrefix
 		}
-		v1alpha1ApplicationSourceKustomize.NamePrefix = xstring
-		var xstring2 string
 		if (*source).NameSuffix != nil {
-			xstring2 = *(*source).NameSuffix
+			v1alpha1ApplicationSourceKustomize.NameSuffix = *(*source).NameSuffix
 		}
-		v1alpha1ApplicationSourceKustomize.NameSuffix = xstring2
 		v1alpha1ApplicationSourceKustomize.Images = c.v1alpha1KustomizeImagesToV1alpha1KustomizeImages2((*source).Images)
-		mapStringString := make(map[string]string, len((*source).CommonLabels))
-		for key, value := range (*source).CommonLabels {
-			mapStringString[key] = value
-		}
-		v1alpha1ApplicationSourceKustomize.CommonLabels = mapStringString
-		var xstring3 string
-		if (*source).Version != nil {
-			xstring3 = *(*source).Version
-		}
-		v1alpha1ApplicationSourceKustomize.Version = xstring3
-		mapStringString2 := make(map[string]string, len((*source).CommonAnnotations))
-		for key2, value2 := range (*source).CommonAnnotations {
-			mapStringString2[key2] = value2
-		}
-		v1alpha1ApplicationSourceKustomize.CommonAnnotations = mapStringString2
-		var xbool bool
-		if (*source).ForceCommonLabels != nil {
-			xbool = *(*source).ForceCommonLabels
-		}
-		v1alpha1ApplicationSourceKustomize.ForceCommonLabels = xbool
-		var xbool2 bool
-		if (*source).ForceCommonAnnotations != nil {
-			xbool2 = *(*source).ForceCommonAnnotations
-		}
-		v1alpha1ApplicationSourceKustomize.ForceCommonAnnotations = xbool2
-		var xstring4 string
-		if (*source).Namespace != nil {
-			xstring4 = *(*source).Namespace
-		}
-		v1alpha1ApplicationSourceKustomize.Namespace = xstring4
-		var xbool3 bool
-		if (*source).CommonAnnotationsEnvsubst != nil {
-			xbool3 = *(*source).CommonAnnotationsEnvsubst
-		}
-		v1alpha1ApplicationSourceKustomize.CommonAnnotationsEnvsubst = xbool3
-		v1alpha1ApplicationSourceKustomize.Replicas = c.v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas2((*source).Replicas)
-		v1alpha1ApplicationSourceKustomize.Patches = c.v1alpha1KustomizePatchesToV1alpha1KustomizePatches2((*source).Patches)
-		var stringList []string
-		if (*source).Components != nil {
-			stringList = make([]string, len((*source).Components))
-			for i := 0; i < len((*source).Components); i++ {
-				stringList[i] = (*source).Components[i]
+		if (*source).CommonLabels != nil {
+			v1alpha1ApplicationSourceKustomize.CommonLabels = make(map[string]string, len((*source).CommonLabels))
+			for key, value := range (*source).CommonLabels {
+				v1alpha1ApplicationSourceKustomize.CommonLabels[key] = value
 			}
 		}
-		v1alpha1ApplicationSourceKustomize.Components = stringList
-		v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = (*source).LabelWithoutSelector
+		if (*source).Version != nil {
+			v1alpha1ApplicationSourceKustomize.Version = *(*source).Version
+		}
+		if (*source).CommonAnnotations != nil {
+			v1alpha1ApplicationSourceKustomize.CommonAnnotations = make(map[string]string, len((*source).CommonAnnotations))
+			for key2, value2 := range (*source).CommonAnnotations {
+				v1alpha1ApplicationSourceKustomize.CommonAnnotations[key2] = value2
+			}
+		}
+		if (*source).ForceCommonLabels != nil {
+			v1alpha1ApplicationSourceKustomize.ForceCommonLabels = *(*source).ForceCommonLabels
+		}
+		if (*source).ForceCommonAnnotations != nil {
+			v1alpha1ApplicationSourceKustomize.ForceCommonAnnotations = *(*source).ForceCommonAnnotations
+		}
+		if (*source).Namespace != nil {
+			v1alpha1ApplicationSourceKustomize.Namespace = *(*source).Namespace
+		}
+		if (*source).CommonAnnotationsEnvsubst != nil {
+			v1alpha1ApplicationSourceKustomize.CommonAnnotationsEnvsubst = *(*source).CommonAnnotationsEnvsubst
+		}
+		v1alpha1ApplicationSourceKustomize.Replicas = c.v1alpha1KustomizeReplicasToV1alpha1KustomizeReplicas2((*source).Replicas)
+		v1alpha1ApplicationSourceKustomize.Patches = c.v1alpha1KustomizePatchesToV1alpha1KustomizePatches2((*source).Patches)
+		if (*source).Components != nil {
+			v1alpha1ApplicationSourceKustomize.Components = make([]string, len((*source).Components))
+			for i := 0; i < len((*source).Components); i++ {
+				v1alpha1ApplicationSourceKustomize.Components[i] = (*source).Components[i]
+			}
+		}
+		if (*source).LabelWithoutSelector != nil {
+			v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = *(*source).LabelWithoutSelector
+		}
+		if (*source).KubeVersion != nil {
+			v1alpha1ApplicationSourceKustomize.KubeVersion = *(*source).KubeVersion
+		}
+		if (*source).APIVersions != nil {
+			v1alpha1ApplicationSourceKustomize.APIVersions = make([]string, len((*source).APIVersions))
+			for j := 0; j < len((*source).APIVersions); j++ {
+				v1alpha1ApplicationSourceKustomize.APIVersions[j] = (*source).APIVersions[j]
+			}
+		}
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -428,11 +419,9 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourcePluginToPV1alpha1ApplicationSo
 	var pV1alpha1ApplicationSourcePlugin *v1alpha1.ApplicationSourcePlugin
 	if source != nil {
 		var v1alpha1ApplicationSourcePlugin v1alpha1.ApplicationSourcePlugin
-		var xstring string
 		if (*source).Name != nil {
-			xstring = *(*source).Name
+			v1alpha1ApplicationSourcePlugin.Name = *(*source).Name
 		}
-		v1alpha1ApplicationSourcePlugin.Name = xstring
 		v1alpha1ApplicationSourcePlugin.Env = c.v1alpha1EnvToV1alpha1Env2((*source).Env)
 		v1alpha1ApplicationSourcePlugin.Parameters = c.v1alpha1ApplicationSourcePluginParametersToV1alpha1ApplicationSourcePluginParameters2((*source).Parameters)
 		pV1alpha1ApplicationSourcePlugin = &v1alpha1ApplicationSourcePlugin
@@ -452,30 +441,22 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceToPV1alpha1ApplicationSource2(
 	if source != nil {
 		var v1alpha1ApplicationSource v1alpha1.ApplicationSource
 		v1alpha1ApplicationSource.RepoURL = (*source).RepoURL
-		var xstring string
 		if (*source).Path != nil {
-			xstring = *(*source).Path
+			v1alpha1ApplicationSource.Path = *(*source).Path
 		}
-		v1alpha1ApplicationSource.Path = xstring
-		var xstring2 string
 		if (*source).TargetRevision != nil {
-			xstring2 = *(*source).TargetRevision
+			v1alpha1ApplicationSource.TargetRevision = *(*source).TargetRevision
 		}
-		v1alpha1ApplicationSource.TargetRevision = xstring2
 		v1alpha1ApplicationSource.Helm = c.pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSourceHelm2((*source).Helm)
 		v1alpha1ApplicationSource.Kustomize = c.pV1alpha1ApplicationSourceKustomizeToPV1alpha1ApplicationSourceKustomize2((*source).Kustomize)
 		v1alpha1ApplicationSource.Directory = c.pV1alpha1ApplicationSourceDirectoryToPV1alpha1ApplicationSourceDirectory2((*source).Directory)
 		v1alpha1ApplicationSource.Plugin = c.pV1alpha1ApplicationSourcePluginToPV1alpha1ApplicationSourcePlugin2((*source).Plugin)
-		var xstring3 string
 		if (*source).Chart != nil {
-			xstring3 = *(*source).Chart
+			v1alpha1ApplicationSource.Chart = *(*source).Chart
 		}
-		v1alpha1ApplicationSource.Chart = xstring3
-		var xstring4 string
 		if (*source).Ref != nil {
-			xstring4 = *(*source).Ref
+			v1alpha1ApplicationSource.Ref = *(*source).Ref
 		}
-		v1alpha1ApplicationSource.Ref = xstring4
 		pV1alpha1ApplicationSource = &v1alpha1ApplicationSource
 	}
 	return pV1alpha1ApplicationSource
@@ -486,12 +467,10 @@ func (c *ConverterImpl) pV1alpha1BackoffToPV1alpha1Backoff(source *v1alpha1.Back
 		var v1alpha1Backoff v1alpha11.Backoff
 		pString := (*source).Duration
 		v1alpha1Backoff.Duration = &pString
-		var pInt64 *int64
 		if (*source).Factor != nil {
 			xint64 := *(*source).Factor
-			pInt64 = &xint64
+			v1alpha1Backoff.Factor = &xint64
 		}
-		v1alpha1Backoff.Factor = pInt64
 		pString2 := (*source).MaxDuration
 		v1alpha1Backoff.MaxDuration = &pString2
 		pV1alpha1Backoff = &v1alpha1Backoff
@@ -502,22 +481,16 @@ func (c *ConverterImpl) pV1alpha1BackoffToPV1alpha1Backoff2(source *v1alpha11.Ba
 	var pV1alpha1Backoff *v1alpha1.Backoff
 	if source != nil {
 		var v1alpha1Backoff v1alpha1.Backoff
-		var xstring string
 		if (*source).Duration != nil {
-			xstring = *(*source).Duration
+			v1alpha1Backoff.Duration = *(*source).Duration
 		}
-		v1alpha1Backoff.Duration = xstring
-		var pInt64 *int64
 		if (*source).Factor != nil {
 			xint64 := *(*source).Factor
-			pInt64 = &xint64
+			v1alpha1Backoff.Factor = &xint64
 		}
-		v1alpha1Backoff.Factor = pInt64
-		var xstring2 string
 		if (*source).MaxDuration != nil {
-			xstring2 = *(*source).MaxDuration
+			v1alpha1Backoff.MaxDuration = *(*source).MaxDuration
 		}
-		v1alpha1Backoff.MaxDuration = xstring2
 		pV1alpha1Backoff = &v1alpha1Backoff
 	}
 	return pV1alpha1Backoff
@@ -589,16 +562,18 @@ func (c *ConverterImpl) pV1alpha1ManagedNamespaceMetadataToPV1alpha1ManagedNames
 	var pV1alpha1ManagedNamespaceMetadata *v1alpha1.ManagedNamespaceMetadata
 	if source != nil {
 		var v1alpha1ManagedNamespaceMetadata v1alpha1.ManagedNamespaceMetadata
-		mapStringString := make(map[string]string, len((*source).Labels))
-		for key, value := range (*source).Labels {
-			mapStringString[key] = value
+		if (*source).Labels != nil {
+			v1alpha1ManagedNamespaceMetadata.Labels = make(map[string]string, len((*source).Labels))
+			for key, value := range (*source).Labels {
+				v1alpha1ManagedNamespaceMetadata.Labels[key] = value
+			}
 		}
-		v1alpha1ManagedNamespaceMetadata.Labels = mapStringString
-		mapStringString2 := make(map[string]string, len((*source).Annotations))
-		for key2, value2 := range (*source).Annotations {
-			mapStringString2[key2] = value2
+		if (*source).Annotations != nil {
+			v1alpha1ManagedNamespaceMetadata.Annotations = make(map[string]string, len((*source).Annotations))
+			for key2, value2 := range (*source).Annotations {
+				v1alpha1ManagedNamespaceMetadata.Annotations[key2] = value2
+			}
 		}
-		v1alpha1ManagedNamespaceMetadata.Annotations = mapStringString2
 		pV1alpha1ManagedNamespaceMetadata = &v1alpha1ManagedNamespaceMetadata
 	}
 	return pV1alpha1ManagedNamespaceMetadata
@@ -624,14 +599,12 @@ func (c *ConverterImpl) pV1alpha1OptionalArrayToPV1alpha1OptionalArray(source *v
 	var pV1alpha1OptionalArray *v1alpha11.OptionalArray
 	if source != nil {
 		var v1alpha1OptionalArray v1alpha11.OptionalArray
-		var stringList []string
 		if (*source).Array != nil {
-			stringList = make([]string, len((*source).Array))
+			v1alpha1OptionalArray.Array = make([]string, len((*source).Array))
 			for i := 0; i < len((*source).Array); i++ {
-				stringList[i] = (*source).Array[i]
+				v1alpha1OptionalArray.Array[i] = (*source).Array[i]
 			}
 		}
-		v1alpha1OptionalArray.Array = stringList
 		pV1alpha1OptionalArray = &v1alpha1OptionalArray
 	}
 	return pV1alpha1OptionalArray
@@ -640,14 +613,12 @@ func (c *ConverterImpl) pV1alpha1OptionalArrayToPV1alpha1OptionalArray2(source *
 	var pV1alpha1OptionalArray *v1alpha1.OptionalArray
 	if source != nil {
 		var v1alpha1OptionalArray v1alpha1.OptionalArray
-		var stringList []string
 		if (*source).Array != nil {
-			stringList = make([]string, len((*source).Array))
+			v1alpha1OptionalArray.Array = make([]string, len((*source).Array))
 			for i := 0; i < len((*source).Array); i++ {
-				stringList[i] = (*source).Array[i]
+				v1alpha1OptionalArray.Array[i] = (*source).Array[i]
 			}
 		}
-		v1alpha1OptionalArray.Array = stringList
 		pV1alpha1OptionalArray = &v1alpha1OptionalArray
 	}
 	return pV1alpha1OptionalArray
@@ -656,11 +627,12 @@ func (c *ConverterImpl) pV1alpha1OptionalMapToPV1alpha1OptionalMap(source *v1alp
 	var pV1alpha1OptionalMap *v1alpha11.OptionalMap
 	if source != nil {
 		var v1alpha1OptionalMap v1alpha11.OptionalMap
-		mapStringString := make(map[string]string, len((*source).Map))
-		for key, value := range (*source).Map {
-			mapStringString[key] = value
+		if (*source).Map != nil {
+			v1alpha1OptionalMap.Map = make(map[string]string, len((*source).Map))
+			for key, value := range (*source).Map {
+				v1alpha1OptionalMap.Map[key] = value
+			}
 		}
-		v1alpha1OptionalMap.Map = mapStringString
 		pV1alpha1OptionalMap = &v1alpha1OptionalMap
 	}
 	return pV1alpha1OptionalMap
@@ -669,11 +641,12 @@ func (c *ConverterImpl) pV1alpha1OptionalMapToPV1alpha1OptionalMap2(source *v1al
 	var pV1alpha1OptionalMap *v1alpha1.OptionalMap
 	if source != nil {
 		var v1alpha1OptionalMap v1alpha1.OptionalMap
-		mapStringString := make(map[string]string, len((*source).Map))
-		for key, value := range (*source).Map {
-			mapStringString[key] = value
+		if (*source).Map != nil {
+			v1alpha1OptionalMap.Map = make(map[string]string, len((*source).Map))
+			for key, value := range (*source).Map {
+				v1alpha1OptionalMap.Map[key] = value
+			}
 		}
-		v1alpha1OptionalMap.Map = mapStringString
 		pV1alpha1OptionalMap = &v1alpha1OptionalMap
 	}
 	return pV1alpha1OptionalMap
@@ -704,11 +677,9 @@ func (c *ConverterImpl) pV1alpha1RetryStrategyToPV1alpha1RetryStrategy(source *v
 	var pV1alpha1RetryStrategy *v1alpha1.RetryStrategy
 	if source != nil {
 		var v1alpha1RetryStrategy v1alpha1.RetryStrategy
-		var xint64 int64
 		if (*source).Limit != nil {
-			xint64 = *(*source).Limit
+			v1alpha1RetryStrategy.Limit = *(*source).Limit
 		}
-		v1alpha1RetryStrategy.Limit = xint64
 		v1alpha1RetryStrategy.Backoff = c.pV1alpha1BackoffToPV1alpha1Backoff2((*source).Backoff)
 		pV1alpha1RetryStrategy = &v1alpha1RetryStrategy
 	}
@@ -722,14 +693,12 @@ func (c *ConverterImpl) pV1alpha1SyncOperationResultToPV1alpha1SyncOperationResu
 		v1alpha1SyncOperationResult.Revision = (*source).Revision
 		v1alpha1SyncOperationResult.Source = c.v1alpha1ApplicationSourceToV1alpha1ApplicationSource((*source).Source)
 		v1alpha1SyncOperationResult.Sources = c.v1alpha1ApplicationSourcesToV1alpha1ApplicationSources((*source).Sources)
-		var stringList []string
 		if (*source).Revisions != nil {
-			stringList = make([]string, len((*source).Revisions))
+			v1alpha1SyncOperationResult.Revisions = make([]string, len((*source).Revisions))
 			for i := 0; i < len((*source).Revisions); i++ {
-				stringList[i] = (*source).Revisions[i]
+				v1alpha1SyncOperationResult.Revisions[i] = (*source).Revisions[i]
 			}
 		}
-		v1alpha1SyncOperationResult.Revisions = stringList
 		pV1alpha1SyncOperationResult = &v1alpha1SyncOperationResult
 	}
 	return pV1alpha1SyncOperationResult
@@ -745,33 +714,27 @@ func (c *ConverterImpl) pV1alpha1SyncOperationToPV1alpha1SyncOperation(source *v
 		pBool2 := (*source).DryRun
 		v1alpha1SyncOperation.DryRun = &pBool2
 		v1alpha1SyncOperation.SyncStrategy = c.pV1alpha1SyncStrategyToPV1alpha1SyncStrategy((*source).SyncStrategy)
-		var v1alpha1SyncOperationResourceList []v1alpha11.SyncOperationResource
 		if (*source).Resources != nil {
-			v1alpha1SyncOperationResourceList = make([]v1alpha11.SyncOperationResource, len((*source).Resources))
+			v1alpha1SyncOperation.Resources = make([]v1alpha11.SyncOperationResource, len((*source).Resources))
 			for i := 0; i < len((*source).Resources); i++ {
-				v1alpha1SyncOperationResourceList[i] = c.v1alpha1SyncOperationResourceToV1alpha1SyncOperationResource((*source).Resources[i])
+				v1alpha1SyncOperation.Resources[i] = c.v1alpha1SyncOperationResourceToV1alpha1SyncOperationResource((*source).Resources[i])
 			}
 		}
-		v1alpha1SyncOperation.Resources = v1alpha1SyncOperationResourceList
 		v1alpha1SyncOperation.Source = c.pV1alpha1ApplicationSourceToPV1alpha1ApplicationSource((*source).Source)
-		var stringList []string
 		if (*source).Manifests != nil {
-			stringList = make([]string, len((*source).Manifests))
+			v1alpha1SyncOperation.Manifests = make([]string, len((*source).Manifests))
 			for j := 0; j < len((*source).Manifests); j++ {
-				stringList[j] = (*source).Manifests[j]
+				v1alpha1SyncOperation.Manifests[j] = (*source).Manifests[j]
 			}
 		}
-		v1alpha1SyncOperation.Manifests = stringList
 		v1alpha1SyncOperation.SyncOptions = c.v1alpha1SyncOptionsToV1alpha1SyncOptions((*source).SyncOptions)
 		v1alpha1SyncOperation.Sources = c.v1alpha1ApplicationSourcesToV1alpha1ApplicationSources((*source).Sources)
-		var stringList2 []string
 		if (*source).Revisions != nil {
-			stringList2 = make([]string, len((*source).Revisions))
+			v1alpha1SyncOperation.Revisions = make([]string, len((*source).Revisions))
 			for k := 0; k < len((*source).Revisions); k++ {
-				stringList2[k] = (*source).Revisions[k]
+				v1alpha1SyncOperation.Revisions[k] = (*source).Revisions[k]
 			}
 		}
-		v1alpha1SyncOperation.Revisions = stringList2
 		pV1alpha1SyncOperation = &v1alpha1SyncOperation
 	}
 	return pV1alpha1SyncOperation
@@ -780,21 +743,15 @@ func (c *ConverterImpl) pV1alpha1SyncPolicyAutomatedToPV1alpha1SyncPolicyAutomat
 	var pV1alpha1SyncPolicyAutomated *v1alpha1.SyncPolicyAutomated
 	if source != nil {
 		var v1alpha1SyncPolicyAutomated v1alpha1.SyncPolicyAutomated
-		var xbool bool
 		if (*source).Prune != nil {
-			xbool = *(*source).Prune
+			v1alpha1SyncPolicyAutomated.Prune = *(*source).Prune
 		}
-		v1alpha1SyncPolicyAutomated.Prune = xbool
-		var xbool2 bool
 		if (*source).SelfHeal != nil {
-			xbool2 = *(*source).SelfHeal
+			v1alpha1SyncPolicyAutomated.SelfHeal = *(*source).SelfHeal
 		}
-		v1alpha1SyncPolicyAutomated.SelfHeal = xbool2
-		var xbool3 bool
 		if (*source).AllowEmpty != nil {
-			xbool3 = *(*source).AllowEmpty
+			v1alpha1SyncPolicyAutomated.AllowEmpty = *(*source).AllowEmpty
 		}
-		v1alpha1SyncPolicyAutomated.AllowEmpty = xbool3
 		pV1alpha1SyncPolicyAutomated = &v1alpha1SyncPolicyAutomated
 	}
 	return pV1alpha1SyncPolicyAutomated
@@ -859,87 +816,69 @@ func (c *ConverterImpl) v1alpha1ApplicationConditionToV1alpha1ApplicationConditi
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourceJsonnetToV1alpha1ApplicationSourceJsonnet(source v1alpha1.ApplicationSourceJsonnet) v1alpha11.ApplicationSourceJsonnet {
 	var v1alpha1ApplicationSourceJsonnet v1alpha11.ApplicationSourceJsonnet
-	var v1alpha1JsonnetVarList []v1alpha11.JsonnetVar
 	if source.ExtVars != nil {
-		v1alpha1JsonnetVarList = make([]v1alpha11.JsonnetVar, len(source.ExtVars))
+		v1alpha1ApplicationSourceJsonnet.ExtVars = make([]v1alpha11.JsonnetVar, len(source.ExtVars))
 		for i := 0; i < len(source.ExtVars); i++ {
-			v1alpha1JsonnetVarList[i] = c.v1alpha1JsonnetVarToV1alpha1JsonnetVar(source.ExtVars[i])
+			v1alpha1ApplicationSourceJsonnet.ExtVars[i] = c.v1alpha1JsonnetVarToV1alpha1JsonnetVar(source.ExtVars[i])
 		}
 	}
-	v1alpha1ApplicationSourceJsonnet.ExtVars = v1alpha1JsonnetVarList
-	var v1alpha1JsonnetVarList2 []v1alpha11.JsonnetVar
 	if source.TLAs != nil {
-		v1alpha1JsonnetVarList2 = make([]v1alpha11.JsonnetVar, len(source.TLAs))
+		v1alpha1ApplicationSourceJsonnet.TLAs = make([]v1alpha11.JsonnetVar, len(source.TLAs))
 		for j := 0; j < len(source.TLAs); j++ {
-			v1alpha1JsonnetVarList2[j] = c.v1alpha1JsonnetVarToV1alpha1JsonnetVar(source.TLAs[j])
+			v1alpha1ApplicationSourceJsonnet.TLAs[j] = c.v1alpha1JsonnetVarToV1alpha1JsonnetVar(source.TLAs[j])
 		}
 	}
-	v1alpha1ApplicationSourceJsonnet.TLAs = v1alpha1JsonnetVarList2
-	var stringList []string
 	if source.Libs != nil {
-		stringList = make([]string, len(source.Libs))
+		v1alpha1ApplicationSourceJsonnet.Libs = make([]string, len(source.Libs))
 		for k := 0; k < len(source.Libs); k++ {
-			stringList[k] = source.Libs[k]
+			v1alpha1ApplicationSourceJsonnet.Libs[k] = source.Libs[k]
 		}
 	}
-	v1alpha1ApplicationSourceJsonnet.Libs = stringList
 	return v1alpha1ApplicationSourceJsonnet
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourceJsonnetToV1alpha1ApplicationSourceJsonnet2(source v1alpha11.ApplicationSourceJsonnet) v1alpha1.ApplicationSourceJsonnet {
 	var v1alpha1ApplicationSourceJsonnet v1alpha1.ApplicationSourceJsonnet
-	var v1alpha1JsonnetVarList []v1alpha1.JsonnetVar
 	if source.ExtVars != nil {
-		v1alpha1JsonnetVarList = make([]v1alpha1.JsonnetVar, len(source.ExtVars))
+		v1alpha1ApplicationSourceJsonnet.ExtVars = make([]v1alpha1.JsonnetVar, len(source.ExtVars))
 		for i := 0; i < len(source.ExtVars); i++ {
-			v1alpha1JsonnetVarList[i] = c.v1alpha1JsonnetVarToV1alpha1JsonnetVar2(source.ExtVars[i])
+			v1alpha1ApplicationSourceJsonnet.ExtVars[i] = c.v1alpha1JsonnetVarToV1alpha1JsonnetVar2(source.ExtVars[i])
 		}
 	}
-	v1alpha1ApplicationSourceJsonnet.ExtVars = v1alpha1JsonnetVarList
-	var v1alpha1JsonnetVarList2 []v1alpha1.JsonnetVar
 	if source.TLAs != nil {
-		v1alpha1JsonnetVarList2 = make([]v1alpha1.JsonnetVar, len(source.TLAs))
+		v1alpha1ApplicationSourceJsonnet.TLAs = make([]v1alpha1.JsonnetVar, len(source.TLAs))
 		for j := 0; j < len(source.TLAs); j++ {
-			v1alpha1JsonnetVarList2[j] = c.v1alpha1JsonnetVarToV1alpha1JsonnetVar2(source.TLAs[j])
+			v1alpha1ApplicationSourceJsonnet.TLAs[j] = c.v1alpha1JsonnetVarToV1alpha1JsonnetVar2(source.TLAs[j])
 		}
 	}
-	v1alpha1ApplicationSourceJsonnet.TLAs = v1alpha1JsonnetVarList2
-	var stringList []string
 	if source.Libs != nil {
-		stringList = make([]string, len(source.Libs))
+		v1alpha1ApplicationSourceJsonnet.Libs = make([]string, len(source.Libs))
 		for k := 0; k < len(source.Libs); k++ {
-			stringList[k] = source.Libs[k]
+			v1alpha1ApplicationSourceJsonnet.Libs[k] = source.Libs[k]
 		}
 	}
-	v1alpha1ApplicationSourceJsonnet.Libs = stringList
 	return v1alpha1ApplicationSourceJsonnet
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourcePluginParameterToV1alpha1ApplicationSourcePluginParameter(source v1alpha1.ApplicationSourcePluginParameter) v1alpha11.ApplicationSourcePluginParameter {
 	var v1alpha1ApplicationSourcePluginParameter v1alpha11.ApplicationSourcePluginParameter
 	pString := source.Name
 	v1alpha1ApplicationSourcePluginParameter.Name = &pString
-	var pString2 *string
 	if source.String_ != nil {
 		xstring := *source.String_
-		pString2 = &xstring
+		v1alpha1ApplicationSourcePluginParameter.String_ = &xstring
 	}
-	v1alpha1ApplicationSourcePluginParameter.String_ = pString2
 	v1alpha1ApplicationSourcePluginParameter.OptionalMap = c.pV1alpha1OptionalMapToPV1alpha1OptionalMap(source.OptionalMap)
 	v1alpha1ApplicationSourcePluginParameter.OptionalArray = c.pV1alpha1OptionalArrayToPV1alpha1OptionalArray(source.OptionalArray)
 	return v1alpha1ApplicationSourcePluginParameter
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourcePluginParameterToV1alpha1ApplicationSourcePluginParameter2(source v1alpha11.ApplicationSourcePluginParameter) v1alpha1.ApplicationSourcePluginParameter {
 	var v1alpha1ApplicationSourcePluginParameter v1alpha1.ApplicationSourcePluginParameter
-	var xstring string
 	if source.Name != nil {
-		xstring = *source.Name
+		v1alpha1ApplicationSourcePluginParameter.Name = *source.Name
 	}
-	v1alpha1ApplicationSourcePluginParameter.Name = xstring
-	var pString *string
 	if source.String_ != nil {
-		xstring2 := *source.String_
-		pString = &xstring2
+		xstring := *source.String_
+		v1alpha1ApplicationSourcePluginParameter.String_ = &xstring
 	}
-	v1alpha1ApplicationSourcePluginParameter.String_ = pString
 	v1alpha1ApplicationSourcePluginParameter.OptionalMap = c.pV1alpha1OptionalMapToPV1alpha1OptionalMap2(source.OptionalMap)
 	v1alpha1ApplicationSourcePluginParameter.OptionalArray = c.pV1alpha1OptionalArrayToPV1alpha1OptionalArray2(source.OptionalArray)
 	return v1alpha1ApplicationSourcePluginParameter
@@ -984,30 +923,22 @@ func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource(sou
 func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource2(source v1alpha11.ApplicationSource) v1alpha1.ApplicationSource {
 	var v1alpha1ApplicationSource v1alpha1.ApplicationSource
 	v1alpha1ApplicationSource.RepoURL = source.RepoURL
-	var xstring string
 	if source.Path != nil {
-		xstring = *source.Path
+		v1alpha1ApplicationSource.Path = *source.Path
 	}
-	v1alpha1ApplicationSource.Path = xstring
-	var xstring2 string
 	if source.TargetRevision != nil {
-		xstring2 = *source.TargetRevision
+		v1alpha1ApplicationSource.TargetRevision = *source.TargetRevision
 	}
-	v1alpha1ApplicationSource.TargetRevision = xstring2
 	v1alpha1ApplicationSource.Helm = c.pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSourceHelm2(source.Helm)
 	v1alpha1ApplicationSource.Kustomize = c.pV1alpha1ApplicationSourceKustomizeToPV1alpha1ApplicationSourceKustomize2(source.Kustomize)
 	v1alpha1ApplicationSource.Directory = c.pV1alpha1ApplicationSourceDirectoryToPV1alpha1ApplicationSourceDirectory2(source.Directory)
 	v1alpha1ApplicationSource.Plugin = c.pV1alpha1ApplicationSourcePluginToPV1alpha1ApplicationSourcePlugin2(source.Plugin)
-	var xstring3 string
 	if source.Chart != nil {
-		xstring3 = *source.Chart
+		v1alpha1ApplicationSource.Chart = *source.Chart
 	}
-	v1alpha1ApplicationSource.Chart = xstring3
-	var xstring4 string
 	if source.Ref != nil {
-		xstring4 = *source.Ref
+		v1alpha1ApplicationSource.Ref = *source.Ref
 	}
-	v1alpha1ApplicationSource.Ref = xstring4
 	return v1alpha1ApplicationSource
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourceTypeToV1alpha1ApplicationSourceType(source v1alpha1.ApplicationSourceType) v1alpha11.ApplicationSourceType {
@@ -1035,22 +966,18 @@ func (c *ConverterImpl) v1alpha1ApplicationSourcesToV1alpha1ApplicationSources2(
 }
 func (c *ConverterImpl) v1alpha1ApplicationSummaryToV1alpha1ApplicationSummary(source v1alpha1.ApplicationSummary) v1alpha11.ApplicationSummary {
 	var v1alpha1ApplicationSummary v1alpha11.ApplicationSummary
-	var stringList []string
 	if source.ExternalURLs != nil {
-		stringList = make([]string, len(source.ExternalURLs))
+		v1alpha1ApplicationSummary.ExternalURLs = make([]string, len(source.ExternalURLs))
 		for i := 0; i < len(source.ExternalURLs); i++ {
-			stringList[i] = source.ExternalURLs[i]
+			v1alpha1ApplicationSummary.ExternalURLs[i] = source.ExternalURLs[i]
 		}
 	}
-	v1alpha1ApplicationSummary.ExternalURLs = stringList
-	var stringList2 []string
 	if source.Images != nil {
-		stringList2 = make([]string, len(source.Images))
+		v1alpha1ApplicationSummary.Images = make([]string, len(source.Images))
 		for j := 0; j < len(source.Images); j++ {
-			stringList2[j] = source.Images[j]
+			v1alpha1ApplicationSummary.Images[j] = source.Images[j]
 		}
 	}
-	v1alpha1ApplicationSummary.Images = stringList2
 	return v1alpha1ApplicationSummary
 }
 func (c *ConverterImpl) v1alpha1ComparedToToV1alpha1ComparedTo(source v1alpha1.ComparedTo) v1alpha11.ComparedTo {
@@ -1097,16 +1024,12 @@ func (c *ConverterImpl) v1alpha1HelmFileParameterToV1alpha1HelmFileParameter(sou
 }
 func (c *ConverterImpl) v1alpha1HelmFileParameterToV1alpha1HelmFileParameter2(source v1alpha11.HelmFileParameter) v1alpha1.HelmFileParameter {
 	var v1alpha1HelmFileParameter v1alpha1.HelmFileParameter
-	var xstring string
 	if source.Name != nil {
-		xstring = *source.Name
+		v1alpha1HelmFileParameter.Name = *source.Name
 	}
-	v1alpha1HelmFileParameter.Name = xstring
-	var xstring2 string
 	if source.Path != nil {
-		xstring2 = *source.Path
+		v1alpha1HelmFileParameter.Path = *source.Path
 	}
-	v1alpha1HelmFileParameter.Path = xstring2
 	return v1alpha1HelmFileParameter
 }
 func (c *ConverterImpl) v1alpha1HelmParameterToV1alpha1HelmParameter(source v1alpha1.HelmParameter) v1alpha11.HelmParameter {
@@ -1121,21 +1044,15 @@ func (c *ConverterImpl) v1alpha1HelmParameterToV1alpha1HelmParameter(source v1al
 }
 func (c *ConverterImpl) v1alpha1HelmParameterToV1alpha1HelmParameter2(source v1alpha11.HelmParameter) v1alpha1.HelmParameter {
 	var v1alpha1HelmParameter v1alpha1.HelmParameter
-	var xstring string
 	if source.Name != nil {
-		xstring = *source.Name
+		v1alpha1HelmParameter.Name = *source.Name
 	}
-	v1alpha1HelmParameter.Name = xstring
-	var xstring2 string
 	if source.Value != nil {
-		xstring2 = *source.Value
+		v1alpha1HelmParameter.Value = *source.Value
 	}
-	v1alpha1HelmParameter.Value = xstring2
-	var xbool bool
 	if source.ForceString != nil {
-		xbool = *source.ForceString
+		v1alpha1HelmParameter.ForceString = *source.ForceString
 	}
-	v1alpha1HelmParameter.ForceString = xbool
 	return v1alpha1HelmParameter
 }
 func (c *ConverterImpl) v1alpha1InfoToV1alpha1Info(source v1alpha11.Info) v1alpha1.Info {
@@ -1156,11 +1073,9 @@ func (c *ConverterImpl) v1alpha1JsonnetVarToV1alpha1JsonnetVar2(source v1alpha11
 	var v1alpha1JsonnetVar v1alpha1.JsonnetVar
 	v1alpha1JsonnetVar.Name = source.Name
 	v1alpha1JsonnetVar.Value = source.Value
-	var xbool bool
 	if source.Code != nil {
-		xbool = *source.Code
+		v1alpha1JsonnetVar.Code = *source.Code
 	}
-	v1alpha1JsonnetVar.Code = xbool
 	return v1alpha1JsonnetVar
 }
 func (c *ConverterImpl) v1alpha1KustomizeGvkToV1alpha1KustomizeGvk(source v1alpha1.KustomizeGvk) v1alpha11.KustomizeGvk {
@@ -1202,11 +1117,12 @@ func (c *ConverterImpl) v1alpha1KustomizePatchToV1alpha1KustomizePatch(source v1
 	v1alpha1KustomizePatch.Path = source.Path
 	v1alpha1KustomizePatch.Patch = source.Patch
 	v1alpha1KustomizePatch.Target = c.pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector(source.Target)
-	mapStringBool := make(map[string]bool, len(source.Options))
-	for key, value := range source.Options {
-		mapStringBool[key] = value
+	if source.Options != nil {
+		v1alpha1KustomizePatch.Options = make(map[string]bool, len(source.Options))
+		for key, value := range source.Options {
+			v1alpha1KustomizePatch.Options[key] = value
+		}
 	}
-	v1alpha1KustomizePatch.Options = mapStringBool
 	return v1alpha1KustomizePatch
 }
 func (c *ConverterImpl) v1alpha1KustomizePatchToV1alpha1KustomizePatch2(source v1alpha11.KustomizePatch) v1alpha1.KustomizePatch {
@@ -1214,11 +1130,12 @@ func (c *ConverterImpl) v1alpha1KustomizePatchToV1alpha1KustomizePatch2(source v
 	v1alpha1KustomizePatch.Path = source.Path
 	v1alpha1KustomizePatch.Patch = source.Patch
 	v1alpha1KustomizePatch.Target = c.pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector2(source.Target)
-	mapStringBool := make(map[string]bool, len(source.Options))
-	for key, value := range source.Options {
-		mapStringBool[key] = value
+	if source.Options != nil {
+		v1alpha1KustomizePatch.Options = make(map[string]bool, len(source.Options))
+		for key, value := range source.Options {
+			v1alpha1KustomizePatch.Options[key] = value
+		}
 	}
-	v1alpha1KustomizePatch.Options = mapStringBool
 	return v1alpha1KustomizePatch
 }
 func (c *ConverterImpl) v1alpha1KustomizePatchesToV1alpha1KustomizePatches(source v1alpha1.KustomizePatches) v1alpha11.KustomizePatches {
@@ -1299,14 +1216,12 @@ func (c *ConverterImpl) v1alpha1OperationToV1alpha1Operation(source v1alpha1.Ope
 	var v1alpha1Operation v1alpha11.Operation
 	v1alpha1Operation.Sync = c.pV1alpha1SyncOperationToPV1alpha1SyncOperation(source.Sync)
 	v1alpha1Operation.InitiatedBy = c.v1alpha1OperationInitiatorToV1alpha1OperationInitiator(source.InitiatedBy)
-	var pV1alpha1InfoList []*v1alpha11.Info
 	if source.Info != nil {
-		pV1alpha1InfoList = make([]*v1alpha11.Info, len(source.Info))
+		v1alpha1Operation.Info = make([]*v1alpha11.Info, len(source.Info))
 		for i := 0; i < len(source.Info); i++ {
-			pV1alpha1InfoList[i] = c.pV1alpha1InfoToPV1alpha1Info(source.Info[i])
+			v1alpha1Operation.Info[i] = c.pV1alpha1InfoToPV1alpha1Info(source.Info[i])
 		}
 	}
-	v1alpha1Operation.Info = pV1alpha1InfoList
 	v1alpha1Operation.Retry = c.v1alpha1RetryStrategyToV1alpha1RetryStrategy(source.Retry)
 	return v1alpha1Operation
 }
@@ -1326,30 +1241,24 @@ func (c *ConverterImpl) v1alpha1ResourceIgnoreDifferencesToV1alpha1ResourceIgnor
 	v1alpha1ResourceIgnoreDifferences.Kind = source.Kind
 	v1alpha1ResourceIgnoreDifferences.Name = source.Name
 	v1alpha1ResourceIgnoreDifferences.Namespace = source.Namespace
-	var stringList []string
 	if source.JSONPointers != nil {
-		stringList = make([]string, len(source.JSONPointers))
+		v1alpha1ResourceIgnoreDifferences.JSONPointers = make([]string, len(source.JSONPointers))
 		for i := 0; i < len(source.JSONPointers); i++ {
-			stringList[i] = source.JSONPointers[i]
+			v1alpha1ResourceIgnoreDifferences.JSONPointers[i] = source.JSONPointers[i]
 		}
 	}
-	v1alpha1ResourceIgnoreDifferences.JSONPointers = stringList
-	var stringList2 []string
 	if source.JQPathExpressions != nil {
-		stringList2 = make([]string, len(source.JQPathExpressions))
+		v1alpha1ResourceIgnoreDifferences.JQPathExpressions = make([]string, len(source.JQPathExpressions))
 		for j := 0; j < len(source.JQPathExpressions); j++ {
-			stringList2[j] = source.JQPathExpressions[j]
+			v1alpha1ResourceIgnoreDifferences.JQPathExpressions[j] = source.JQPathExpressions[j]
 		}
 	}
-	v1alpha1ResourceIgnoreDifferences.JQPathExpressions = stringList2
-	var stringList3 []string
 	if source.ManagedFieldsManagers != nil {
-		stringList3 = make([]string, len(source.ManagedFieldsManagers))
+		v1alpha1ResourceIgnoreDifferences.ManagedFieldsManagers = make([]string, len(source.ManagedFieldsManagers))
 		for k := 0; k < len(source.ManagedFieldsManagers); k++ {
-			stringList3[k] = source.ManagedFieldsManagers[k]
+			v1alpha1ResourceIgnoreDifferences.ManagedFieldsManagers[k] = source.ManagedFieldsManagers[k]
 		}
 	}
-	v1alpha1ResourceIgnoreDifferences.ManagedFieldsManagers = stringList3
 	return v1alpha1ResourceIgnoreDifferences
 }
 func (c *ConverterImpl) v1alpha1ResourceResultsToV1alpha1ResourceResults(source v1alpha1.ResourceResults) v1alpha11.ResourceResults {
@@ -1412,14 +1321,12 @@ func (c *ConverterImpl) v1alpha1RevisionHistoryToV1alpha1RevisionHistory(source 
 	v1alpha1RevisionHistory.Source = c.v1alpha1ApplicationSourceToV1alpha1ApplicationSource(source.Source)
 	v1alpha1RevisionHistory.DeployStartedAt = c.pV1TimeToPV1Time(source.DeployStartedAt)
 	v1alpha1RevisionHistory.Sources = c.v1alpha1ApplicationSourcesToV1alpha1ApplicationSources(source.Sources)
-	var stringList []string
 	if source.Revisions != nil {
-		stringList = make([]string, len(source.Revisions))
+		v1alpha1RevisionHistory.Revisions = make([]string, len(source.Revisions))
 		for i := 0; i < len(source.Revisions); i++ {
-			stringList[i] = source.Revisions[i]
+			v1alpha1RevisionHistory.Revisions[i] = source.Revisions[i]
 		}
 	}
-	v1alpha1RevisionHistory.Revisions = stringList
 	return v1alpha1RevisionHistory
 }
 func (c *ConverterImpl) v1alpha1SyncOperationResourceToV1alpha1SyncOperationResource(source v1alpha1.SyncOperationResource) v1alpha11.SyncOperationResource {
@@ -1461,14 +1368,12 @@ func (c *ConverterImpl) v1alpha1SyncStatusToV1alpha1SyncStatus(source v1alpha1.S
 	v1alpha1SyncStatus.ComparedTo = c.v1alpha1ComparedToToV1alpha1ComparedTo(source.ComparedTo)
 	pString := source.Revision
 	v1alpha1SyncStatus.Revision = &pString
-	var stringList []string
 	if source.Revisions != nil {
-		stringList = make([]string, len(source.Revisions))
+		v1alpha1SyncStatus.Revisions = make([]string, len(source.Revisions))
 		for i := 0; i < len(source.Revisions); i++ {
-			stringList[i] = source.Revisions[i]
+			v1alpha1SyncStatus.Revisions[i] = source.Revisions[i]
 		}
 	}
-	v1alpha1SyncStatus.Revisions = stringList
 	return v1alpha1SyncStatus
 }
 func (c *ConverterImpl) v1alpha1SyncStrategyApplyToV1alpha1SyncStrategyApply(source v1alpha1.SyncStrategyApply) v1alpha11.SyncStrategyApply {

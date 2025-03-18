@@ -61,7 +61,7 @@ const (
 func SetupCluster(mgr ctrl.Manager, o xpcontroller.Options) error {
 	name := managed.ControllerName(v1alpha1.ClusterKind)
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: cluster.NewClusterServiceClient}),
+		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: cluster.NewClusterServiceClient}), //nolint:staticcheck
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 	}
@@ -206,10 +206,10 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateFailed)
 }
 
-func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
+func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	cr, ok := mg.(*v1alpha1.Cluster)
 	if !ok {
-		return errors.New(errNotCluster)
+		return managed.ExternalDelete{}, errors.New(errNotCluster)
 	}
 
 	clusterQuery := argocdcluster.ClusterQuery{
@@ -219,7 +219,7 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 
 	_, err := e.client.Delete(ctx, &clusterQuery)
 
-	return errors.Wrap(err, errDeleteFailed)
+	return managed.ExternalDelete{}, errors.Wrap(err, errDeleteFailed)
 }
 
 func lateInitializeCluster(p *v1alpha1.ClusterParameters, r *argocdv1alpha1.Cluster) {
@@ -606,4 +606,8 @@ func newRESTConfigForKubeconfig(kubeConfig []byte) (*rest.Config, error) {
 		return nil, err
 	}
 	return restConfig, nil
+}
+
+func (e *external) Disconnect(ctx context.Context) error {
+	return nil
 }

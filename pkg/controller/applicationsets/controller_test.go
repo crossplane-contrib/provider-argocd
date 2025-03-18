@@ -26,9 +26,9 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/test"
-	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
+	"go.uber.org/mock/gomock"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -318,6 +318,8 @@ func TestCreate(t *testing.T) {
 		"Successful": {
 			args: args{
 				client: withMockClient(t, func(m *mockclient.MockServiceClient) {
+					// Might panic on diff.
+					// See https://github.com/argoproj/argo-cd/issues/22081
 					m.EXPECT().Create(
 						gomock.Any(),
 						&argoapplicationset.ApplicationSetCreateRequest{
@@ -397,10 +399,7 @@ type ArgoApplicationSetSpecModifier func(*argocdv1alpha1.ApplicationSetSpec)
 func ArgoAppSpec(m ...ArgoApplicationSetSpecModifier) *argocdv1alpha1.ApplicationSetSpec {
 	cr := argocdv1alpha1.ApplicationSetSpec{
 		Template: argocdv1alpha1.ApplicationSetTemplate{
-			ApplicationSetTemplateMeta: argocdv1alpha1.ApplicationSetTemplateMeta{
-				Labels:      map[string]string{},
-				Annotations: map[string]string{},
-			},
+			ApplicationSetTemplateMeta: argocdv1alpha1.ApplicationSetTemplateMeta{},
 		},
 	}
 	for _, f := range m {
@@ -506,6 +505,7 @@ func TestDelete(t *testing.T) {
 	type want struct {
 		cr  *v1alpha1.ApplicationSet
 		err error
+		res managed.ExternalDelete
 	}
 
 	cases := map[string]struct {
@@ -559,8 +559,11 @@ func TestDelete(t *testing.T) {
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			e := &external{client: tc.client}
-			err := e.Delete(context.Background(), tc.args.cr)
+			got, err := e.Delete(context.Background(), tc.args.cr)
 
+			if diff := cmp.Diff(tc.want.res, got); diff != "" {
+				t.Errorf("res: -want +got:\n%s", diff)
+			}
 			if diff := cmp.Diff(tc.want.err, err, test.EquateErrors()); diff != "" {
 				t.Errorf("r: -want, +got:\n%s", diff)
 			}
