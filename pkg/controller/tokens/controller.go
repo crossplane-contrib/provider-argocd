@@ -39,7 +39,7 @@ const (
 
 // SetupToken adds a controller that reconciles tokens.
 func SetupToken(mgr ctrl.Manager, o xpcontroller.Options) error {
-	name := managed.ControllerName(v1alpha1.ProjectKind)
+	name := managed.ControllerName(v1alpha1.TokenKind)
 
 	opts := []managed.ReconcilerOption{
 		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}), //nolint:staticcheck
