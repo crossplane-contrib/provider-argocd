@@ -52,16 +52,17 @@ type ApplicationSetConditionStatus string
 type ApplicationSetConditionType string
 
 type ResourceStatus struct {
-	Group           string        `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
-	Version         string        `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
-	Kind            string        `json:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
-	Namespace       string        `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
-	Name            string        `json:"name,omitempty" protobuf:"bytes,5,opt,name=name"`
-	Status          string        `json:"status,omitempty" protobuf:"bytes,6,opt,name=status"`
-	Health          *HealthStatus `json:"health,omitempty" protobuf:"bytes,7,opt,name=health"`
-	Hook            bool          `json:"hook,omitempty" protobuf:"bytes,8,opt,name=hook"`
-	RequiresPruning bool          `json:"requiresPruning,omitempty" protobuf:"bytes,9,opt,name=requiresPruning"`
-	SyncWave        int64         `json:"syncWave,omitempty" protobuf:"bytes,10,opt,name=syncWave"`
+	Group                        string        `json:"group,omitempty" protobuf:"bytes,1,opt,name=group"`
+	Version                      string        `json:"version,omitempty" protobuf:"bytes,2,opt,name=version"`
+	Kind                         string        `json:"kind,omitempty" protobuf:"bytes,3,opt,name=kind"`
+	Namespace                    string        `json:"namespace,omitempty" protobuf:"bytes,4,opt,name=namespace"`
+	Name                         string        `json:"name,omitempty" protobuf:"bytes,5,opt,name=name"`
+	Status                       string        `json:"status,omitempty" protobuf:"bytes,6,opt,name=status"`
+	Health                       *HealthStatus `json:"health,omitempty" protobuf:"bytes,7,opt,name=health"`
+	Hook                         bool          `json:"hook,omitempty" protobuf:"bytes,8,opt,name=hook"`
+	RequiresPruning              bool          `json:"requiresPruning,omitempty" protobuf:"bytes,9,opt,name=requiresPruning"`
+	SyncWave                     int64         `json:"syncWave,omitempty" protobuf:"bytes,10,opt,name=syncWave"`
+	RequiresDeletionConfirmation bool          `json:"requiresDeletionConfirmation,omitempty" protobuf:"bytes,11,opt,name=requiresDeletionConfirmation"`
 }
 
 type HealthStatus struct {
@@ -69,4 +70,6 @@ type HealthStatus struct {
 	Status string `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
 	// Message is a human-readable informational message describing the health status
 	Message string `json:"message,omitempty" protobuf:"bytes,2,opt,name=message"`
+	// LastTransitionTime is the time the HealthStatus was set or updated
+	LastTransitionTime *metav1.Time `json:"lastTransitionTime,omitempty" protobuf:"bytes,3,opt,name=lastTransitionTime"`
 }

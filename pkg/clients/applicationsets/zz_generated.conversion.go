@@ -411,6 +411,8 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSour
 				v1alpha1ApplicationSourceHelm.APIVersions[l] = (*source).APIVersions[l]
 			}
 		}
+		v1alpha1ApplicationSourceHelm.SkipTests = (*source).SkipTests
+		v1alpha1ApplicationSourceHelm.SkipSchemaValidation = (*source).SkipSchemaValidation
 		pV1alpha1ApplicationSourceHelm = &v1alpha1ApplicationSourceHelm
 	}
 	return pV1alpha1ApplicationSourceHelm
@@ -468,6 +470,8 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSour
 				v1alpha1ApplicationSourceHelm.APIVersions[l] = (*source).APIVersions[l]
 			}
 		}
+		v1alpha1ApplicationSourceHelm.SkipTests = (*source).SkipTests
+		v1alpha1ApplicationSourceHelm.SkipSchemaValidation = (*source).SkipSchemaValidation
 		pV1alpha1ApplicationSourceHelm = &v1alpha1ApplicationSourceHelm
 	}
 	return pV1alpha1ApplicationSourceHelm
@@ -629,6 +633,8 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceToPV1alpha1ApplicationSource(s
 		v1alpha1ApplicationSource.Chart = &pString3
 		pString4 := (*source).Ref
 		v1alpha1ApplicationSource.Ref = &pString4
+		pString5 := (*source).Name
+		v1alpha1ApplicationSource.Name = &pString5
 		pV1alpha1ApplicationSource = &v1alpha1ApplicationSource
 	}
 	return pV1alpha1ApplicationSource
@@ -653,6 +659,9 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceToPV1alpha1ApplicationSource2(
 		}
 		if (*source).Ref != nil {
 			v1alpha1ApplicationSource.Ref = *(*source).Ref
+		}
+		if (*source).Name != nil {
+			v1alpha1ApplicationSource.Name = *(*source).Name
 		}
 		pV1alpha1ApplicationSource = &v1alpha1ApplicationSource
 	}
@@ -760,6 +769,7 @@ func (c *ConverterImpl) pV1alpha1ClusterGeneratorToPV1alpha1ClusterGenerator(sou
 				v1alpha1ClusterGenerator.Values[key] = value
 			}
 		}
+		v1alpha1ClusterGenerator.FlatList = (*source).FlatList
 		pV1alpha1ClusterGenerator = &v1alpha1ClusterGenerator
 	}
 	return pV1alpha1ClusterGenerator
@@ -776,6 +786,7 @@ func (c *ConverterImpl) pV1alpha1ClusterGeneratorToPV1alpha1ClusterGenerator2(so
 				v1alpha1ClusterGenerator.Values[key] = value
 			}
 		}
+		v1alpha1ClusterGenerator.FlatList = (*source).FlatList
 		pV1alpha1ClusterGenerator = &v1alpha1ClusterGenerator
 	}
 	return pV1alpha1ClusterGenerator
@@ -938,6 +949,7 @@ func (c *ConverterImpl) pV1alpha1HealthStatusToPV1alpha1HealthStatus(source *v1a
 		var v1alpha1HealthStatus v1alpha11.HealthStatus
 		v1alpha1HealthStatus.Status = string((*source).Status)
 		v1alpha1HealthStatus.Message = (*source).Message
+		v1alpha1HealthStatus.LastTransitionTime = c.pV1TimeToPV1Time((*source).LastTransitionTime)
 		pV1alpha1HealthStatus = &v1alpha1HealthStatus
 	}
 	return pV1alpha1HealthStatus
@@ -948,9 +960,28 @@ func (c *ConverterImpl) pV1alpha1HealthStatusToPV1alpha1HealthStatus2(source *v1
 		var v1alpha1HealthStatus v1alpha1.HealthStatus
 		v1alpha1HealthStatus.Status = health.HealthStatusCode((*source).Status)
 		v1alpha1HealthStatus.Message = (*source).Message
+		v1alpha1HealthStatus.LastTransitionTime = c.pV1TimeToPV1Time((*source).LastTransitionTime)
 		pV1alpha1HealthStatus = &v1alpha1HealthStatus
 	}
 	return pV1alpha1HealthStatus
+}
+func (c *ConverterImpl) pV1alpha1HydrateToToPV1alpha1HydrateTo(source *v1alpha1.HydrateTo) *v1alpha11.HydrateTo {
+	var pV1alpha1HydrateTo *v1alpha11.HydrateTo
+	if source != nil {
+		var v1alpha1HydrateTo v1alpha11.HydrateTo
+		v1alpha1HydrateTo.TargetBranch = (*source).TargetBranch
+		pV1alpha1HydrateTo = &v1alpha1HydrateTo
+	}
+	return pV1alpha1HydrateTo
+}
+func (c *ConverterImpl) pV1alpha1HydrateToToPV1alpha1HydrateTo2(source *v1alpha11.HydrateTo) *v1alpha1.HydrateTo {
+	var pV1alpha1HydrateTo *v1alpha1.HydrateTo
+	if source != nil {
+		var v1alpha1HydrateTo v1alpha1.HydrateTo
+		v1alpha1HydrateTo.TargetBranch = (*source).TargetBranch
+		pV1alpha1HydrateTo = &v1alpha1HydrateTo
+	}
+	return pV1alpha1HydrateTo
 }
 func (c *ConverterImpl) pV1alpha1KustomizeSelectorToPV1alpha1KustomizeSelector(source *v1alpha1.KustomizeSelector) *v1alpha11.KustomizeSelector {
 	var pV1alpha1KustomizeSelector *v1alpha11.KustomizeSelector
@@ -1800,6 +1831,28 @@ func (c *ConverterImpl) pV1alpha1SecretRefToPV1alpha1SecretRef2(source *v1alpha1
 	}
 	return pV1alpha1SecretRef
 }
+func (c *ConverterImpl) pV1alpha1SourceHydratorToPV1alpha1SourceHydrator(source *v1alpha1.SourceHydrator) *v1alpha11.SourceHydrator {
+	var pV1alpha1SourceHydrator *v1alpha11.SourceHydrator
+	if source != nil {
+		var v1alpha1SourceHydrator v1alpha11.SourceHydrator
+		v1alpha1SourceHydrator.DrySource = c.v1alpha1DrySourceToV1alpha1DrySource((*source).DrySource)
+		v1alpha1SourceHydrator.SyncSource = c.v1alpha1SyncSourceToV1alpha1SyncSource((*source).SyncSource)
+		v1alpha1SourceHydrator.HydrateTo = c.pV1alpha1HydrateToToPV1alpha1HydrateTo((*source).HydrateTo)
+		pV1alpha1SourceHydrator = &v1alpha1SourceHydrator
+	}
+	return pV1alpha1SourceHydrator
+}
+func (c *ConverterImpl) pV1alpha1SourceHydratorToPV1alpha1SourceHydrator2(source *v1alpha11.SourceHydrator) *v1alpha1.SourceHydrator {
+	var pV1alpha1SourceHydrator *v1alpha1.SourceHydrator
+	if source != nil {
+		var v1alpha1SourceHydrator v1alpha1.SourceHydrator
+		v1alpha1SourceHydrator.DrySource = c.v1alpha1DrySourceToV1alpha1DrySource2((*source).DrySource)
+		v1alpha1SourceHydrator.SyncSource = c.v1alpha1SyncSourceToV1alpha1SyncSource2((*source).SyncSource)
+		v1alpha1SourceHydrator.HydrateTo = c.pV1alpha1HydrateToToPV1alpha1HydrateTo2((*source).HydrateTo)
+		pV1alpha1SourceHydrator = &v1alpha1SourceHydrator
+	}
+	return pV1alpha1SourceHydrator
+}
 func (c *ConverterImpl) pV1alpha1SyncPolicyAutomatedToPV1alpha1SyncPolicyAutomated(source *v1alpha1.SyncPolicyAutomated) *v1alpha11.SyncPolicyAutomated {
 	var pV1alpha1SyncPolicyAutomated *v1alpha11.SyncPolicyAutomated
 	if source != nil {
@@ -2301,6 +2354,8 @@ func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource(sou
 	v1alpha1ApplicationSource.Chart = &pString3
 	pString4 := source.Ref
 	v1alpha1ApplicationSource.Ref = &pString4
+	pString5 := source.Name
+	v1alpha1ApplicationSource.Name = &pString5
 	return v1alpha1ApplicationSource
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource2(source v1alpha11.ApplicationSource) v1alpha1.ApplicationSource {
@@ -2321,6 +2376,9 @@ func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource2(so
 	}
 	if source.Ref != nil {
 		v1alpha1ApplicationSource.Ref = *source.Ref
+	}
+	if source.Name != nil {
+		v1alpha1ApplicationSource.Name = *source.Name
 	}
 	return v1alpha1ApplicationSource
 }
@@ -2362,6 +2420,7 @@ func (c *ConverterImpl) v1alpha1ApplicationSpecToV1alpha1ApplicationSpec(source 
 		v1alpha1ApplicationSpec.RevisionHistoryLimit = &xint64
 	}
 	v1alpha1ApplicationSpec.Sources = c.v1alpha1ApplicationSourcesToV1alpha1ApplicationSources(source.Sources)
+	v1alpha1ApplicationSpec.SourceHydrator = c.pV1alpha1SourceHydratorToPV1alpha1SourceHydrator(source.SourceHydrator)
 	return v1alpha1ApplicationSpec
 }
 func (c *ConverterImpl) v1alpha1ApplicationSpecToV1alpha1ApplicationSpec2(source v1alpha11.ApplicationSpec) v1alpha1.ApplicationSpec {
@@ -2382,7 +2441,22 @@ func (c *ConverterImpl) v1alpha1ApplicationSpecToV1alpha1ApplicationSpec2(source
 		v1alpha1ApplicationSpec.RevisionHistoryLimit = &xint64
 	}
 	v1alpha1ApplicationSpec.Sources = c.v1alpha1ApplicationSourcesToV1alpha1ApplicationSources2(source.Sources)
+	v1alpha1ApplicationSpec.SourceHydrator = c.pV1alpha1SourceHydratorToPV1alpha1SourceHydrator2(source.SourceHydrator)
 	return v1alpha1ApplicationSpec
+}
+func (c *ConverterImpl) v1alpha1DrySourceToV1alpha1DrySource(source v1alpha1.DrySource) v1alpha11.DrySource {
+	var v1alpha1DrySource v1alpha11.DrySource
+	v1alpha1DrySource.RepoURL = source.RepoURL
+	v1alpha1DrySource.TargetRevision = source.TargetRevision
+	v1alpha1DrySource.Path = source.Path
+	return v1alpha1DrySource
+}
+func (c *ConverterImpl) v1alpha1DrySourceToV1alpha1DrySource2(source v1alpha11.DrySource) v1alpha1.DrySource {
+	var v1alpha1DrySource v1alpha1.DrySource
+	v1alpha1DrySource.RepoURL = source.RepoURL
+	v1alpha1DrySource.TargetRevision = source.TargetRevision
+	v1alpha1DrySource.Path = source.Path
+	return v1alpha1DrySource
 }
 func (c *ConverterImpl) v1alpha1EnvToV1alpha1Env(source v1alpha1.Env) v1alpha11.Env {
 	var v1alpha1Env v1alpha11.Env
@@ -2770,6 +2844,7 @@ func (c *ConverterImpl) v1alpha1ResourceStatusToV1alpha1ResourceStatus(source v1
 	v1alpha1ResourceStatus.Hook = source.Hook
 	v1alpha1ResourceStatus.RequiresPruning = source.RequiresPruning
 	v1alpha1ResourceStatus.SyncWave = source.SyncWave
+	v1alpha1ResourceStatus.RequiresDeletionConfirmation = source.RequiresDeletionConfirmation
 	return v1alpha1ResourceStatus
 }
 func (c *ConverterImpl) v1alpha1ResourceStatusToV1alpha1ResourceStatus2(source v1alpha11.ResourceStatus) v1alpha1.ResourceStatus {
@@ -2784,6 +2859,7 @@ func (c *ConverterImpl) v1alpha1ResourceStatusToV1alpha1ResourceStatus2(source v
 	v1alpha1ResourceStatus.Hook = source.Hook
 	v1alpha1ResourceStatus.RequiresPruning = source.RequiresPruning
 	v1alpha1ResourceStatus.SyncWave = source.SyncWave
+	v1alpha1ResourceStatus.RequiresDeletionConfirmation = source.RequiresDeletionConfirmation
 	return v1alpha1ResourceStatus
 }
 func (c *ConverterImpl) v1alpha1SCMProviderGeneratorFilterToV1alpha1SCMProviderGeneratorFilter(source v1alpha1.SCMProviderGeneratorFilter) v1alpha11.SCMProviderGeneratorFilter {
@@ -2861,4 +2937,16 @@ func (c *ConverterImpl) v1alpha1SyncOptionsToV1alpha1SyncOptions2(source v1alpha
 		}
 	}
 	return v1alpha1SyncOptions
+}
+func (c *ConverterImpl) v1alpha1SyncSourceToV1alpha1SyncSource(source v1alpha1.SyncSource) v1alpha11.SyncSource {
+	var v1alpha1SyncSource v1alpha11.SyncSource
+	v1alpha1SyncSource.TargetBranch = source.TargetBranch
+	v1alpha1SyncSource.Path = source.Path
+	return v1alpha1SyncSource
+}
+func (c *ConverterImpl) v1alpha1SyncSourceToV1alpha1SyncSource2(source v1alpha11.SyncSource) v1alpha1.SyncSource {
+	var v1alpha1SyncSource v1alpha1.SyncSource
+	v1alpha1SyncSource.TargetBranch = source.TargetBranch
+	v1alpha1SyncSource.Path = source.Path
+	return v1alpha1SyncSource
 }
