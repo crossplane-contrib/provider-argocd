@@ -32,3 +32,19 @@ spec:
       namespace: crossplane-system
       name: argocd-credentials
       key: authToken
+---
+# argocd provider that uses AzureWorkloadIdentity authentication
+apiVersion: argocd.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: argocd-provider
+spec:
+  serverAddr: argocd-server.argocd.svc:443
+  credentials:
+    source: AzureWorkloadIdentity
+    audiences:
+      - argocd-server.argocd.svc/.default
+    azureWorkloadIdentityOptions:
+      clientID: <client-id> # Optional, defaults to env var
+      tenantID: <tenant-id> # Optional, defaults to env var
+      tokenFilePath: <token-file-path> # Optional, defaults to env var

@@ -55,6 +55,30 @@ spec:
               credentials:
                 description: Credentials required to authenticate to this provider.
                 properties:
+                  audiences:
+                    description: Audiences is the audience of the token. This is used
+                      by ArgoCD to validate the token.
+                    items:
+                      type: string
+                    type: array
+                  azureWorkloadIdentityOptions:
+                    description: AzureWorkloadIdentityOptions contains optional parameters
+                      for AzureWorkloadIdentity.
+                    properties:
+                      clientID:
+                        description: ClientID of the service principal. Defaults to
+                          the value of the environment variable AZURE_CLIENT_ID.
+                        type: string
+                      tenantID:
+                        description: TenantID of the service principal. Defaults to
+                          the value of the environment variable AZURE_TENANT_ID.
+                        type: string
+                      tokenFilePath:
+                        description: |-
+                          TokenFilePath is the path of a file containing a Kubernetes service account token. Defaults to the value of the
+                          environment variable AZURE_FEDERATED_TOKEN_FILE.
+                        type: string
+                    type: object
                   env:
                     description: |-
                       Env is a reference to an environment variable that contains credentials
@@ -103,6 +127,7 @@ spec:
                     - Secret
                     - Environment
                     - Filesystem
+                    - AzureWorkloadIdentity
                     type: string
                 required:
                 - source

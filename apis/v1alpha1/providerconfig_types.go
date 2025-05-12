@@ -21,6 +21,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+var (
+	CredentialsSourceAzureWorkloadIdentity xpv1.CredentialsSource = "AzureWorkloadIdentity"
+)
+
 // A ProviderConfigSpec defines the desired state of a ProviderConfig.
 type ProviderConfigSpec struct {
 	// ServerAddr is the hostname or IP of the argocd instance
@@ -49,10 +53,32 @@ type ProviderConfigSpec struct {
 // ProviderCredentials required to authenticate.
 type ProviderCredentials struct {
 	// Source of the provider credentials.
-	// +kubebuilder:validation:Enum=None;Secret;Environment;Filesystem
+	// +kubebuilder:validation:Enum=None;Secret;Environment;Filesystem;AzureWorkloadIdentity
 	Source xpv1.CredentialsSource `json:"source"`
 
 	xpv1.CommonCredentialSelectors `json:",inline"`
+
+	// Audiences is the audience of the token. This is used by ArgoCD to validate the token.
+	// +optional
+	Audiences []string `json:"audiences,omitempty"`
+
+	// AzureWorkloadIdentityOptions contains optional parameters for AzureWorkloadIdentity.
+	// +optional
+	AzureWorkloadIdentityOptions *AzureWorkloadIdentityOptions `json:"azureWorkloadIdentityOptions,omitempty"`
+}
+
+// AzureWorkloadIdentityOptions contains optional parameters for AzureWorkloadIdentity.
+type AzureWorkloadIdentityOptions struct {
+	// ClientID of the service principal. Defaults to the value of the environment variable AZURE_CLIENT_ID.
+	// +optional
+	ClientID *string `json:"clientID,omitempty"`
+	// TenantID of the service principal. Defaults to the value of the environment variable AZURE_TENANT_ID.
+	// +optional
+	TenantID *string `json:"tenantID,omitempty"`
+	// TokenFilePath is the path of a file containing a Kubernetes service account token. Defaults to the value of the
+	// environment variable AZURE_FEDERATED_TOKEN_FILE.
+	// +optional
+	TokenFilePath *string `json:"tokenFilePath,omitempty"`
 }
 
 // A ProviderConfigStatus represents the status of a ProviderConfig.

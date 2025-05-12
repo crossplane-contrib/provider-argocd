@@ -20,6 +20,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	argocd "github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
@@ -110,6 +112,31 @@ func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.Pr
 			return "", errors.Wrap(err, "cannot read credentials file")
 		}
 		return string(token), nil
+	case v1alpha1.CredentialsSourceAzureWorkloadIdentity:
+		options := &azidentity.WorkloadIdentityCredentialOptions{}
+		if creds.AzureWorkloadIdentityOptions != nil {
+			if creds.AzureWorkloadIdentityOptions.ClientID != nil {
+				options.ClientID = *creds.AzureWorkloadIdentityOptions.ClientID
+			}
+			if creds.AzureWorkloadIdentityOptions.TenantID != nil {
+				options.TenantID = *creds.AzureWorkloadIdentityOptions.TenantID
+			}
+			if creds.AzureWorkloadIdentityOptions.TokenFilePath != nil {
+				options.TokenFilePath = *creds.AzureWorkloadIdentityOptions.TokenFilePath
+			}
+		}
+
+		azcreds, err := azidentity.NewWorkloadIdentityCredential(options)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to create workload identity credentials")
+		}
+		token, err := azcreds.GetToken(ctx, policy.TokenRequestOptions{
+			Scopes: creds.Audiences,
+		})
+		if err != nil {
+			return "", errors.Wrap(err, "cannot get token from Azure")
+		}
+		return token.Token, nil
 	default:
 		return "", errors.Errorf("credentials source %s is not currently supported", s)
 	}
