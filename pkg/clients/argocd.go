@@ -20,7 +20,7 @@ import (
 	"context"
 	"os"
 
-	argocd "github.com/argoproj/argo-cd/v2/pkg/apiclient"
+	argocd "github.com/argoproj/argo-cd/v3/pkg/apiclient"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	"github.com/google/go-cmp/cmp"
