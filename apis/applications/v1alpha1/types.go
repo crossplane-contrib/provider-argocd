@@ -54,6 +54,9 @@ type ApplicationParameters struct {
 
 	// Finalizers added to the ArgoCD Application
 	Finalizers []string `json:"finalizers,omitempty" protobuf:"bytes,13,opt,name=finalizers"`
+
+	// SourceHydrator provides a way to push hydrated manifests back to git before syncing them to the cluster.
+	SourceHydrator *SourceHydrator `json:"sourceHydrator,omitempty" protobuf:"bytes,14,opt,name=sourceHydrator"`
 }
 
 // ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored during comparison with live state.
@@ -99,10 +102,51 @@ type ApplicationSource struct {
 	Chart *string `json:"chart,omitempty" protobuf:"bytes,12,opt,name=chart"`
 	// Ref is reference to another source within sources field. This field will not be used if used with a `source` tag.
 	Ref *string `json:"ref,omitempty" protobuf:"bytes,13,opt,name=ref"`
+	// Name is the name of the application source
+	Name string `json:"name,omitempty" protobuf:"bytes,14,opt,name=name"`
 }
 
 // ApplicationSources contains list of required information about the sources of an application
 type ApplicationSources []ApplicationSource
+
+// SourceHydrator specifies a dry "don't repeat yourself" source for manifests, a sync source from which to sync
+// hydrated manifests, and an optional hydrateTo location to act as a "staging" aread for hydrated manifests.
+type SourceHydrator struct {
+	// DrySource specifies where the dry "don't repeat yourself" manifest source lives.
+	DrySource DrySource `json:"drySource" protobuf:"bytes,1,name=drySource"`
+	// SyncSource specifies where to sync hydrated manifests from.
+	SyncSource SyncSource `json:"syncSource" protobuf:"bytes,2,name=syncSource"`
+	// HydrateTo specifies an optional "staging" location to push hydrated manifests to. An external system would then
+	// have to move manifests to the SyncSource, e.g. by pull request.
+	HydrateTo *HydrateTo `json:"hydrateTo,omitempty" protobuf:"bytes,3,opt,name=hydrateTo"`
+}
+
+// DrySource specifies a location for dry "don't repeat yourself" manifest source information.
+type DrySource struct {
+	// RepoURL is the URL to the git repository that contains the application manifests
+	RepoURL string `json:"repoURL" protobuf:"bytes,1,name=repoURL"`
+	// TargetRevision defines the revision of the source to hydrate
+	TargetRevision string `json:"targetRevision" protobuf:"bytes,2,name=targetRevision"`
+	// Path is a directory path within the Git repository where the manifests are located
+	Path string `json:"path" protobuf:"bytes,3,name=path"`
+}
+
+// SyncSource specifies a location from which hydrated manifests may be synced. RepoURL is assumed based on the
+// associated DrySource config in the SourceHydrator.
+type SyncSource struct {
+	// TargetBranch is the branch to which hydrated manifests should be committed
+	TargetBranch string `json:"targetBranch" protobuf:"bytes,1,name=targetBranch"`
+	// Path is a directory path within the git repository where hydrated manifests should be committed to and synced
+	// from. If hydrateTo is set, this is just the path from which hydrated manifests will be synced.
+	Path string `json:"path" protobuf:"bytes,2,name=path"`
+}
+
+// HydrateTo specifies a location to which hydrated manifests should be pushed as a "staging area" before being moved to
+// the SyncSource. The RepoURL and Path are assumed based on the associated SyncSource config in the SourceHydrator.
+type HydrateTo struct {
+	// TargetBranch is the branch to which hydrated manifests should be committed
+	TargetBranch string `json:"targetBranch" protobuf:"bytes,1,name=targetBranch"`
+}
 
 // ApplicationDestination holds information about the application's destination
 type ApplicationDestination struct {
@@ -188,6 +232,10 @@ type ApplicationSourceHelm struct {
 	// APIVersions specifies the Kubernetes resource API versions to pass to Helm when templating manifests. By default,
 	// Argo CD uses the API versions of the target cluster. The format is [group/]version/kind.
 	APIVersions []string `json:"apiVersions,omitempty" protobuf:"bytes,13,opt,name=apiVersions"`
+	// SkipTests skips test manifest installation step (Helm's --skip-tests).
+	SkipTests bool `json:"skipTests,omitempty" protobuf:"bytes,14,opt,name=skipTests"`
+	// SkipSchemaValidation skips JSON schema validation (Helm's --skip-schema-validation)
+	SkipSchemaValidation bool `json:"skipSchemaValidation,omitempty" protobuf:"bytes,15,opt,name=skipSchemaValidation"`
 }
 
 // HelmParameter is a parameter that's passed to helm template during manifest generation
