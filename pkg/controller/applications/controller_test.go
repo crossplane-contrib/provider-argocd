@@ -41,6 +41,7 @@ var (
 	testApplicationExternalName = "testapplication"
 	testProjectName             = "default"
 	testDestinationNamespace    = "default-at-destination"
+	testAppNamespace            = "test-app-namespace"
 	emptyString                 = ""
 	repoURL                     = "https://github.com/stefanprodan/podinfo/"
 	chartPath                   = "charts/podinfo"
@@ -90,6 +91,10 @@ func withSpec(p v1alpha1.ApplicationParameters) ApplicationModifier {
 	return func(r *v1alpha1.Application) { r.Spec.ForProvider = p }
 }
 
+func withAppNamespace(n *string) ApplicationModifier {
+	return func(r *v1alpha1.Application) { r.Spec.ForProvider.AppNamespace = n }
+}
+
 func withObservation(p v1alpha1.ArgoApplicationStatus) ApplicationModifier {
 	return func(r *v1alpha1.Application) { r.Status.AtProvider = p }
 }
@@ -115,7 +120,8 @@ func TestObserve(t *testing.T) {
 					mcs.EXPECT().List(
 						context.Background(),
 						&argocdApplication.ApplicationQuery{
-							Name: &testApplicationExternalName,
+							Name:     &testApplicationExternalName,
+							Projects: []string{testProjectName},
 						},
 					).Return(
 						&argocdv1alpha1.ApplicationList{
@@ -235,13 +241,145 @@ func TestObserve(t *testing.T) {
 				err: nil,
 			},
 		},
+		"SuccessfulAvailableWithAppNamespace": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().List(
+						context.Background(),
+						&argocdApplication.ApplicationQuery{
+							Name:         &testApplicationExternalName,
+							Projects:     []string{testProjectName},
+							AppNamespace: &testAppNamespace,
+						},
+					).Return(
+						&argocdv1alpha1.ApplicationList{
+							TypeMeta: metav1.TypeMeta{},
+							ListMeta: metav1.ListMeta{},
+							Items: []argocdv1alpha1.Application{{
+								TypeMeta: metav1.TypeMeta{},
+								ObjectMeta: metav1.ObjectMeta{
+									Name:        testApplicationExternalName,
+									Namespace:   testAppNamespace,
+									Annotations: testApplicationAnnotations,
+									Finalizers:  testApplicationFinalizers,
+								},
+								Spec: argocdv1alpha1.ApplicationSpec{
+									Project: testProjectName,
+									Source: &argocdv1alpha1.ApplicationSource{
+										RepoURL:        repoURL,
+										Path:           chartPath,
+										TargetRevision: revision,
+									},
+									Destination: argocdv1alpha1.ApplicationDestination{
+										Namespace: testDestinationNamespace,
+									},
+									SyncPolicy: &argocdv1alpha1.SyncPolicy{
+										Automated: &argocdv1alpha1.SyncPolicyAutomated{
+											SelfHeal: true,
+										},
+									},
+								},
+								Status: argocdv1alpha1.ApplicationStatus{
+									Health: argocdv1alpha1.HealthStatus{
+										Status: "Healthy",
+									},
+									Sync: argocdv1alpha1.SyncStatus{
+										Status: "Synced",
+									},
+								},
+							}},
+						}, nil)
+				}),
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withSpec(v1alpha1.ApplicationParameters{
+						Project:      testProjectName,
+						AppNamespace: &testAppNamespace,
+						Destination: v1alpha1.ApplicationDestination{
+							Namespace: &testDestinationNamespace,
+						},
+						Source: &v1alpha1.ApplicationSource{
+							RepoURL:        repoURL,
+							Path:           &chartPath,
+							TargetRevision: &revision,
+						},
+						SyncPolicy: &v1alpha1.SyncPolicy{
+							Automated: &v1alpha1.SyncPolicyAutomated{
+								SelfHeal: &selfHealEnabled,
+							},
+						},
+						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
+					}),
+				),
+			},
+			want: want{
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withSpec(v1alpha1.ApplicationParameters{
+						Project:      testProjectName,
+						AppNamespace: &testAppNamespace,
+						Destination: v1alpha1.ApplicationDestination{
+							Namespace: &testDestinationNamespace,
+						},
+						Source: &v1alpha1.ApplicationSource{
+							RepoURL:        repoURL,
+							Path:           &chartPath,
+							TargetRevision: &revision,
+						},
+						SyncPolicy: &v1alpha1.SyncPolicy{
+							Automated: &v1alpha1.SyncPolicyAutomated{
+								SelfHeal: &selfHealEnabled,
+							},
+						},
+						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
+					}),
+					withConditions(xpv1.Available()),
+					withObservation(v1alpha1.ArgoApplicationStatus{
+						Resources: nil,
+						Sync: v1alpha1.SyncStatus{
+							Status:   "Synced",
+							Revision: &emptyString,
+							ComparedTo: v1alpha1.ComparedTo{
+								Source: v1alpha1.ApplicationSource{
+									Path:           &emptyString,
+									TargetRevision: &emptyString,
+									Chart:          &emptyString,
+									Ref:            &emptyString,
+								},
+								Destination: v1alpha1.ApplicationDestination{
+									Server:    &emptyString,
+									Namespace: &emptyString,
+									Name:      &emptyString,
+								},
+							},
+						},
+						Health: v1alpha1.HealthStatus{
+							Status:  "Healthy",
+							Message: &emptyString,
+						},
+						SourceType:           "",
+						Summary:              v1alpha1.ApplicationSummary{},
+						ResourceHealthSource: "",
+					}),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:          true,
+					ResourceUpToDate:        true,
+					ResourceLateInitialized: false,
+				},
+				err: nil,
+			},
+		},
 		"SyncPolicyNotUpToDate": {
 			args: args{
 				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
 					mcs.EXPECT().List(
 						context.Background(),
 						&argocdApplication.ApplicationQuery{
-							Name: &testApplicationExternalName,
+							Name:     &testApplicationExternalName,
+							Projects: []string{testProjectName},
 						},
 					).Return(
 						&argocdv1alpha1.ApplicationList{
@@ -601,6 +739,68 @@ func TestUpdate(t *testing.T) {
 				err:    nil,
 			},
 		},
+		"SuccessfulWithAppNamespace": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Update(
+						context.Background(),
+						&argocdApplication.ApplicationUpdateRequest{
+							Application: &argocdv1alpha1.Application{
+								ObjectMeta: metav1.ObjectMeta{
+									Name:        testApplicationExternalName,
+									Annotations: testApplicationAnnotations,
+									Finalizers:  testApplicationFinalizers,
+									Namespace:   testAppNamespace,
+								},
+								Spec: argocdv1alpha1.ApplicationSpec{
+									Project: testProjectName,
+									Destination: argocdv1alpha1.ApplicationDestination{
+										Namespace: testDestinationNamespace,
+									},
+								},
+							},
+						},
+					).Return(&argocdv1alpha1.Application{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:        testApplicationExternalName,
+							Annotations: testApplicationAnnotations,
+							Finalizers:  testApplicationFinalizers,
+							Namespace:   testAppNamespace,
+						},
+					}, nil)
+				}),
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withSpec(v1alpha1.ApplicationParameters{
+						Project:      testProjectName,
+						AppNamespace: &testAppNamespace,
+						Destination: v1alpha1.ApplicationDestination{
+							Namespace: &testDestinationNamespace,
+						},
+						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
+					}),
+					withExternalName(testApplicationExternalName),
+				),
+			},
+			want: want{
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withSpec(v1alpha1.ApplicationParameters{
+						Project:      testProjectName,
+						AppNamespace: &testAppNamespace,
+						Destination: v1alpha1.ApplicationDestination{
+							Namespace: &testDestinationNamespace,
+						},
+						Annotations: testApplicationAnnotations,
+						Finalizers:  testApplicationFinalizers,
+					}),
+					withExternalName(testApplicationExternalName),
+				),
+				result: managed.ExternalUpdate{},
+				err:    nil,
+			},
+		},
 		"UpdateFailed": {
 			args: args{
 				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
@@ -689,6 +889,95 @@ func TestDelete(t *testing.T) {
 				cr: Application(
 					withExternalName(testApplicationExternalName),
 					withName(testApplicationExternalName),
+				),
+				err: nil,
+			},
+		},
+		"SuccessfulWithProject": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Delete(
+						context.Background(),
+						&argocdApplication.ApplicationDeleteRequest{
+							Name:    &testApplicationExternalName,
+							Project: &testProjectName,
+						},
+					).Return(&argocdApplication.ApplicationResponse{}, nil)
+				}),
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withName(testApplicationExternalName),
+					withSpec(v1alpha1.ApplicationParameters{
+						Project: testProjectName,
+					}),
+				),
+			},
+			want: want{
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withName(testApplicationExternalName),
+					withSpec(v1alpha1.ApplicationParameters{
+						Project: testProjectName,
+					}),
+				),
+				err: nil,
+			},
+		},
+		"SuccessfulWithAppNamespace": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Delete(
+						context.Background(),
+						&argocdApplication.ApplicationDeleteRequest{
+							Name:         &testApplicationExternalName,
+							AppNamespace: &testAppNamespace,
+						},
+					).Return(&argocdApplication.ApplicationResponse{}, nil)
+				}),
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withName(testApplicationExternalName),
+					withAppNamespace(&testAppNamespace),
+				),
+			},
+			want: want{
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withName(testApplicationExternalName),
+					withAppNamespace(&testAppNamespace),
+				),
+				err: nil,
+			},
+		},
+		"SuccessfulWithProjectAndAppNamespace": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Delete(
+						context.Background(),
+						&argocdApplication.ApplicationDeleteRequest{
+							Name:         &testApplicationExternalName,
+							Project:      &testProjectName,
+							AppNamespace: &testAppNamespace,
+						},
+					).Return(&argocdApplication.ApplicationResponse{}, nil)
+				}),
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withName(testApplicationExternalName),
+					withSpec(v1alpha1.ApplicationParameters{
+						Project:      testProjectName,
+						AppNamespace: &testAppNamespace,
+					}),
+				),
+			},
+			want: want{
+				cr: Application(
+					withExternalName(testApplicationExternalName),
+					withName(testApplicationExternalName),
+					withSpec(v1alpha1.ApplicationParameters{
+						Project:      testProjectName,
+						AppNamespace: &testAppNamespace,
+					}),
 				),
 				err: nil,
 			},

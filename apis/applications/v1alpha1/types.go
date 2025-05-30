@@ -55,6 +55,9 @@ type ApplicationParameters struct {
 
 	// SourceHydrator provides a way to push hydrated manifests back to git before syncing them to the cluster.
 	SourceHydrator *SourceHydrator `json:"sourceHydrator,omitempty" protobuf:"bytes,14,opt,name=sourceHydrator"`
+
+	// AppNamespace is the namespace of the application in the ArgoCD server
+	AppNamespace *string `json:"appNamespace,omitempty"`
 }
 
 // ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored during comparison with live state.

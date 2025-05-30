@@ -78,6 +78,10 @@ spec:
                     description: ApplyNestedSelectors enables selectors defined within
                       the generators of two level-nested matrix or merge generators
                     type: boolean
+                  appsetNamespace:
+                    description: AppsetNamespace is the namespace of the application
+                      set in the ArgoCD server
+                    type: string
                   generators:
                     items:
                       description: ApplicationSetGenerator defines the generators
