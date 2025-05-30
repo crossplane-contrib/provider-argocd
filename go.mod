@@ -1,6 +1,6 @@
 module github.com/crossplane-contrib/provider-argocd
 
-go 1.23
+go 1.23.0
 
 // Keep until https://github.com/argoproj/gitops-engine/pull/566 is merged.
 replace github.com/argoproj/gitops-engine v0.7.1-0.20230607163028-425d65e07695 => github.com/sivchari/gitops-engine v0.0.0-20240312224237-99b2b7889ecc
