@@ -32,6 +32,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -121,7 +122,12 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}
 
 	appQuery := application.ApplicationQuery{
-		Name: &name,
+		Name:         &name,
+		AppNamespace: cr.Spec.ForProvider.AppNamespace,
+	}
+
+	if cr.Spec.ForProvider.Project != "" {
+		appQuery.Projects = []string{cr.Spec.ForProvider.Project}
 	}
 
 	// we have to use List() because Get() returns permission error
@@ -130,15 +136,19 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, errListFailed)
 	}
-	app := &argocdv1alpha1.Application{}
-	for _, item := range apps.Items {
-		if item.Name == name && item.Spec.Project == cr.Spec.ForProvider.Project {
-			app = item.DeepCopy()
-		}
+
+	if len(apps.Items) == 0 {
+		return managed.ExternalObservation{
+			ResourceExists:   false,
+			ResourceUpToDate: false,
+		}, nil
 	}
-	if app.Name == "" {
-		return managed.ExternalObservation{}, nil
+
+	if len(apps.Items) > 1 {
+		return managed.ExternalObservation{}, errors.New("multiple applications found")
 	}
+
+	app := &apps.Items[0]
 
 	current := cr.Spec.ForProvider.DeepCopy()
 	lateInitialize(&cr.Spec.ForProvider, app)
@@ -174,7 +184,7 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 	if !ok {
 		return managed.ExternalUpdate{}, errors.New(errNotApplication)
 	}
-	updateRequest := generateUpdateRepositoryOptions(cr)
+	updateRequest := generateUpdateApplicationRequest(cr)
 	_, err := e.client.Update(ctx, updateRequest)
 	if err != nil {
 		return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateFailed)
@@ -189,7 +199,12 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalDelete{}, errors.New(errNotApplication)
 	}
 	query := application.ApplicationDeleteRequest{
-		Name: clients.StringToPtr(meta.GetExternalName(cr)),
+		Name:         clients.StringToPtr(meta.GetExternalName(cr)),
+		AppNamespace: cr.Spec.ForProvider.AppNamespace,
+	}
+
+	if cr.Spec.ForProvider.Project != "" {
+		query.Project = &cr.Spec.ForProvider.Project
 	}
 
 	_, err := e.client.Delete(ctx, &query)
@@ -226,6 +241,7 @@ func generateCreateApplicationRequest(cr *v1alpha1.Application) *application.App
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        meta.GetExternalName(cr),
+			Namespace:   ptr.Deref(cr.Spec.ForProvider.AppNamespace, ""),
 			Annotations: cr.Spec.ForProvider.Annotations,
 			Finalizers:  cr.Spec.ForProvider.Finalizers,
 		},
@@ -239,7 +255,7 @@ func generateCreateApplicationRequest(cr *v1alpha1.Application) *application.App
 	return repoCreateRequest
 }
 
-func generateUpdateRepositoryOptions(cr *v1alpha1.Application) *application.ApplicationUpdateRequest {
+func generateUpdateApplicationRequest(cr *v1alpha1.Application) *application.ApplicationUpdateRequest {
 	converter := applications.ConverterImpl{}
 
 	spec := converter.ToArgoApplicationSpec(&cr.Spec.ForProvider)
@@ -248,6 +264,7 @@ func generateUpdateRepositoryOptions(cr *v1alpha1.Application) *application.Appl
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        meta.GetExternalName(cr),
+			Namespace:   ptr.Deref(cr.Spec.ForProvider.AppNamespace, ""),
 			Annotations: cr.Spec.ForProvider.Annotations,
 			Finalizers:  cr.Spec.ForProvider.Finalizers,
 		},

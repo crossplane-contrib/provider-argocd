@@ -32,6 +32,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -120,7 +121,8 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}
 
 	query := applicationset.ApplicationSetGetQuery{
-		Name: name,
+		Name:            name,
+		AppsetNamespace: ptr.Deref(cr.Spec.ForProvider.AppsetNamespace, ""),
 	}
 
 	var appset *argov1alpha1.ApplicationSet
@@ -170,11 +172,13 @@ func (e *external) generateCreateApplicationSetRequest(cr *v1alpha1.ApplicationS
 	req := &applicationset.ApplicationSetCreateRequest{
 		Applicationset: &argov1alpha1.ApplicationSet{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: meta.GetExternalName(cr),
+				Name:      meta.GetExternalName(cr),
+				Namespace: ptr.Deref(cr.Spec.ForProvider.AppsetNamespace, ""),
 			},
 			Spec: *targetSpec,
 		},
 	}
+
 	return req
 }
 
@@ -198,9 +202,12 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalDelete{}, errors.New(errNotApplicationSet)
 	}
 
-	_, err := e.client.Delete(ctx, &applicationset.ApplicationSetDeleteRequest{
-		Name: meta.GetExternalName(cr),
-	})
+	query := &applicationset.ApplicationSetDeleteRequest{
+		Name:            meta.GetExternalName(cr),
+		AppsetNamespace: ptr.Deref(cr.Spec.ForProvider.AppsetNamespace, ""),
+	}
+
+	_, err := e.client.Delete(ctx, query)
 	return managed.ExternalDelete{}, err
 }
 

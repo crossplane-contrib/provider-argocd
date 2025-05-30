@@ -33,6 +33,7 @@ type Converter interface {
 	ToArgoDestination(in v1alpha1.ApplicationDestination) argocdv1alpha1.ApplicationDestination
 
 	ToArgoApplicationSetSpec(in *v1alpha1.ApplicationSetParameters) *argocdv1alpha1.ApplicationSetSpec
+	// goverter:ignore AppsetNamespace
 	FromArgoApplicationSetSpec(in *argocdv1alpha1.ApplicationSetSpec) *v1alpha1.ApplicationSetParameters
 
 	FromArgoApplicationSetStatus(in *argocdv1alpha1.ApplicationSetStatus) *v1alpha1.ArgoApplicationSetStatus
