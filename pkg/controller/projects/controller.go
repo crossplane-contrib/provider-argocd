@@ -18,6 +18,7 @@ package projects
 
 import (
 	"context"
+	"time"
 
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v2/pkg/apiclient/project"
@@ -26,9 +27,11 @@ import (
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	xpcontroller "github.com/crossplane/crossplane-runtime/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
+	"github.com/crossplane/crossplane-runtime/pkg/feature"
 	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	"github.com/crossplane/crossplane-runtime/pkg/statemetrics"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,7 +42,6 @@ import (
 	"github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/projects"
-	"github.com/crossplane-contrib/provider-argocd/pkg/features"
 )
 
 const (
@@ -55,19 +57,40 @@ const (
 func SetupProject(mgr ctrl.Manager, o xpcontroller.Options) error {
 	name := managed.ControllerName(v1alpha1.ProjectKind)
 
+	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
+
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}), //nolint:staticcheck
+		managed.WithExternalConnecter(&connector{
+			kube:              mgr.GetClient(),
+			newArgocdClientFn: projects.NewProjectServiceClient,
+		}), //nolint:staticcheck
+		managed.WithPollInterval(o.PollInterval),
+		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
+		managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
+		managed.WithConnectionPublishers(cps...),
+		managed.WithTimeout(5 * time.Minute),
+		managed.WithMetricRecorder(o.MetricOptions.MRMetrics),
 	}
 
-	if o.Features.Enabled(features.EnableBetaManagementPolicies) {
+	if o.Features.Enabled(feature.EnableAlphaChangeLogs) {
+		opts = append(opts, managed.WithChangeLogger(o.ChangeLogOptions.ChangeLogger))
+	}
+
+	if o.Features.Enabled(feature.EnableBetaManagementPolicies) {
 		opts = append(opts, managed.WithManagementPolicies())
+	}
+
+	if err := mgr.Add(statemetrics.NewMRStateRecorder(
+		mgr.GetClient(), o.Logger, o.MetricOptions.MRStateMetrics, &v1alpha1.ProjectList{}, o.MetricOptions.PollStateMetricInterval)); err != nil {
+		return err
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		For(&v1alpha1.Project{}).
+		WithOptions(o.ForControllerRuntime()).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.ProjectGroupVersionKind),
 			opts...))
@@ -76,7 +99,6 @@ func SetupProject(mgr ctrl.Manager, o xpcontroller.Options) error {
 type connector struct {
 	kube              client.Client
 	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, project.ProjectServiceClient)
-	conn              io.Closer
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -89,17 +111,13 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, err
 	}
 	conn, argocdClient := c.newArgocdClientFn(cfg)
-	c.conn = conn
-	return &external{kube: c.kube, client: argocdClient}, nil
-}
-
-func (c *connector) Disconnect(ctx context.Context) error {
-	return c.conn.Close()
+	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
 }
 
 type external struct {
 	kube   client.Client
 	client projects.ProjectServiceClient
+	conn   io.Closer
 }
 
 func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
@@ -601,5 +619,5 @@ func isEqualSyncWindows(p v1alpha1.SyncWindows, r argocdv1alpha1.SyncWindows) bo
 }
 
 func (e *external) Disconnect(ctx context.Context) error {
-	return nil
+	return e.conn.Close()
 }
