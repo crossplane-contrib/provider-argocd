@@ -1,6 +1,6 @@
 module github.com/crossplane-contrib/provider-argocd
 
-go 1.23
+go 1.23.0
 
 // Keep until https://github.com/argoproj/gitops-engine/pull/566 is merged.
 replace github.com/argoproj/gitops-engine v0.7.1-0.20230607163028-425d65e07695 => github.com/sivchari/gitops-engine v0.0.0-20240312224237-99b2b7889ecc
@@ -8,18 +8,18 @@ replace github.com/argoproj/gitops-engine v0.7.1-0.20230607163028-425d65e07695 =
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.9.0
+	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/argoproj/argo-cd/v2 v2.13.5
 	github.com/argoproj/gitops-engine v0.7.1-0.20250129155113-4c6e03c46314
 	github.com/argoproj/pkg v0.13.7-0.20230626144333-d56162821bd1
 	github.com/crossplane/crossplane-runtime v1.18.0
-	github.com/crossplane/crossplane-tools v0.0.0-20230925130601-628280f8bf79
+	github.com/crossplane/crossplane-tools v0.0.0-20240419203311-b29e71200e71
 	github.com/golang-jwt/jwt/v4 v4.5.1
 	github.com/google/go-cmp v0.7.0
 	github.com/jmattheis/goverter v1.8.0
 	github.com/pkg/errors v0.9.1
 	go.uber.org/mock v0.5.0
 	google.golang.org/grpc v1.72.2
-	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	k8s.io/api v0.31.2
 	k8s.io/apiextensions-apiserver v0.31.2
 	k8s.io/apimachinery v0.31.2
@@ -39,7 +39,6 @@ require (
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v1.1.3 // indirect
-	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
@@ -143,6 +142,7 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
+	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	github.com/xlab/treeprint v1.2.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.56.0 // indirect
