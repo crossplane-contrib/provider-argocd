@@ -54,6 +54,10 @@ type ApplicationParameters struct {
 
 	// Finalizers added to the ArgoCD Application
 	Finalizers []string `json:"finalizers,omitempty" protobuf:"bytes,13,opt,name=finalizers"`
+
+	// AppNamespace is the namespace of the application in the ArgoCD server
+	// +optional
+	AppNamespace string `json:"appNamespace"`
 }
 
 // ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored during comparison with live state.

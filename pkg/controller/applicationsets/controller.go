@@ -123,6 +123,10 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		Name: name,
 	}
 
+	if cr.Spec.ForProvider.AppsetNamespace != "" {
+		query.AppsetNamespace = cr.Spec.ForProvider.AppsetNamespace
+	}
+
 	var appset *argov1alpha1.ApplicationSet
 
 	appset, err := e.client.Get(ctx, &query)
@@ -175,6 +179,11 @@ func (e *external) generateCreateApplicationSetRequest(cr *v1alpha1.ApplicationS
 			Spec: *targetSpec,
 		},
 	}
+
+	if cr.Spec.ForProvider.AppsetNamespace != "" {
+		req.Applicationset.SetNamespace(cr.Spec.ForProvider.AppsetNamespace)
+	}
+
 	return req
 }
 
@@ -198,9 +207,15 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalDelete{}, errors.New(errNotApplicationSet)
 	}
 
-	_, err := e.client.Delete(ctx, &applicationset.ApplicationSetDeleteRequest{
+	query := &applicationset.ApplicationSetDeleteRequest{
 		Name: meta.GetExternalName(cr),
-	})
+	}
+
+	if cr.Spec.ForProvider.AppsetNamespace != "" {
+		query.AppsetNamespace = cr.Spec.ForProvider.AppsetNamespace
+	}
+
+	_, err := e.client.Delete(ctx, query)
 	return managed.ExternalDelete{}, err
 }
 

@@ -38,6 +38,10 @@ type ApplicationSetParameters struct {
 	ApplyNestedSelectors         bool                            `json:"applyNestedSelectors,omitempty" protobuf:"bytes,8,name=applyNestedSelectors"`
 	IgnoreApplicationDifferences ApplicationSetIgnoreDifferences `json:"ignoreApplicationDifferences,omitempty" protobuf:"bytes,9,name=ignoreApplicationDifferences"`
 	TemplatePatch                *string                         `json:"templatePatch,omitempty" protobuf:"bytes,10,name=templatePatch"`
+
+	// AppsetNamespace is the namespace of the application set in the ArgoCD server
+	// +optional
+	AppsetNamespace string `json:"appsetNamespace"`
 }
 
 type ApplicationSetIgnoreDifferences []ApplicationSetResourceIgnoreDifferences

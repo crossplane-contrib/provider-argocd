@@ -78,6 +78,10 @@ spec:
                       type: string
                     description: Annotations that will be applied to the ArgoCD Application
                     type: object
+                  appNamespace:
+                    description: AppNamespace is the namespace of the application
+                      in the ArgoCD server
+                    type: string
                   destination:
                     description: Destination is a reference to the target Kubernetes
                       server and namespace
