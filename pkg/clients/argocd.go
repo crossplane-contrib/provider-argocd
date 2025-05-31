@@ -90,7 +90,7 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 	}, nil
 }
 
-func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.ProviderCredentials) (string, error) {
+func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.ProviderCredentials) (string, error) { //nolint:gocyclo
 	switch s := creds.Source; s { //nolint:exhaustive
 	case xpv1.CredentialsSourceSecret:
 		csr := creds.SecretRef

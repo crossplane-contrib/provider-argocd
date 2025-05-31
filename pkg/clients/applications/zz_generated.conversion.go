@@ -82,6 +82,7 @@ func (c *ConverterImpl) ToArgoApplicationSpec(source *v1alpha11.ApplicationParam
 			v1alpha1ApplicationSpec.RevisionHistoryLimit = &xint64
 		}
 		v1alpha1ApplicationSpec.Sources = c.v1alpha1ApplicationSourcesToV1alpha1ApplicationSources2((*source).Sources)
+		v1alpha1ApplicationSpec.SourceHydrator = c.pV1alpha1SourceHydratorToPV1alpha1SourceHydrator((*source).SourceHydrator)
 		pV1alpha1ApplicationSpec = &v1alpha1ApplicationSpec
 	}
 	return pV1alpha1ApplicationSpec
@@ -227,6 +228,8 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSour
 				v1alpha1ApplicationSourceHelm.APIVersions[l] = (*source).APIVersions[l]
 			}
 		}
+		v1alpha1ApplicationSourceHelm.SkipTests = (*source).SkipTests
+		v1alpha1ApplicationSourceHelm.SkipSchemaValidation = (*source).SkipSchemaValidation
 		pV1alpha1ApplicationSourceHelm = &v1alpha1ApplicationSourceHelm
 	}
 	return pV1alpha1ApplicationSourceHelm
@@ -284,6 +287,8 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSour
 				v1alpha1ApplicationSourceHelm.APIVersions[l] = (*source).APIVersions[l]
 			}
 		}
+		v1alpha1ApplicationSourceHelm.SkipTests = (*source).SkipTests
+		v1alpha1ApplicationSourceHelm.SkipSchemaValidation = (*source).SkipSchemaValidation
 		pV1alpha1ApplicationSourceHelm = &v1alpha1ApplicationSourceHelm
 	}
 	return pV1alpha1ApplicationSourceHelm
@@ -457,6 +462,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceToPV1alpha1ApplicationSource2(
 		if (*source).Ref != nil {
 			v1alpha1ApplicationSource.Ref = *(*source).Ref
 		}
+		v1alpha1ApplicationSource.Name = (*source).Name
 		pV1alpha1ApplicationSource = &v1alpha1ApplicationSource
 	}
 	return pV1alpha1ApplicationSource
@@ -522,9 +528,19 @@ func (c *ConverterImpl) pV1alpha1HealthStatusToPV1alpha1HealthStatus(source *v1a
 		v1alpha1HealthStatus.Status = string((*source).Status)
 		pString := (*source).Message
 		v1alpha1HealthStatus.Message = &pString
+		v1alpha1HealthStatus.LastTransitionTime = c.pV1TimeToPV1Time((*source).LastTransitionTime)
 		pV1alpha1HealthStatus = &v1alpha1HealthStatus
 	}
 	return pV1alpha1HealthStatus
+}
+func (c *ConverterImpl) pV1alpha1HydrateToToPV1alpha1HydrateTo(source *v1alpha11.HydrateTo) *v1alpha1.HydrateTo {
+	var pV1alpha1HydrateTo *v1alpha1.HydrateTo
+	if source != nil {
+		var v1alpha1HydrateTo v1alpha1.HydrateTo
+		v1alpha1HydrateTo.TargetBranch = (*source).TargetBranch
+		pV1alpha1HydrateTo = &v1alpha1HydrateTo
+	}
+	return pV1alpha1HydrateTo
 }
 func (c *ConverterImpl) pV1alpha1InfoToPV1alpha1Info(source *v1alpha1.Info) *v1alpha11.Info {
 	var pV1alpha1Info *v1alpha11.Info
@@ -684,6 +700,17 @@ func (c *ConverterImpl) pV1alpha1RetryStrategyToPV1alpha1RetryStrategy(source *v
 		pV1alpha1RetryStrategy = &v1alpha1RetryStrategy
 	}
 	return pV1alpha1RetryStrategy
+}
+func (c *ConverterImpl) pV1alpha1SourceHydratorToPV1alpha1SourceHydrator(source *v1alpha11.SourceHydrator) *v1alpha1.SourceHydrator {
+	var pV1alpha1SourceHydrator *v1alpha1.SourceHydrator
+	if source != nil {
+		var v1alpha1SourceHydrator v1alpha1.SourceHydrator
+		v1alpha1SourceHydrator.DrySource = c.v1alpha1DrySourceToV1alpha1DrySource((*source).DrySource)
+		v1alpha1SourceHydrator.SyncSource = c.v1alpha1SyncSourceToV1alpha1SyncSource((*source).SyncSource)
+		v1alpha1SourceHydrator.HydrateTo = c.pV1alpha1HydrateToToPV1alpha1HydrateTo((*source).HydrateTo)
+		pV1alpha1SourceHydrator = &v1alpha1SourceHydrator
+	}
+	return pV1alpha1SourceHydrator
 }
 func (c *ConverterImpl) pV1alpha1SyncOperationResultToPV1alpha1SyncOperationResult(source *v1alpha1.SyncOperationResult) *v1alpha11.SyncOperationResult {
 	var pV1alpha1SyncOperationResult *v1alpha11.SyncOperationResult
@@ -918,6 +945,7 @@ func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource(sou
 	v1alpha1ApplicationSource.Chart = &pString3
 	pString4 := source.Ref
 	v1alpha1ApplicationSource.Ref = &pString4
+	v1alpha1ApplicationSource.Name = source.Name
 	return v1alpha1ApplicationSource
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource2(source v1alpha11.ApplicationSource) v1alpha1.ApplicationSource {
@@ -939,6 +967,7 @@ func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource2(so
 	if source.Ref != nil {
 		v1alpha1ApplicationSource.Ref = *source.Ref
 	}
+	v1alpha1ApplicationSource.Name = source.Name
 	return v1alpha1ApplicationSource
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourceTypeToV1alpha1ApplicationSourceType(source v1alpha1.ApplicationSourceType) v1alpha11.ApplicationSourceType {
@@ -987,6 +1016,13 @@ func (c *ConverterImpl) v1alpha1ComparedToToV1alpha1ComparedTo(source v1alpha1.C
 	v1alpha1ComparedTo.Sources = c.v1alpha1ApplicationSourcesToV1alpha1ApplicationSources(source.Sources)
 	return v1alpha1ComparedTo
 }
+func (c *ConverterImpl) v1alpha1DrySourceToV1alpha1DrySource(source v1alpha11.DrySource) v1alpha1.DrySource {
+	var v1alpha1DrySource v1alpha1.DrySource
+	v1alpha1DrySource.RepoURL = source.RepoURL
+	v1alpha1DrySource.TargetRevision = source.TargetRevision
+	v1alpha1DrySource.Path = source.Path
+	return v1alpha1DrySource
+}
 func (c *ConverterImpl) v1alpha1EnvToV1alpha1Env(source v1alpha1.Env) v1alpha11.Env {
 	var v1alpha1Env v1alpha11.Env
 	if source != nil {
@@ -1012,6 +1048,7 @@ func (c *ConverterImpl) v1alpha1HealthStatusToV1alpha1HealthStatus(source v1alph
 	v1alpha1HealthStatus.Status = string(source.Status)
 	pString := source.Message
 	v1alpha1HealthStatus.Message = &pString
+	v1alpha1HealthStatus.LastTransitionTime = c.pV1TimeToPV1Time(source.LastTransitionTime)
 	return v1alpha1HealthStatus
 }
 func (c *ConverterImpl) v1alpha1HelmFileParameterToV1alpha1HelmFileParameter(source v1alpha1.HelmFileParameter) v1alpha11.HelmFileParameter {
@@ -1292,6 +1329,8 @@ func (c *ConverterImpl) v1alpha1ResourceStatusToV1alpha1ResourceStatus(source v1
 	v1alpha1ResourceStatus.RequiresPruning = &pBool2
 	pInt64 := source.SyncWave
 	v1alpha1ResourceStatus.SyncWave = &pInt64
+	pBool3 := source.RequiresDeletionConfirmation
+	v1alpha1ResourceStatus.RequiresDeletionConfirmation = &pBool3
 	return v1alpha1ResourceStatus
 }
 func (c *ConverterImpl) v1alpha1RetryStrategyToV1alpha1RetryStrategy(source v1alpha1.RetryStrategy) v1alpha11.RetryStrategy {
@@ -1358,6 +1397,12 @@ func (c *ConverterImpl) v1alpha1SyncOptionsToV1alpha1SyncOptions2(source v1alpha
 		}
 	}
 	return v1alpha1SyncOptions
+}
+func (c *ConverterImpl) v1alpha1SyncSourceToV1alpha1SyncSource(source v1alpha11.SyncSource) v1alpha1.SyncSource {
+	var v1alpha1SyncSource v1alpha1.SyncSource
+	v1alpha1SyncSource.TargetBranch = source.TargetBranch
+	v1alpha1SyncSource.Path = source.Path
+	return v1alpha1SyncSource
 }
 func (c *ConverterImpl) v1alpha1SyncStatusCodeToString(source v1alpha1.SyncStatusCode) string {
 	return string(source)
