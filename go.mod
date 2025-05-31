@@ -1,6 +1,6 @@
 module github.com/crossplane-contrib/provider-argocd
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
@@ -19,7 +19,7 @@ require (
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	k8s.io/api v0.32.0
 	k8s.io/apiextensions-apiserver v0.32.0
-	k8s.io/apimachinery v0.32.0
+	k8s.io/apimachinery v0.33.1
 	k8s.io/client-go v0.32.0
 	k8s.io/utils v0.0.0-20250321185631-1f6e0b77f77e
 	sigs.k8s.io/controller-runtime v0.20.1
@@ -88,7 +88,6 @@ require (
 	github.com/google/go-github/v66 v66.0.0 // indirect
 	github.com/google/go-github/v69 v69.2.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
