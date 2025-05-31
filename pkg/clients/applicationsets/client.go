@@ -3,11 +3,11 @@ package applicationsets
 import (
 	"context"
 
-	"github.com/argoproj/argo-cd/v2/pkg/apiclient"
-	"github.com/argoproj/argo-cd/v2/pkg/apiclient/applicationset"
-	"github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
-	argoGrpc "github.com/argoproj/argo-cd/v2/util/grpc"
-	"github.com/argoproj/argo-cd/v2/util/io"
+	"github.com/argoproj/argo-cd/v3/pkg/apiclient"
+	"github.com/argoproj/argo-cd/v3/pkg/apiclient/applicationset"
+	"github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
+	argoGrpc "github.com/argoproj/argo-cd/v3/util/grpc"
+	"github.com/argoproj/argo-cd/v3/util/io"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 )

@@ -23,8 +23,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-//go:generate go run github.com/crossplane/crossplane-tools/cmd/angryjet generate-methodsets ./...
-
 // ApplicationSetParameters are the configurable fields of a ApplicationSet.
 type ApplicationSetParameters struct {
 	GoTemplate        bool                        `json:"goTemplate,omitempty" protobuf:"bytes,1,name=goTemplate"`
@@ -433,6 +431,10 @@ type PullRequestGenerator struct {
 	Bitbucket           *PullRequestGeneratorBitbucket `json:"bitbucket,omitempty" protobuf:"bytes,8,opt,name=bitbucket"`
 	// Additional provider to use and config for it.
 	AzureDevOps *PullRequestGeneratorAzureDevOps `json:"azuredevops,omitempty" protobuf:"bytes,9,opt,name=azuredevops"`
+
+	// Values contains key/value pairs which are passed directly as parameters to the template
+	Values map[string]string `json:"values,omitempty" protobuf:"bytes,10,name=values"`
+
 	// If you add a new SCM provider, update CustomApiUrl below.
 }
 

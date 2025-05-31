@@ -1,5 +1,3 @@
-//go:generate go run github.com/crossplane/crossplane-tools/cmd/angryjet generate-methodsets ./...
-
 package v1alpha1
 
 import (

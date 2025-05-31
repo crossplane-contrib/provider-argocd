@@ -13,8 +13,8 @@ import (
 	context "context"
 	reflect "reflect"
 
-	applicationset "github.com/argoproj/argo-cd/v2/pkg/apiclient/applicationset"
-	v1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	applicationset "github.com/argoproj/argo-cd/v3/pkg/apiclient/applicationset"
+	v1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	gomock "go.uber.org/mock/gomock"
 	grpc "google.golang.org/grpc"
 )
