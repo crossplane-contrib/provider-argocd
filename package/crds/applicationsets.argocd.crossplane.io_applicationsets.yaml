@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.17.1
+    controller-gen.kubebuilder.io/version: v0.18.0
   name: applicationsets.applicationsets.argocd.crossplane.io
 spec:
   group: applicationsets.argocd.crossplane.io
@@ -668,6 +668,13 @@ spec:
                                                 whether to force applying common labels
                                                 to resources for Kustomize apps
                                               type: boolean
+                                            ignoreMissingComponents:
+                                              description: IgnoreMissingComponents
+                                                prevents kustomize from failing when
+                                                components do not exist locally by
+                                                not appending them to kustomization
+                                                file
+                                              type: boolean
                                             images:
                                               description: Images is a list of Kustomize
                                                 image override specifications
@@ -682,6 +689,11 @@ spec:
                                                 KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                 uses the Kubernetes version of the target cluster.
                                               type: string
+                                            labelIncludeTemplates:
+                                              description: LabelIncludeTemplates specifies
+                                                whether to apply common labels to
+                                                resource templates or not
+                                              type: boolean
                                             labelWithoutSelector:
                                               description: LabelWithoutSelector specifies
                                                 whether to apply common labels to
@@ -1176,6 +1188,13 @@ spec:
                                                   labels to resources for Kustomize
                                                   apps
                                                 type: boolean
+                                              ignoreMissingComponents:
+                                                description: IgnoreMissingComponents
+                                                  prevents kustomize from failing
+                                                  when components do not exist locally
+                                                  by not appending them to kustomization
+                                                  file
+                                                type: boolean
                                               images:
                                                 description: Images is a list of Kustomize
                                                   image override specifications
@@ -1190,6 +1209,12 @@ spec:
                                                   KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                   uses the Kubernetes version of the target cluster.
                                                 type: string
+                                              labelIncludeTemplates:
+                                                description: LabelIncludeTemplates
+                                                  specifies whether to apply common
+                                                  labels to resource templates or
+                                                  not
+                                                type: boolean
                                               labelWithoutSelector:
                                                 description: LabelWithoutSelector
                                                   specifies whether to apply common
@@ -2042,6 +2067,13 @@ spec:
                                                 whether to force applying common labels
                                                 to resources for Kustomize apps
                                               type: boolean
+                                            ignoreMissingComponents:
+                                              description: IgnoreMissingComponents
+                                                prevents kustomize from failing when
+                                                components do not exist locally by
+                                                not appending them to kustomization
+                                                file
+                                              type: boolean
                                             images:
                                               description: Images is a list of Kustomize
                                                 image override specifications
@@ -2056,6 +2088,11 @@ spec:
                                                 KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                 uses the Kubernetes version of the target cluster.
                                               type: string
+                                            labelIncludeTemplates:
+                                              description: LabelIncludeTemplates specifies
+                                                whether to apply common labels to
+                                                resource templates or not
+                                              type: boolean
                                             labelWithoutSelector:
                                               description: LabelWithoutSelector specifies
                                                 whether to apply common labels to
@@ -2550,6 +2587,13 @@ spec:
                                                   labels to resources for Kustomize
                                                   apps
                                                 type: boolean
+                                              ignoreMissingComponents:
+                                                description: IgnoreMissingComponents
+                                                  prevents kustomize from failing
+                                                  when components do not exist locally
+                                                  by not appending them to kustomization
+                                                  file
+                                                type: boolean
                                               images:
                                                 description: Images is a list of Kustomize
                                                   image override specifications
@@ -2564,6 +2608,12 @@ spec:
                                                   KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                   uses the Kubernetes version of the target cluster.
                                                 type: string
+                                              labelIncludeTemplates:
+                                                description: LabelIncludeTemplates
+                                                  specifies whether to apply common
+                                                  labels to resource templates or
+                                                  not
+                                                type: boolean
                                               labelWithoutSelector:
                                                 description: LabelWithoutSelector
                                                   specifies whether to apply common
@@ -3394,6 +3444,13 @@ spec:
                                                 whether to force applying common labels
                                                 to resources for Kustomize apps
                                               type: boolean
+                                            ignoreMissingComponents:
+                                              description: IgnoreMissingComponents
+                                                prevents kustomize from failing when
+                                                components do not exist locally by
+                                                not appending them to kustomization
+                                                file
+                                              type: boolean
                                             images:
                                               description: Images is a list of Kustomize
                                                 image override specifications
@@ -3408,6 +3465,11 @@ spec:
                                                 KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                 uses the Kubernetes version of the target cluster.
                                               type: string
+                                            labelIncludeTemplates:
+                                              description: LabelIncludeTemplates specifies
+                                                whether to apply common labels to
+                                                resource templates or not
+                                              type: boolean
                                             labelWithoutSelector:
                                               description: LabelWithoutSelector specifies
                                                 whether to apply common labels to
@@ -3902,6 +3964,13 @@ spec:
                                                   labels to resources for Kustomize
                                                   apps
                                                 type: boolean
+                                              ignoreMissingComponents:
+                                                description: IgnoreMissingComponents
+                                                  prevents kustomize from failing
+                                                  when components do not exist locally
+                                                  by not appending them to kustomization
+                                                  file
+                                                type: boolean
                                               images:
                                                 description: Images is a list of Kustomize
                                                   image override specifications
@@ -3916,6 +3985,12 @@ spec:
                                                   KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                   uses the Kubernetes version of the target cluster.
                                                 type: string
+                                              labelIncludeTemplates:
+                                                description: LabelIncludeTemplates
+                                                  specifies whether to apply common
+                                                  labels to resource templates or
+                                                  not
+                                                type: boolean
                                               labelWithoutSelector:
                                                 description: LabelWithoutSelector
                                                   specifies whether to apply common
@@ -4721,6 +4796,13 @@ spec:
                                                 whether to force applying common labels
                                                 to resources for Kustomize apps
                                               type: boolean
+                                            ignoreMissingComponents:
+                                              description: IgnoreMissingComponents
+                                                prevents kustomize from failing when
+                                                components do not exist locally by
+                                                not appending them to kustomization
+                                                file
+                                              type: boolean
                                             images:
                                               description: Images is a list of Kustomize
                                                 image override specifications
@@ -4735,6 +4817,11 @@ spec:
                                                 KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                 uses the Kubernetes version of the target cluster.
                                               type: string
+                                            labelIncludeTemplates:
+                                              description: LabelIncludeTemplates specifies
+                                                whether to apply common labels to
+                                                resource templates or not
+                                              type: boolean
                                             labelWithoutSelector:
                                               description: LabelWithoutSelector specifies
                                                 whether to apply common labels to
@@ -5229,6 +5316,13 @@ spec:
                                                   labels to resources for Kustomize
                                                   apps
                                                 type: boolean
+                                              ignoreMissingComponents:
+                                                description: IgnoreMissingComponents
+                                                  prevents kustomize from failing
+                                                  when components do not exist locally
+                                                  by not appending them to kustomization
+                                                  file
+                                                type: boolean
                                               images:
                                                 description: Images is a list of Kustomize
                                                   image override specifications
@@ -5243,6 +5337,12 @@ spec:
                                                   KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                   uses the Kubernetes version of the target cluster.
                                                 type: string
+                                              labelIncludeTemplates:
+                                                description: LabelIncludeTemplates
+                                                  specifies whether to apply common
+                                                  labels to resource templates or
+                                                  not
+                                                type: boolean
                                               labelWithoutSelector:
                                                 description: LabelWithoutSelector
                                                   specifies whether to apply common
@@ -6158,6 +6258,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -6174,6 +6282,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -6725,6 +6839,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -6741,6 +6863,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -7671,6 +7799,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -7687,6 +7823,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -8238,6 +8380,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -8254,6 +8404,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -9161,6 +9317,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -9177,6 +9341,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -9728,6 +9898,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -9744,6 +9922,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -10626,6 +10810,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -10642,6 +10834,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -11193,6 +11391,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -11209,6 +11415,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -12113,6 +12325,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -12129,6 +12349,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -12680,6 +12906,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -12696,6 +12930,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -13902,6 +14142,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -13918,6 +14166,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -14469,6 +14723,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -14485,6 +14747,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -14777,6 +15045,13 @@ spec:
                                         required:
                                         - metadata
                                         - spec
+                                        type: object
+                                      values:
+                                        additionalProperties:
+                                          type: string
+                                        description: Values contains key/value pairs
+                                          which are passed directly as parameters
+                                          to the template
                                         type: object
                                     type: object
                                   scmProvider:
@@ -15714,6 +15989,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -15730,6 +16013,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -16281,6 +16570,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -16297,6 +16594,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -17168,6 +17471,13 @@ spec:
                                                 whether to force applying common labels
                                                 to resources for Kustomize apps
                                               type: boolean
+                                            ignoreMissingComponents:
+                                              description: IgnoreMissingComponents
+                                                prevents kustomize from failing when
+                                                components do not exist locally by
+                                                not appending them to kustomization
+                                                file
+                                              type: boolean
                                             images:
                                               description: Images is a list of Kustomize
                                                 image override specifications
@@ -17182,6 +17492,11 @@ spec:
                                                 KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                 uses the Kubernetes version of the target cluster.
                                               type: string
+                                            labelIncludeTemplates:
+                                              description: LabelIncludeTemplates specifies
+                                                whether to apply common labels to
+                                                resource templates or not
+                                              type: boolean
                                             labelWithoutSelector:
                                               description: LabelWithoutSelector specifies
                                                 whether to apply common labels to
@@ -17676,6 +17991,13 @@ spec:
                                                   labels to resources for Kustomize
                                                   apps
                                                 type: boolean
+                                              ignoreMissingComponents:
+                                                description: IgnoreMissingComponents
+                                                  prevents kustomize from failing
+                                                  when components do not exist locally
+                                                  by not appending them to kustomization
+                                                  file
+                                                type: boolean
                                               images:
                                                 description: Images is a list of Kustomize
                                                   image override specifications
@@ -17690,6 +18012,12 @@ spec:
                                                   KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                   uses the Kubernetes version of the target cluster.
                                                 type: string
+                                              labelIncludeTemplates:
+                                                description: LabelIncludeTemplates
+                                                  specifies whether to apply common
+                                                  labels to resource templates or
+                                                  not
+                                                type: boolean
                                               labelWithoutSelector:
                                                 description: LabelWithoutSelector
                                                   specifies whether to apply common
@@ -18613,6 +18941,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -18629,6 +18965,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -19180,6 +19522,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -19196,6 +19546,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -20126,6 +20482,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -20142,6 +20506,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -20693,6 +21063,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -20709,6 +21087,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -21616,6 +22000,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -21632,6 +22024,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -22183,6 +22581,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -22199,6 +22605,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -23081,6 +23493,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -23097,6 +23517,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -23648,6 +24074,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -23664,6 +24098,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -24568,6 +25008,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -24584,6 +25032,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -25135,6 +25589,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -25151,6 +25613,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -26357,6 +26825,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -26373,6 +26849,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -26924,6 +27406,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -26940,6 +27430,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -27232,6 +27728,13 @@ spec:
                                         required:
                                         - metadata
                                         - spec
+                                        type: object
+                                      values:
+                                        additionalProperties:
+                                          type: string
+                                        description: Values contains key/value pairs
+                                          which are passed directly as parameters
+                                          to the template
                                         type: object
                                     type: object
                                   scmProvider:
@@ -28169,6 +28672,14 @@ spec:
                                                           resources for Kustomize
                                                           apps
                                                         type: boolean
+                                                      ignoreMissingComponents:
+                                                        description: IgnoreMissingComponents
+                                                          prevents kustomize from
+                                                          failing when components
+                                                          do not exist locally by
+                                                          not appending them to kustomization
+                                                          file
+                                                        type: boolean
                                                       images:
                                                         description: Images is a list
                                                           of Kustomize image override
@@ -28185,6 +28696,12 @@ spec:
                                                           KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                           uses the Kubernetes version of the target cluster.
                                                         type: string
+                                                      labelIncludeTemplates:
+                                                        description: LabelIncludeTemplates
+                                                          specifies whether to apply
+                                                          common labels to resource
+                                                          templates or not
+                                                        type: boolean
                                                       labelWithoutSelector:
                                                         description: LabelWithoutSelector
                                                           specifies whether to apply
@@ -28736,6 +29253,14 @@ spec:
                                                             to resources for Kustomize
                                                             apps
                                                           type: boolean
+                                                        ignoreMissingComponents:
+                                                          description: IgnoreMissingComponents
+                                                            prevents kustomize from
+                                                            failing when components
+                                                            do not exist locally by
+                                                            not appending them to
+                                                            kustomization file
+                                                          type: boolean
                                                         images:
                                                           description: Images is a
                                                             list of Kustomize image
@@ -28752,6 +29277,12 @@ spec:
                                                             KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                             uses the Kubernetes version of the target cluster.
                                                           type: string
+                                                        labelIncludeTemplates:
+                                                          description: LabelIncludeTemplates
+                                                            specifies whether to apply
+                                                            common labels to resource
+                                                            templates or not
+                                                          type: boolean
                                                         labelWithoutSelector:
                                                           description: LabelWithoutSelector
                                                             specifies whether to apply
@@ -29627,6 +30158,13 @@ spec:
                                                 whether to force applying common labels
                                                 to resources for Kustomize apps
                                               type: boolean
+                                            ignoreMissingComponents:
+                                              description: IgnoreMissingComponents
+                                                prevents kustomize from failing when
+                                                components do not exist locally by
+                                                not appending them to kustomization
+                                                file
+                                              type: boolean
                                             images:
                                               description: Images is a list of Kustomize
                                                 image override specifications
@@ -29641,6 +30179,11 @@ spec:
                                                 KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                 uses the Kubernetes version of the target cluster.
                                               type: string
+                                            labelIncludeTemplates:
+                                              description: LabelIncludeTemplates specifies
+                                                whether to apply common labels to
+                                                resource templates or not
+                                              type: boolean
                                             labelWithoutSelector:
                                               description: LabelWithoutSelector specifies
                                                 whether to apply common labels to
@@ -30135,6 +30678,13 @@ spec:
                                                   labels to resources for Kustomize
                                                   apps
                                                 type: boolean
+                                              ignoreMissingComponents:
+                                                description: IgnoreMissingComponents
+                                                  prevents kustomize from failing
+                                                  when components do not exist locally
+                                                  by not appending them to kustomization
+                                                  file
+                                                type: boolean
                                               images:
                                                 description: Images is a list of Kustomize
                                                   image override specifications
@@ -30149,6 +30699,12 @@ spec:
                                                   KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                   uses the Kubernetes version of the target cluster.
                                                 type: string
+                                              labelIncludeTemplates:
+                                                description: LabelIncludeTemplates
+                                                  specifies whether to apply common
+                                                  labels to resource templates or
+                                                  not
+                                                type: boolean
                                               labelWithoutSelector:
                                                 description: LabelWithoutSelector
                                                   specifies whether to apply common
@@ -30970,6 +31526,13 @@ spec:
                                                 whether to force applying common labels
                                                 to resources for Kustomize apps
                                               type: boolean
+                                            ignoreMissingComponents:
+                                              description: IgnoreMissingComponents
+                                                prevents kustomize from failing when
+                                                components do not exist locally by
+                                                not appending them to kustomization
+                                                file
+                                              type: boolean
                                             images:
                                               description: Images is a list of Kustomize
                                                 image override specifications
@@ -30984,6 +31547,11 @@ spec:
                                                 KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                 uses the Kubernetes version of the target cluster.
                                               type: string
+                                            labelIncludeTemplates:
+                                              description: LabelIncludeTemplates specifies
+                                                whether to apply common labels to
+                                                resource templates or not
+                                              type: boolean
                                             labelWithoutSelector:
                                               description: LabelWithoutSelector specifies
                                                 whether to apply common labels to
@@ -31478,6 +32046,13 @@ spec:
                                                   labels to resources for Kustomize
                                                   apps
                                                 type: boolean
+                                              ignoreMissingComponents:
+                                                description: IgnoreMissingComponents
+                                                  prevents kustomize from failing
+                                                  when components do not exist locally
+                                                  by not appending them to kustomization
+                                                  file
+                                                type: boolean
                                               images:
                                                 description: Images is a list of Kustomize
                                                   image override specifications
@@ -31492,6 +32067,12 @@ spec:
                                                   KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                   uses the Kubernetes version of the target cluster.
                                                 type: string
+                                              labelIncludeTemplates:
+                                                description: LabelIncludeTemplates
+                                                  specifies whether to apply common
+                                                  labels to resource templates or
+                                                  not
+                                                type: boolean
                                               labelWithoutSelector:
                                                 description: LabelWithoutSelector
                                                   specifies whether to apply common
@@ -32608,6 +33189,13 @@ spec:
                                                 whether to force applying common labels
                                                 to resources for Kustomize apps
                                               type: boolean
+                                            ignoreMissingComponents:
+                                              description: IgnoreMissingComponents
+                                                prevents kustomize from failing when
+                                                components do not exist locally by
+                                                not appending them to kustomization
+                                                file
+                                              type: boolean
                                             images:
                                               description: Images is a list of Kustomize
                                                 image override specifications
@@ -32622,6 +33210,11 @@ spec:
                                                 KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                 uses the Kubernetes version of the target cluster.
                                               type: string
+                                            labelIncludeTemplates:
+                                              description: LabelIncludeTemplates specifies
+                                                whether to apply common labels to
+                                                resource templates or not
+                                              type: boolean
                                             labelWithoutSelector:
                                               description: LabelWithoutSelector specifies
                                                 whether to apply common labels to
@@ -33116,6 +33709,13 @@ spec:
                                                   labels to resources for Kustomize
                                                   apps
                                                 type: boolean
+                                              ignoreMissingComponents:
+                                                description: IgnoreMissingComponents
+                                                  prevents kustomize from failing
+                                                  when components do not exist locally
+                                                  by not appending them to kustomization
+                                                  file
+                                                type: boolean
                                               images:
                                                 description: Images is a list of Kustomize
                                                   image override specifications
@@ -33130,6 +33730,12 @@ spec:
                                                   KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                   uses the Kubernetes version of the target cluster.
                                                 type: string
+                                              labelIncludeTemplates:
+                                                description: LabelIncludeTemplates
+                                                  specifies whether to apply common
+                                                  labels to resource templates or
+                                                  not
+                                                type: boolean
                                               labelWithoutSelector:
                                                 description: LabelWithoutSelector
                                                   specifies whether to apply common
@@ -33395,6 +34001,12 @@ spec:
                               required:
                               - metadata
                               - spec
+                              type: object
+                            values:
+                              additionalProperties:
+                                type: string
+                              description: Values contains key/value pairs which are
+                                passed directly as parameters to the template
                               type: object
                           type: object
                         scmProvider:
@@ -34269,6 +34881,13 @@ spec:
                                                 whether to force applying common labels
                                                 to resources for Kustomize apps
                                               type: boolean
+                                            ignoreMissingComponents:
+                                              description: IgnoreMissingComponents
+                                                prevents kustomize from failing when
+                                                components do not exist locally by
+                                                not appending them to kustomization
+                                                file
+                                              type: boolean
                                             images:
                                               description: Images is a list of Kustomize
                                                 image override specifications
@@ -34283,6 +34902,11 @@ spec:
                                                 KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                 uses the Kubernetes version of the target cluster.
                                               type: string
+                                            labelIncludeTemplates:
+                                              description: LabelIncludeTemplates specifies
+                                                whether to apply common labels to
+                                                resource templates or not
+                                              type: boolean
                                             labelWithoutSelector:
                                               description: LabelWithoutSelector specifies
                                                 whether to apply common labels to
@@ -34777,6 +35401,13 @@ spec:
                                                   labels to resources for Kustomize
                                                   apps
                                                 type: boolean
+                                              ignoreMissingComponents:
+                                                description: IgnoreMissingComponents
+                                                  prevents kustomize from failing
+                                                  when components do not exist locally
+                                                  by not appending them to kustomization
+                                                  file
+                                                type: boolean
                                               images:
                                                 description: Images is a list of Kustomize
                                                   image override specifications
@@ -34791,6 +35422,12 @@ spec:
                                                   KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                                   uses the Kubernetes version of the target cluster.
                                                 type: string
+                                              labelIncludeTemplates:
+                                                description: LabelIncludeTemplates
+                                                  specifies whether to apply common
+                                                  labels to resource templates or
+                                                  not
+                                                type: boolean
                                               labelWithoutSelector:
                                                 description: LabelWithoutSelector
                                                   specifies whether to apply common
@@ -35709,6 +36346,12 @@ spec:
                                       to force applying common labels to resources
                                       for Kustomize apps
                                     type: boolean
+                                  ignoreMissingComponents:
+                                    description: IgnoreMissingComponents prevents
+                                      kustomize from failing when components do not
+                                      exist locally by not appending them to kustomization
+                                      file
+                                    type: boolean
                                   images:
                                     description: Images is a list of Kustomize image
                                       override specifications
@@ -35722,6 +36365,11 @@ spec:
                                       KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                       uses the Kubernetes version of the target cluster.
                                     type: string
+                                  labelIncludeTemplates:
+                                    description: LabelIncludeTemplates specifies whether
+                                      to apply common labels to resource templates
+                                      or not
+                                    type: boolean
                                   labelWithoutSelector:
                                     description: LabelWithoutSelector specifies whether
                                       to apply common labels to resource selectors
@@ -36174,6 +36822,12 @@ spec:
                                         to force applying common labels to resources
                                         for Kustomize apps
                                       type: boolean
+                                    ignoreMissingComponents:
+                                      description: IgnoreMissingComponents prevents
+                                        kustomize from failing when components do
+                                        not exist locally by not appending them to
+                                        kustomization file
+                                      type: boolean
                                     images:
                                       description: Images is a list of Kustomize image
                                         override specifications
@@ -36187,6 +36841,11 @@ spec:
                                         KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
                                         uses the Kubernetes version of the target cluster.
                                       type: string
+                                    labelIncludeTemplates:
+                                      description: LabelIncludeTemplates specifies
+                                        whether to apply common labels to resource
+                                        templates or not
+                                      type: boolean
                                     labelWithoutSelector:
                                       description: LabelWithoutSelector specifies
                                         whether to apply common labels to resource

@@ -4,7 +4,7 @@
 package applications
 
 import (
-	v1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	v1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	common "github.com/argoproj/gitops-engine/pkg/sync/common"
 	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -332,6 +332,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 				v1alpha1ApplicationSourceKustomize.Components[i] = (*source).Components[i]
 			}
 		}
+		v1alpha1ApplicationSourceKustomize.IgnoreMissingComponents = (*source).IgnoreMissingComponents
 		pBool4 := (*source).LabelWithoutSelector
 		v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = &pBool4
 		pString5 := (*source).KubeVersion
@@ -342,6 +343,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 				v1alpha1ApplicationSourceKustomize.APIVersions[j] = (*source).APIVersions[j]
 			}
 		}
+		v1alpha1ApplicationSourceKustomize.LabelIncludeTemplates = (*source).LabelIncludeTemplates
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -392,6 +394,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 				v1alpha1ApplicationSourceKustomize.Components[i] = (*source).Components[i]
 			}
 		}
+		v1alpha1ApplicationSourceKustomize.IgnoreMissingComponents = (*source).IgnoreMissingComponents
 		if (*source).LabelWithoutSelector != nil {
 			v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = *(*source).LabelWithoutSelector
 		}
@@ -404,6 +407,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 				v1alpha1ApplicationSourceKustomize.APIVersions[j] = (*source).APIVersions[j]
 			}
 		}
+		v1alpha1ApplicationSourceKustomize.LabelIncludeTemplates = (*source).LabelIncludeTemplates
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize

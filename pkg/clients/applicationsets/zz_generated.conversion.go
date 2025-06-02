@@ -4,8 +4,7 @@
 package applicationsets
 
 import (
-	v1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
-	health "github.com/argoproj/gitops-engine/pkg/health"
+	v1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -515,6 +514,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 				v1alpha1ApplicationSourceKustomize.Components[i] = (*source).Components[i]
 			}
 		}
+		v1alpha1ApplicationSourceKustomize.IgnoreMissingComponents = (*source).IgnoreMissingComponents
 		pBool4 := (*source).LabelWithoutSelector
 		v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = &pBool4
 		pString5 := (*source).KubeVersion
@@ -525,6 +525,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 				v1alpha1ApplicationSourceKustomize.APIVersions[j] = (*source).APIVersions[j]
 			}
 		}
+		v1alpha1ApplicationSourceKustomize.LabelIncludeTemplates = (*source).LabelIncludeTemplates
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -575,6 +576,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 				v1alpha1ApplicationSourceKustomize.Components[i] = (*source).Components[i]
 			}
 		}
+		v1alpha1ApplicationSourceKustomize.IgnoreMissingComponents = (*source).IgnoreMissingComponents
 		if (*source).LabelWithoutSelector != nil {
 			v1alpha1ApplicationSourceKustomize.LabelWithoutSelector = *(*source).LabelWithoutSelector
 		}
@@ -587,6 +589,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceKustomizeToPV1alpha1Applicatio
 				v1alpha1ApplicationSourceKustomize.APIVersions[j] = (*source).APIVersions[j]
 			}
 		}
+		v1alpha1ApplicationSourceKustomize.LabelIncludeTemplates = (*source).LabelIncludeTemplates
 		pV1alpha1ApplicationSourceKustomize = &v1alpha1ApplicationSourceKustomize
 	}
 	return pV1alpha1ApplicationSourceKustomize
@@ -948,17 +951,6 @@ func (c *ConverterImpl) pV1alpha1HealthStatusToPV1alpha1HealthStatus(source *v1a
 	if source != nil {
 		var v1alpha1HealthStatus v1alpha11.HealthStatus
 		v1alpha1HealthStatus.Status = string((*source).Status)
-		v1alpha1HealthStatus.Message = (*source).Message
-		v1alpha1HealthStatus.LastTransitionTime = c.pV1TimeToPV1Time((*source).LastTransitionTime)
-		pV1alpha1HealthStatus = &v1alpha1HealthStatus
-	}
-	return pV1alpha1HealthStatus
-}
-func (c *ConverterImpl) pV1alpha1HealthStatusToPV1alpha1HealthStatus2(source *v1alpha11.HealthStatus) *v1alpha1.HealthStatus {
-	var pV1alpha1HealthStatus *v1alpha1.HealthStatus
-	if source != nil {
-		var v1alpha1HealthStatus v1alpha1.HealthStatus
-		v1alpha1HealthStatus.Status = health.HealthStatusCode((*source).Status)
 		v1alpha1HealthStatus.Message = (*source).Message
 		v1alpha1HealthStatus.LastTransitionTime = c.pV1TimeToPV1Time((*source).LastTransitionTime)
 		pV1alpha1HealthStatus = &v1alpha1HealthStatus
@@ -1478,6 +1470,12 @@ func (c *ConverterImpl) pV1alpha1PullRequestGeneratorToPV1alpha1PullRequestGener
 		v1alpha1PullRequestGenerator.Template = c.v1alpha1ApplicationSetTemplateToV1alpha1ApplicationSetTemplate((*source).Template)
 		v1alpha1PullRequestGenerator.Bitbucket = c.pV1alpha1PullRequestGeneratorBitbucketToPV1alpha1PullRequestGeneratorBitbucket((*source).Bitbucket)
 		v1alpha1PullRequestGenerator.AzureDevOps = c.pV1alpha1PullRequestGeneratorAzureDevOpsToPV1alpha1PullRequestGeneratorAzureDevOps((*source).AzureDevOps)
+		if (*source).Values != nil {
+			v1alpha1PullRequestGenerator.Values = make(map[string]string, len((*source).Values))
+			for key, value := range (*source).Values {
+				v1alpha1PullRequestGenerator.Values[key] = value
+			}
+		}
 		pV1alpha1PullRequestGenerator = &v1alpha1PullRequestGenerator
 	}
 	return pV1alpha1PullRequestGenerator
@@ -1503,6 +1501,12 @@ func (c *ConverterImpl) pV1alpha1PullRequestGeneratorToPV1alpha1PullRequestGener
 		v1alpha1PullRequestGenerator.Template = c.v1alpha1ApplicationSetTemplateToV1alpha1ApplicationSetTemplate2((*source).Template)
 		v1alpha1PullRequestGenerator.Bitbucket = c.pV1alpha1PullRequestGeneratorBitbucketToPV1alpha1PullRequestGeneratorBitbucket2((*source).Bitbucket)
 		v1alpha1PullRequestGenerator.AzureDevOps = c.pV1alpha1PullRequestGeneratorAzureDevOpsToPV1alpha1PullRequestGeneratorAzureDevOps2((*source).AzureDevOps)
+		if (*source).Values != nil {
+			v1alpha1PullRequestGenerator.Values = make(map[string]string, len((*source).Values))
+			for key, value := range (*source).Values {
+				v1alpha1PullRequestGenerator.Values[key] = value
+			}
+		}
 		pV1alpha1PullRequestGenerator = &v1alpha1PullRequestGenerator
 	}
 	return pV1alpha1PullRequestGenerator
@@ -2855,7 +2859,7 @@ func (c *ConverterImpl) v1alpha1ResourceStatusToV1alpha1ResourceStatus2(source v
 	v1alpha1ResourceStatus.Namespace = source.Namespace
 	v1alpha1ResourceStatus.Name = source.Name
 	v1alpha1ResourceStatus.Status = v1alpha1.SyncStatusCode(source.Status)
-	v1alpha1ResourceStatus.Health = c.pV1alpha1HealthStatusToPV1alpha1HealthStatus2(source.Health)
+	v1alpha1ResourceStatus.Health = PV1alpha1HealthStatusToPV1alpha1HealthStatus(source.Health)
 	v1alpha1ResourceStatus.Hook = source.Hook
 	v1alpha1ResourceStatus.RequiresPruning = source.RequiresPruning
 	v1alpha1ResourceStatus.SyncWave = source.SyncWave

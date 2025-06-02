@@ -20,8 +20,8 @@ import (
 	"context"
 	"testing"
 
-	argoapplicationset "github.com/argoproj/argo-cd/v2/pkg/apiclient/applicationset"
-	argocdv1alpha1 "github.com/argoproj/argo-cd/v2/pkg/apis/application/v1alpha1"
+	argoapplicationset "github.com/argoproj/argo-cd/v3/pkg/apiclient/applicationset"
+	argocdv1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
