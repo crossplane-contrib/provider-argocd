@@ -12,7 +12,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/go-cmp v0.7.0
 	github.com/pkg/errors v0.9.1
-	go.uber.org/mock v0.5.0
+	go.uber.org/mock v0.5.2
 	google.golang.org/grpc v1.72.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 	k8s.io/api v0.33.1
