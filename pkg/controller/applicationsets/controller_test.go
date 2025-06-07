@@ -49,6 +49,7 @@ import (
 var (
 	errBoom                        = errors.New("boom")
 	testApplicationSetExternalName = "test"
+	testApplicationSetNamespace    = "test-namespace"
 	testTemplateName               = "myTemplate"
 	testProjectName                = "myProject"
 	otherProjectName               = "otherProject"
@@ -87,6 +88,10 @@ func withName(v string) ApplicationSetModifier {
 
 func withSpec(p v1alpha1.ApplicationSetParameters) ApplicationSetModifier {
 	return func(r *v1alpha1.ApplicationSet) { r.Spec.ForProvider = p }
+}
+
+func withAppSetNamespace(a *string) ApplicationSetModifier {
+	return func(r *v1alpha1.ApplicationSet) { r.Spec.ForProvider.AppsetNamespace = a }
 }
 
 func withObservation(p v1alpha1.ArgoApplicationSetStatus) ApplicationSetModifier {
@@ -148,6 +153,61 @@ func TestObserve(t *testing.T) {
 				cr: ApplicationSet(
 					withExternalName(testApplicationSetExternalName),
 					withSpec(simpleApplicationSetParameters()),
+					withConditions(xpv1.Available()),
+					withObservation(v1alpha1.ArgoApplicationSetStatus{
+						Conditions: []v1alpha1.ApplicationSetCondition{
+							{Type: "ErrorOccurred"},
+						},
+					}),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:          true,
+					ResourceUpToDate:        true,
+					ResourceLateInitialized: false,
+				},
+				err: nil,
+			},
+		},
+		"SuccessfulAvailableWithAppSetNamespace": {
+			args: args{
+				client: withMockClient(t, func(m *mockclient.MockServiceClient) {
+					m.EXPECT().Get(gomock.Any(), &argoapplicationset.ApplicationSetGetQuery{
+						Name:            testApplicationSetExternalName,
+						AppsetNamespace: testApplicationSetNamespace,
+					}).Return(
+						&argocdv1alpha1.ApplicationSet{
+							ObjectMeta: metav1.ObjectMeta{
+								Namespace: testApplicationSetNamespace,
+							},
+							Spec: argocdv1alpha1.ApplicationSetSpec{
+								Template: argocdv1alpha1.ApplicationSetTemplate{
+									ApplicationSetTemplateMeta: argocdv1alpha1.ApplicationSetTemplateMeta{
+										Name: testTemplateName,
+									},
+									Spec: argocdv1alpha1.ApplicationSpec{
+										Project: testProjectName,
+									},
+								},
+							},
+							Status: argocdv1alpha1.ApplicationSetStatus{
+								Conditions: []argocdv1alpha1.ApplicationSetCondition{
+									{Type: argocdv1alpha1.ApplicationSetConditionErrorOccurred},
+								},
+							},
+						},
+						nil)
+				}),
+				cr: ApplicationSet(
+					withExternalName(testApplicationSetExternalName),
+					withSpec(simpleApplicationSetParameters()),
+					withAppSetNamespace(&testApplicationSetNamespace),
+				),
+			},
+			want: want{
+				cr: ApplicationSet(
+					withExternalName(testApplicationSetExternalName),
+					withSpec(simpleApplicationSetParameters()),
+					withAppSetNamespace(&testApplicationSetNamespace),
 					withConditions(xpv1.Available()),
 					withObservation(v1alpha1.ArgoApplicationSetStatus{
 						Conditions: []v1alpha1.ApplicationSetCondition{
@@ -351,6 +411,46 @@ func TestCreate(t *testing.T) {
 				err:    nil,
 			},
 		},
+		"SuccessfulWithAppSetNamespace": {
+			args: args{
+				client: withMockClient(t, func(m *mockclient.MockServiceClient) {
+					// Might panic on diff.
+					// See https://github.com/argoproj/argo-cd/issues/22081
+					m.EXPECT().Create(
+						gomock.Any(),
+						&argoapplicationset.ApplicationSetCreateRequest{
+							Applicationset: &argocdv1alpha1.ApplicationSet{
+								ObjectMeta: metav1.ObjectMeta{
+									Name:      testApplicationSetExternalName,
+									Namespace: testApplicationSetNamespace,
+								},
+								Spec: *ArgoAppSpec(),
+							},
+						},
+					).Return(
+						&argocdv1alpha1.ApplicationSet{
+							ObjectMeta: metav1.ObjectMeta{
+								Name:      testApplicationSetExternalName,
+								Namespace: testApplicationSetNamespace,
+							},
+						}, nil)
+				}),
+				cr: ApplicationSet(
+					withExternalName(testApplicationSetExternalName),
+					withName(testApplicationSetExternalName),
+					withAppSetNamespace(&testApplicationSetNamespace),
+				),
+			},
+			want: want{
+				cr: ApplicationSet(
+					withExternalName(testApplicationSetExternalName),
+					withName(testApplicationSetExternalName),
+					withAppSetNamespace(&testApplicationSetNamespace),
+				),
+				result: managed.ExternalCreation{},
+				err:    nil,
+			},
+		},
 		"CreateSystemFailed": {
 			args: args{
 				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
@@ -453,6 +553,44 @@ func TestUpdate(t *testing.T) {
 				err:    nil,
 			},
 		},
+		"SuccessfulWithAppSetNamespace": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Create(
+						gomock.Any(),
+						&argoapplicationset.ApplicationSetCreateRequest{
+							Applicationset: &argocdv1alpha1.ApplicationSet{
+								ObjectMeta: metav1.ObjectMeta{
+									Name:      testApplicationSetExternalName,
+									Namespace: testApplicationSetNamespace,
+								},
+								Spec: *ArgoAppSpec(),
+							},
+							Upsert: true,
+						},
+					).Return(&argocdv1alpha1.ApplicationSet{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      testApplicationSetExternalName,
+							Namespace: testApplicationSetNamespace,
+						},
+					}, nil)
+				}),
+				cr: ApplicationSet(
+					withExternalName(testApplicationSetExternalName),
+					withSpec(v1alpha1.ApplicationSetParameters{}),
+					withAppSetNamespace(&testApplicationSetNamespace),
+				),
+			},
+			want: want{
+				cr: ApplicationSet(
+					withExternalName(testApplicationSetExternalName),
+					withSpec(v1alpha1.ApplicationSetParameters{}),
+					withAppSetNamespace(&testApplicationSetNamespace),
+				),
+				result: managed.ExternalUpdate{},
+				err:    nil,
+			},
+		},
 		"UpdateFailed": {
 			args: args{
 				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
@@ -529,6 +667,30 @@ func TestDelete(t *testing.T) {
 			want: want{
 				cr: ApplicationSet(
 					withExternalName(testApplicationSetExternalName),
+				),
+				err: nil,
+			},
+		},
+		"SuccessfulWithAppSetNamespace": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Delete(
+						gomock.Any(),
+						&argoapplicationset.ApplicationSetDeleteRequest{
+							Name:            testApplicationSetExternalName,
+							AppsetNamespace: testApplicationSetNamespace,
+						},
+					).Return(&argoapplicationset.ApplicationSetResponse{}, nil)
+				}),
+				cr: ApplicationSet(
+					withExternalName(testApplicationSetExternalName),
+					withAppSetNamespace(&testApplicationSetNamespace),
+				),
+			},
+			want: want{
+				cr: ApplicationSet(
+					withExternalName(testApplicationSetExternalName),
+					withAppSetNamespace(&testApplicationSetNamespace),
 				),
 				err: nil,
 			},
