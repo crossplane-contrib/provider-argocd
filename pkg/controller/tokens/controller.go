@@ -37,23 +37,37 @@ const (
 	errKubeUpdateFailed  = "cannot update Argocd Project Token custom resource"
 )
 
-// SetupToken adds a controller that reconciles tokens.
-func SetupToken(mgr ctrl.Manager, o xpcontroller.Options) error {
+// Setup adds a controller that reconciles tokens.
+func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 	name := managed.ControllerName(v1alpha1.TokenKind)
 
+	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
+
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: projects.NewProjectServiceClient}), //nolint:staticcheck
+		managed.WithExternalConnecter(&connector{
+			kube:              mgr.GetClient(),
+			newArgocdClientFn: projects.NewProjectServiceClient,
+		}),
+		managed.WithPollInterval(o.PollInterval),
+		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
+		managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
+		managed.WithConnectionPublishers(cps...),
+		managed.WithTimeout(5 * time.Minute),
+		managed.WithMetricRecorder(o.MetricOptions.MRMetrics),
 	}
 
-	if o.Features.Enabled(features.EnableBetaManagementPolicies) {
-		opts = append(opts, managed.WithManagementPolicies())
+	opts = append(opts, (features.Opts(o))...)
+
+	if err := features.AddMRMetrics(mgr, o, &v1alpha1.TokenList{}); err != nil {
+		return err
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		For(&v1alpha1.Token{}).
+		WithOptions(o.ForControllerRuntime()).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.TokenGroupVersionKind),
 			opts...))
@@ -62,7 +76,6 @@ func SetupToken(mgr ctrl.Manager, o xpcontroller.Options) error {
 type connector struct {
 	kube              client.Client
 	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, project.ProjectServiceClient)
-	conn              io.Closer
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -75,17 +88,13 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, err
 	}
 	conn, argocdClient := c.newArgocdClientFn(cfg)
-	c.conn = conn
-	return &external{kube: c.kube, client: argocdClient}, nil
-}
-
-func (c *connector) Disconnect(ctx context.Context) error {
-	return c.conn.Close()
+	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
 }
 
 type external struct {
 	kube   client.Client
 	client projects.ProjectServiceClient
+	conn   io.Closer
 }
 
 func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
@@ -309,5 +318,5 @@ func (e *external) upsertConnectionSecret(ctx context.Context, token *v1alpha1.T
 }
 
 func (e *external) Disconnect(ctx context.Context) error {
-	return nil
+	return e.conn.Close()
 }
