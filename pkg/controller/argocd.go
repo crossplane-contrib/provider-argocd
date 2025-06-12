@@ -34,12 +34,12 @@ import (
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 	for _, setup := range []func(ctrl.Manager, xpcontroller.Options) error{
 		config.Setup,
-		repositories.SetupRepository,
-		projects.SetupProject,
-		cluster.SetupCluster,
-		applications.SetupApplication,
-		applicationsets.SetupApplicationSet,
-		tokens.SetupToken,
+		repositories.Setup,
+		projects.Setup,
+		cluster.Setup,
+		applications.Setup,
+		applicationsets.Setup,
+		tokens.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err
