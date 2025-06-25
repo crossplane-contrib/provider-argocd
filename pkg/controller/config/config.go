@@ -38,6 +38,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
+		WithOptions(o.ForControllerRuntime()).
 		For(&v1alpha1.ProviderConfig{}).
 		Watches(&v1alpha1.ProviderConfigUsage{}, &resource.EnqueueRequestForProviderConfig{}).
 		Complete(providerconfig.NewReconciler(mgr, of,

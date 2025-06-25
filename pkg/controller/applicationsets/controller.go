@@ -18,6 +18,7 @@ package applicationsets
 
 import (
 	"context"
+	"time"
 
 	"github.com/argoproj/argo-cd/v3/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v3/pkg/apiclient/applicationset"
@@ -47,26 +48,37 @@ const (
 	errGetApplicationSet = "failed to GET ApplicationSet with ArgoCD instance"
 )
 
-// SetupApplicationSet adds a controller that reconciles ApplicationSet managed resources.
-func SetupApplicationSet(mgr ctrl.Manager, o xpcontroller.Options) error {
-	name := managed.ControllerName(v1alpha1.ApplicationSetGroupKind)
+// Setup adds a controller that reconciles ApplicationSet managed resources.
+func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
+	name := managed.ControllerName(v1alpha1.ApplicationSetKind)
 
 	cps := []managed.ConnectionPublisher{managed.NewAPISecretPublisher(mgr.GetClient(), mgr.GetScheme())}
+
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnectDisconnecter(&connector{kube: mgr.GetClient(), newArgocdClientFn: appsets.NewApplicationSetServiceClient}), //nolint:staticcheck
+		managed.WithExternalConnecter(&connector{
+			kube:              mgr.GetClient(),
+			newArgocdClientFn: appsets.NewApplicationSetServiceClient,
+		}),
+		managed.WithPollInterval(o.PollInterval),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
 		managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
 		managed.WithLogger(o.Logger.WithValues("controller", name)),
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 		managed.WithConnectionPublishers(cps...),
+		managed.WithTimeout(5 * time.Minute),
+		managed.WithMetricRecorder(o.MetricOptions.MRMetrics),
 	}
-	if o.Features.Enabled(features.EnableBetaManagementPolicies) {
-		opts = append(opts, managed.WithManagementPolicies())
+
+	opts = append(opts, (features.Opts(o))...)
+
+	if err := features.AddMRMetrics(mgr, o, &v1alpha1.ApplicationSetList{}); err != nil {
+		return err
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
 		For(&v1alpha1.ApplicationSet{}).
+		WithOptions(o.ForControllerRuntime()).
 		Complete(managed.NewReconciler(mgr,
 			resource.ManagedKind(v1alpha1.ApplicationSetGroupVersionKind),
 			opts...))
@@ -75,7 +87,6 @@ func SetupApplicationSet(mgr ctrl.Manager, o xpcontroller.Options) error {
 type connector struct {
 	kube              client.Client
 	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, appsets.ServiceClient)
-	conn              io.Closer
 }
 
 // Connect typically produces an ExternalClient by:
@@ -95,17 +106,13 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	}
 
 	conn, argocdClient := c.newArgocdClientFn(cfg)
-	c.conn = conn
-	return &external{kube: c.kube, client: argocdClient}, nil
-}
-
-func (c *connector) Disconnect(ctx context.Context) error {
-	return c.conn.Close()
+	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
 }
 
 type external struct {
 	kube   client.Client
 	client appsets.ServiceClient
+	conn   io.Closer
 }
 
 func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
@@ -212,5 +219,5 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (e *external) Disconnect(ctx context.Context) error {
-	return nil
+	return e.conn.Close()
 }
