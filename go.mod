@@ -3,7 +3,7 @@ module github.com/crossplane-contrib/provider-argocd
 go 1.24.4
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.0
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.1
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.1
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/argoproj/argo-cd/v3 v3.0.10
