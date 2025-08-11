@@ -58,6 +58,11 @@ type ApplicationParameters struct {
 
 	// AppNamespace is the namespace of the application in the ArgoCD server
 	AppNamespace *string `json:"appNamespace,omitempty"`
+
+	// DeleteCascade indicates whether the delete should be cascaded to the app's underlying resources
+	DeleteCascade *bool `json:"deleteCascade,omitempty"`
+	// DeletePropagationPolicy defines the policy for propagating deletions to the app's resources
+	DeletePropagationPolicy *string `json:"deletePropagationPolicy,omitempty"`
 }
 
 // ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored during comparison with live state.
