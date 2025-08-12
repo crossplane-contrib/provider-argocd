@@ -6,7 +6,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.18.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.10.1
 	github.com/alecthomas/kingpin/v2 v2.4.0
-	github.com/argoproj/argo-cd/v3 v3.0.10
+	github.com/argoproj/argo-cd/v3 v3.0.12
 	github.com/argoproj/gitops-engine v0.7.1-0.20250520182409-89c110b5952e
 	github.com/argoproj/pkg v0.13.7-0.20250305113207-cbc37dc61de5
 	github.com/crossplane/crossplane-runtime v1.20.0
