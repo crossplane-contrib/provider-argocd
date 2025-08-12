@@ -512,7 +512,9 @@ func (e *external) resolveReferences(ctx context.Context, cr *v1alpha1.ClusterPa
 			r.Config.TLSClientConfig.KeyData = payload
 		}
 
-		if cr.Config.TLSClientConfig.CADataSecretRef != nil {
+		if cr.Config.TLSClientConfig.CAData != nil {
+			r.Config.TLSClientConfig.CAData = cr.Config.TLSClientConfig.CAData
+		} else if cr.Config.TLSClientConfig.CADataSecretRef != nil {
 			payload, err := e.getPayload(ctx, cr.Config.TLSClientConfig.CADataSecretRef)
 			if err != nil {
 				return err
