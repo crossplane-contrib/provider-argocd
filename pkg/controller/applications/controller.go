@@ -202,8 +202,10 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalDelete{}, errors.New(errNotApplication)
 	}
 	query := application.ApplicationDeleteRequest{
-		Name:         clients.StringToPtr(meta.GetExternalName(cr)),
-		AppNamespace: cr.Spec.ForProvider.AppNamespace,
+		Name:              clients.StringToPtr(meta.GetExternalName(cr)),
+		AppNamespace:      cr.Spec.ForProvider.AppNamespace,
+		Cascade:           cr.Spec.ForProvider.DeleteCascade,
+		PropagationPolicy: cr.Spec.ForProvider.DeletePropagationPolicy,
 	}
 
 	if cr.Spec.ForProvider.Project != "" {

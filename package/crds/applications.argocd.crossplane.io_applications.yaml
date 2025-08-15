@@ -82,6 +82,14 @@ spec:
                     description: AppNamespace is the namespace of the application
                       in the ArgoCD server
                     type: string
+                  deleteCascade:
+                    description: DeleteCascade indicates whether the delete should
+                      be cascaded to the app's underlying resources
+                    type: boolean
+                  deletePropagationPolicy:
+                    description: DeletePropagationPolicy defines the policy for propagating
+                      deletions to the app's resources
+                    type: string
                   destination:
                     description: Destination is a reference to the target Kubernetes
                       server and namespace
