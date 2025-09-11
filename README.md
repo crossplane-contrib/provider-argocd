@@ -18,6 +18,68 @@ following new functionality:
 
 Follow the [official docs](https://crossplane.io/docs/master/getting-started/install-configure.html#install-crossplane) to install crossplane, then these steps to get started with `provider-argocd`.
 
+### Add the Crossplane Helm Repository
+
+```bash
+helm repo add crossplane-stable https://charts.crossplane.io/stable
+helm repo update
+```
+
+### Initialize Build Submodules
+
+Before building or running the provider, ensure the required "build" Make submodule is initialized. This submodule supports CI/CD tasks shared across all providers.
+
+```bash
+make submodules
+```
+
+### Run ArgoCD and Crossplane Locally with Kind
+
+To start a local Kubernetes cluster with `kind` and install Argo CD and Crossplane and the provider CRDs in a single command, run:
+
+```bash
+make dev-debug
+```
+
+### Run the Provider Locally for Development
+
+To start the provider in debug mode, you can run the provider directly:
+
+```bash
+go run ./cmd/provider --debug
+```
+
+#### Optional: Run with VSCode
+
+Alternatively, if you use VSCode, you can configure a file `.vscode/launch.json` to run the provider in debug mode in a more convenient way:
+
+```json filename=".vscode/launch.json"
+{
+  "configurations": [
+    {
+      "name": "Run Provider Locally",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/provider",
+      "args": [
+        "--debug"
+      ]
+    }
+  ]
+}
+```
+
+### Apply CRs
+
+To test the provider, you can apply the example CRs in `examples/`:
+
+```bash
+kubectl apply -f examples/projects/project.yaml
+```
+
+## Getting Started Step-by-Step
+
 ### Optional: Start a local Argo CD server
 ```bash
 kind create cluster
@@ -104,8 +166,6 @@ spec:
       key: authToken
 EOF
 ```
-
-
 
 ## Contributing
 
