@@ -41,6 +41,8 @@ To start a local Kubernetes cluster with `kind` and install Argo CD and Crosspla
 make dev-debug
 ```
 
+which can later be undone with `make dev-teardown` deleting the Kind cluster.
+
 ### Run the Provider Locally for Development
 
 To start the provider in debug mode, you can run the provider directly:
