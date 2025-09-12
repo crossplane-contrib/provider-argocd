@@ -207,6 +207,9 @@ spec:
                           type: object
                       type: object
                     type: array
+                  name:
+                    description: Name is the name of the project
+                    type: string
                   namespaceResourceBlacklist:
                     description: NamespaceResourceBlacklist contains list of blacklisted
                       namespace level resources

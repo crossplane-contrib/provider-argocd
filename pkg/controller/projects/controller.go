@@ -337,10 +337,15 @@ func generateProjectObservation(r *argocdv1alpha1.AppProject) v1alpha1.ProjectOb
 func generateCreateProjectOptions(p *v1alpha1.Project) *project.ProjectCreateRequest {
 	projSpec := generateProjectSpec(&p.Spec.ForProvider)
 
+	projName := p.Name
+	if specName := p.Spec.ForProvider.Name; specName != "" {
+		projName = specName
+	}
+
 	projectCreateRequest := &project.ProjectCreateRequest{
 		Project: &argocdv1alpha1.AppProject{
 			Spec:       projSpec,
-			ObjectMeta: metav1.ObjectMeta{Name: p.Name, Labels: p.Spec.ForProvider.ProjectLabels},
+			ObjectMeta: metav1.ObjectMeta{Name: projName, Labels: p.Spec.ForProvider.ProjectLabels},
 		},
 		Upsert: false,
 	}

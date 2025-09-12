@@ -5,6 +5,8 @@ metadata:
   name: example-project
 spec:
   forProvider:
+    name: example-project-name
+    description: Example Project with specified name
     projectLabels:
       argocd.crossplane.io/global-project: "true"
   providerConfigRef:

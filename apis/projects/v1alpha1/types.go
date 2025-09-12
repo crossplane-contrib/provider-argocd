@@ -23,6 +23,9 @@ import (
 
 // ProjectParameters define the desired state of an ArgoCD Git Project
 type ProjectParameters struct {
+	// Name is the name of the project
+	// +optional
+	Name string `json:"name,omitempty"`
 	// SourceRepos contains list of repository URLs which can be used for deployment
 	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1.Repository
 	// +crossplane:generate:reference:refFieldName=SourceReposRefs
