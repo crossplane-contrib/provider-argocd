@@ -20,23 +20,13 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	applicationv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1"
-	applicationsetsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
-	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
-	projectsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1"
-	repositoriesv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/apis/v1alpha1"
+	clusterapis "github.com/crossplane-contrib/provider-argocd/apis/cluster"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes,
-		v1alpha1.SchemeBuilder.AddToScheme,
-		repositoriesv1alpha1.SchemeBuilder.AddToScheme,
-		projectsv1alpha1.SchemeBuilder.AddToScheme,
-		clusterv1alpha1.SchemeBuilder.AddToScheme,
-		applicationv1alpha1.SchemeBuilder.AddToScheme,
-		applicationsetsv1alpha1.SchemeBuilder.AddToScheme,
+		clusterapis.AddToScheme,
 	)
 }
 

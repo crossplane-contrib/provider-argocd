@@ -23,8 +23,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-// ApplicationParameters define the desired state of an ArgoCD Git Application
-type ApplicationParameters struct {
+// ApplicationSpec define the desired state of an ArgoCD Git Application
+type ApplicationSpec struct {
 	Source *ApplicationSource `json:"source,omitempty" protobuf:"bytes,1,opt,name=source"`
 	// Destination is a reference to the target Kubernetes server and namespace
 	Destination ApplicationDestination `json:"destination" protobuf:"bytes,2,name=destination"`
@@ -47,22 +47,8 @@ type ApplicationParameters struct {
 	// Sources is a reference to the location of the application's manifests or chart
 	Sources ApplicationSources `json:"sources,omitempty" protobuf:"bytes,8,opt,name=sources"`
 
-	// Annotations that will be applied to the ArgoCD Application
-	Annotations map[string]string `json:"annotations,omitempty" protobuf:"bytes,12,opt,name=annotations"`
-
-	// Finalizers added to the ArgoCD Application
-	Finalizers []string `json:"finalizers,omitempty" protobuf:"bytes,13,opt,name=finalizers"`
-
 	// SourceHydrator provides a way to push hydrated manifests back to git before syncing them to the cluster.
 	SourceHydrator *SourceHydrator `json:"sourceHydrator,omitempty" protobuf:"bytes,14,opt,name=sourceHydrator"`
-
-	// AppNamespace is the namespace of the application in the ArgoCD server
-	AppNamespace *string `json:"appNamespace,omitempty"`
-
-	// DeleteCascade indicates whether the delete should be cascaded to the app's underlying resources
-	DeleteCascade *bool `json:"deleteCascade,omitempty"`
-	// DeletePropagationPolicy defines the policy for propagating deletions to the app's resources
-	DeletePropagationPolicy *string `json:"deletePropagationPolicy,omitempty"`
 }
 
 // ResourceIgnoreDifferences contains resource filter and list of json paths which should be ignored during comparison with live state.
@@ -109,7 +95,7 @@ type ApplicationSource struct {
 	// Ref is reference to another source within sources field. This field will not be used if used with a `source` tag.
 	Ref *string `json:"ref,omitempty" protobuf:"bytes,13,opt,name=ref"`
 	// Name is the name of the application source
-	Name string `json:"name,omitempty" protobuf:"bytes,14,opt,name=name"`
+	Name *string `json:"name,omitempty" protobuf:"bytes,14,opt,name=name"`
 }
 
 // ApplicationSources contains list of required information about the sources of an application
@@ -157,8 +143,7 @@ type HydrateTo struct {
 // ApplicationDestination holds information about the application's destination
 type ApplicationDestination struct {
 	// Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.Cluster
-	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.ServerAddress()
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1.Cluster
 	// +crossplane:generate:reference:refFieldName=ServerRef
 	// +crossplane:generate:reference:selectorFieldName=ServerSelector
 	// +optional
@@ -174,8 +159,8 @@ type ApplicationDestination struct {
 	// +optional
 	Namespace *string `json:"namespace,omitempty"`
 	// Name is an alternate way of specifying the target cluster by its symbolic name
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.Cluster
-	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.ServerName()
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1.Cluster
+	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1.ServerName()
 	// +crossplane:generate:reference:refFieldName=NameRef
 	// +crossplane:generate:reference:selectorFieldName=NameSelector
 	// +optional
@@ -194,18 +179,6 @@ type ConnectionState struct {
 	Status     string       `json:"status,omitempty"`
 	Message    string       `json:"message,omitempty"`
 	ModifiedAt *metav1.Time `json:"attemptedAt,omitempty"`
-}
-
-// A ApplicationSpec defines the desired state of an ArgoCD Application.
-type ApplicationSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       ApplicationParameters `json:"forProvider"`
-}
-
-// A ApplicationStatus represents the observed state of an ArgoCD Application.
-type ApplicationStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          ArgoApplicationStatus `json:"atProvider,omitempty"`
 }
 
 // ApplicationSourceHelm holds helm specific options
@@ -260,31 +233,6 @@ type HelmFileParameter struct {
 	Name *string `json:"name,omitempty" protobuf:"bytes,1,opt,name=name"`
 	// Path is the path to the file containing the values for the Helm parameter
 	Path *string `json:"path,omitempty" protobuf:"bytes,2,opt,name=path"`
-}
-
-// +kubebuilder:object:root=true
-
-// An Application is a managed resource that represents an ArgoCD Application
-// +kubebuilder:printcolumn:name="READY",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
-// +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
-// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,managed,argocd}
-type Application struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   ApplicationSpec   `json:"spec"`
-	Status ApplicationStatus `json:"status,omitempty"`
-}
-
-// +kubebuilder:object:root=true
-
-// ApplicationList contains a list of Application items
-type ApplicationList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Application `json:"items"`
 }
 
 // ApplicationSourceKustomize holds options specific to an Application source specific to Kustomize
