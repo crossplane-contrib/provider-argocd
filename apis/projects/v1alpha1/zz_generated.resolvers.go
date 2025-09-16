@@ -22,7 +22,7 @@ import (
 	"context"
 	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
 	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
-	reference "github.com/crossplane/crossplane-runtime/pkg/reference"
+	reference "github.com/crossplane/crossplane-runtime/v2/pkg/reference"
 	errors "github.com/pkg/errors"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -38,6 +38,7 @@ func (mg *Project) ResolveReferences(ctx context.Context, c client.Reader) error
 	mrsp, err = r.ResolveMultiple(ctx, reference.MultiResolutionRequest{
 		CurrentValues: mg.Spec.ForProvider.SourceRepos,
 		Extract:       reference.ExternalName(),
+		Namespace:     mg.GetNamespace(),
 		References:    mg.Spec.ForProvider.SourceReposRefs,
 		Selector:      mg.Spec.ForProvider.SourceReposSelector,
 		To: reference.To{
@@ -55,6 +56,7 @@ func (mg *Project) ResolveReferences(ctx context.Context, c client.Reader) error
 		rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 			CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Destinations[i3].Server),
 			Extract:      reference.ExternalName(),
+			Namespace:    mg.GetNamespace(),
 			Reference:    mg.Spec.ForProvider.Destinations[i3].ServerRef,
 			Selector:     mg.Spec.ForProvider.Destinations[i3].ServerSelector,
 			To: reference.To{
@@ -83,6 +85,7 @@ func (mg *Token) ResolveReferences(ctx context.Context, c client.Reader) error {
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Project),
 		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.ProjectRef,
 		Selector:     mg.Spec.ForProvider.ProjectSelector,
 		To: reference.To{

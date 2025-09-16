@@ -21,7 +21,7 @@ package v1alpha1
 import (
 	"context"
 	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
-	reference "github.com/crossplane/crossplane-runtime/pkg/reference"
+	reference "github.com/crossplane/crossplane-runtime/v2/pkg/reference"
 	errors "github.com/pkg/errors"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -36,6 +36,7 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Destination.Server),
 		Extract:      v1alpha1.ServerAddress(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.Destination.ServerRef,
 		Selector:     mg.Spec.ForProvider.Destination.ServerSelector,
 		To: reference.To{
@@ -52,6 +53,7 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Destination.Name),
 		Extract:      v1alpha1.ServerName(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.Destination.NameRef,
 		Selector:     mg.Spec.ForProvider.Destination.NameSelector,
 		To: reference.To{
@@ -68,6 +70,7 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Status.AtProvider.Sync.ComparedTo.Destination.Server),
 		Extract:      v1alpha1.ServerAddress(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Status.AtProvider.Sync.ComparedTo.Destination.ServerRef,
 		Selector:     mg.Status.AtProvider.Sync.ComparedTo.Destination.ServerSelector,
 		To: reference.To{
@@ -84,6 +87,7 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Status.AtProvider.Sync.ComparedTo.Destination.Name),
 		Extract:      v1alpha1.ServerName(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Status.AtProvider.Sync.ComparedTo.Destination.NameRef,
 		Selector:     mg.Status.AtProvider.Sync.ComparedTo.Destination.NameSelector,
 		To: reference.To{
