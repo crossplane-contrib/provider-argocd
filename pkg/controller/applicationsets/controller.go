@@ -37,7 +37,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	appsets "github.com/crossplane-contrib/provider-argocd/pkg/clients/applicationsets"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"

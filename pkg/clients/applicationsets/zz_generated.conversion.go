@@ -4,13 +4,14 @@
 package applicationsets
 
 import (
+	"time"
+
 	v1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
-	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
+	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
-	"time"
 )
 
 // +k8s:deepcopy-gen=false

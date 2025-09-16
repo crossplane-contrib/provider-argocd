@@ -31,7 +31,7 @@ import (
 	"go.uber.org/mock/gomock"
 	"k8s.io/utils/ptr"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
 	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/mock/cluster"
 )
