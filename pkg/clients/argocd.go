@@ -91,7 +91,7 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.LegacyM
 }
 
 func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.ProviderCredentials) (string, error) { //nolint:gocyclo
-	switch s := creds.Source; s { //nolint:exhaustive
+	switch s := creds.Source; s {
 	case xpv1.CredentialsSourceSecret:
 		csr := creds.SecretRef
 		if csr == nil {
