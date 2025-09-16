@@ -14,21 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package apis contains Kubernetes API for argocd API.
-package apis
+// Package apis contains cluster-scoped Kubernetes API for argocd API.
+package cluster
 
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	clusterapis "github.com/crossplane-contrib/provider-argocd/apis/cluster"
-	namespaceapis "github.com/crossplane-contrib/provider-argocd/apis/cluster"
+	applicationv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
+	applicationsetsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
+	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
+	projectsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
+	repositoriesv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes,
-		clusterapis.AddToScheme,
-		namespaceapis.AddToScheme,
+		v1alpha1.SchemeBuilder.AddToScheme,
+		repositoriesv1alpha1.SchemeBuilder.AddToScheme,
+		projectsv1alpha1.SchemeBuilder.AddToScheme,
+		clusterv1alpha1.SchemeBuilder.AddToScheme,
+		applicationv1alpha1.SchemeBuilder.AddToScheme,
+		applicationsetsv1alpha1.SchemeBuilder.AddToScheme,
 	)
 }
 

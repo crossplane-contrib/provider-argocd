@@ -69,19 +69,22 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.LegacyM
 	if err := t.Track(ctx, mg); err != nil {
 		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
+	return getClientOptions(ctx, c, &pc.Spec)
+}
 
-	insecure := ptr.Deref(pc.Spec.Insecure, false)
-	plaintext := ptr.Deref(pc.Spec.PlainText, false)
+func getClientOptions(ctx context.Context, c client.Client, pcSpec *v1alpha1.ProviderConfigSpec) (*argocd.ClientOptions, error) {
+	insecure := ptr.Deref(pcSpec.Insecure, false)
+	plaintext := ptr.Deref(pcSpec.PlainText, false)
 
-	authToken, err := authFromCredentials(ctx, c, pc.Spec.Credentials)
+	authToken, err := authFromCredentials(ctx, c, pcSpec.Credentials)
 	if err != nil {
 		return nil, err
 	}
-	grpcWeb := ptr.Deref(pc.Spec.GRPCWeb, false)
-	grpcWebRoot := ptr.Deref(pc.Spec.GRPCWebRootPath, "")
+	grpcWeb := ptr.Deref(pcSpec.GRPCWeb, false)
+	grpcWebRoot := ptr.Deref(pcSpec.GRPCWebRootPath, "")
 
 	return &argocd.ClientOptions{
-		ServerAddr:      pc.Spec.ServerAddr,
+		ServerAddr:      pcSpec.ServerAddr,
 		Insecure:        insecure,
 		PlainText:       plaintext,
 		AuthToken:       authToken,
