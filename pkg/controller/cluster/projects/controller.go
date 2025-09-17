@@ -38,8 +38,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/projects"
+	clients "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/projects"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
 )
 

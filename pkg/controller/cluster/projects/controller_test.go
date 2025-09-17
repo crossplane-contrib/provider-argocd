@@ -32,8 +32,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
-	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/mock/projects"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/projects"
+	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/mock/projects"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/projects"
 )
 
 var (

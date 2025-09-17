@@ -1,4 +1,4 @@
-package applications
+package applicationsets
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	extv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
 )
 
 // Converter helps to convert ArgoCD types to api types of this provider and vise-versa
@@ -20,7 +20,7 @@ import (
 // goverter:enum:unknown @ignore
 // goverter:struct:comment // +k8s:deepcopy-gen=false
 // goverter:output:file ./zz_generated.conversion.go
-// goverter:output:package github.com/crossplane-contrib/provider-argocd/pkg/clients/applications
+// goverter:output:package github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/applicationsets
 // +k8s:deepcopy-gen=false
 type Converter interface {
 
@@ -32,9 +32,12 @@ type Converter interface {
 
 	ToArgoDestination(in v1alpha1.ApplicationDestination) argocdv1alpha1.ApplicationDestination
 
-	ToArgoApplicationSpec(in *v1alpha1.ApplicationParameters) *argocdv1alpha1.ApplicationSpec
+	ToArgoApplicationSetSpec(in *v1alpha1.ApplicationSetParameters) *argocdv1alpha1.ApplicationSetSpec
+	// goverter:ignore AppsetNamespace
+	FromArgoApplicationSetSpec(in *argocdv1alpha1.ApplicationSetSpec) *v1alpha1.ApplicationSetParameters
 
-	FromArgoApplicationStatus(in *argocdv1alpha1.ApplicationStatus) *v1alpha1.ArgoApplicationStatus
+	FromArgoApplicationSetStatus(in *argocdv1alpha1.ApplicationSetStatus) *v1alpha1.ArgoApplicationSetStatus
+	ToArgoApplicationSetStatus(in *v1alpha1.ArgoApplicationSetStatus) *argocdv1alpha1.ApplicationSetStatus
 }
 
 // ExtV1JSONToRuntimeRawExtension converts an extv1.JSON into a

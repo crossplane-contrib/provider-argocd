@@ -6,7 +6,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/applicationsets"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/applicationsets"
 )
 
 // IsApplicationSetUpToDate converts ApplicationParameters to its ArgoCD Counterpart and returns if they equal

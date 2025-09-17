@@ -111,21 +111,10 @@ func (c *ConverterImpl) commonSyncPhaseToString(source common.SyncPhase) string 
 }
 func (c *ConverterImpl) intstrIntOrStringToIntstrIntOrString(source intstr.IntOrString) intstr.IntOrString {
 	var intstrIntOrString intstr.IntOrString
-	intstrIntOrString.Type = c.intstrTypeToIntstrType(source.Type)
+	intstrIntOrString.Type = intstr.Type(source.Type)
 	intstrIntOrString.IntVal = source.IntVal
 	intstrIntOrString.StrVal = source.StrVal
 	return intstrIntOrString
-}
-func (c *ConverterImpl) intstrTypeToIntstrType(source intstr.Type) intstr.Type {
-	var intstrType intstr.Type
-	switch source {
-	case intstr.Int:
-		intstrType = intstr.Int
-	case intstr.String:
-		intstrType = intstr.String
-	default: // ignored
-	}
-	return intstrType
 }
 func (c *ConverterImpl) pRuntimeRawExtensionToV1JSON(source *runtime.RawExtension) v1.JSON {
 	var v1JSON v1.JSON
