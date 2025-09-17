@@ -14,19 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
+package cluster
 
 import (
 	xpcontroller "github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applications"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applicationsets"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/config"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/projects"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/repositories"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/tokens"
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/applications"
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/applicationsets"
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/cluster"
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/config"
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/projects"
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/repositories"
+	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/tokens"
 )
 
 // Setup creates all argocd API controllers with the supplied logger and adds
