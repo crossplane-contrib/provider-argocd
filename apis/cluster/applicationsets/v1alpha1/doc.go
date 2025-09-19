@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Crossplane Authors.
+Copyright 2022 The Crossplane Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,6 +16,6 @@ limitations under the License.
 
 // Package v1alpha1 contains the core resources of the argocd provider.
 // +kubebuilder:object:generate=true
-// +groupName=argocd.crossplane.io
+// +groupName=applicationsets.argocd.crossplane.io
 // +versionName=v1alpha1
 package v1alpha1

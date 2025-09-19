@@ -25,7 +25,7 @@ import (
 
 // Package type metadata.
 const (
-	Group   = "argocd.crossplane.io"
+	Group   = "argocd.m.crossplane.io"
 	Version = "v1alpha1"
 )
 
