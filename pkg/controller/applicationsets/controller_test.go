@@ -33,7 +33,7 @@ import (
 	"google.golang.org/grpc/status"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/applicationsets"
 	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/mock/applicationsets"
 )

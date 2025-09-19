@@ -20,12 +20,12 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	applicationv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1"
-	applicationsetsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
-	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
-	projectsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1"
-	repositoriesv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/apis/v1alpha1"
+	applicationv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
+	applicationsetsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
+	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
+	projectsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
+	repositoriesv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
 )
 
 func init() {

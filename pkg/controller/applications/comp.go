@@ -9,7 +9,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/applications/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/applications"
 )
 

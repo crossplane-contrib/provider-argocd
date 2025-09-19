@@ -7,7 +7,7 @@ import (
 	extv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
 )
 
 // Converter helps to convert ArgoCD types to api types of this provider and vise-versa

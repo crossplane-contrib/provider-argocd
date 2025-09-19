@@ -37,7 +37,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/applicationsets/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	appsets "github.com/crossplane-contrib/provider-argocd/pkg/clients/applicationsets"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
@@ -153,7 +153,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 func generateApplicationObservation(appset *argov1alpha1.ApplicationSet) v1alpha1.ArgoApplicationSetStatus {
 	converter := &appsets.ConverterImpl{}
-	return *converter.FromArgoApplicationSetStatus(&appset.Status)
+	return converter.FromArgoApplicationSetStatus(&appset.Status)
 }
 
 func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
