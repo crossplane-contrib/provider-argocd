@@ -20,23 +20,35 @@ package apis
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	applicationv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
-	applicationsetsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
-	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
-	projectsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
-	repositoriesv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
+	clusterapplications "github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
+	namespacedapplications "github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
+	clusterapplicationsets "github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
+	namespacedapplicationsets "github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
+	clustercluster "github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
+	namespacedcluster "github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
+	clusterprojects "github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
+	namespacedprojects "github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
+	clusterrepositories "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
+	namespacedrepositories "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
+	namespacev1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/v1alpha1"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes,
 		v1alpha1.SchemeBuilder.AddToScheme,
-		repositoriesv1alpha1.SchemeBuilder.AddToScheme,
-		projectsv1alpha1.SchemeBuilder.AddToScheme,
-		clusterv1alpha1.SchemeBuilder.AddToScheme,
-		applicationv1alpha1.SchemeBuilder.AddToScheme,
-		applicationsetsv1alpha1.SchemeBuilder.AddToScheme,
+		namespacev1alpha1.SchemeBuilder.AddToScheme,
+		clusterapplications.SchemeBuilder.AddToScheme,
+		namespacedapplications.SchemeBuilder.AddToScheme,
+		clusterapplicationsets.SchemeBuilder.AddToScheme,
+		namespacedapplicationsets.SchemeBuilder.AddToScheme,
+		clustercluster.SchemeBuilder.AddToScheme,
+		namespacedcluster.SchemeBuilder.AddToScheme,
+		clusterprojects.SchemeBuilder.AddToScheme,
+		namespacedprojects.SchemeBuilder.AddToScheme,
+		clusterrepositories.SchemeBuilder.AddToScheme,
+		namespacedrepositories.SchemeBuilder.AddToScheme,
 	)
 }
 
