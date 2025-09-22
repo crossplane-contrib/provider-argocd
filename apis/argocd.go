@@ -30,15 +30,15 @@ import (
 	namespacedprojects "github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
 	clusterrepositories "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
 	namespacedrepositories "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
-	namespacev1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/v1alpha1"
+	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
+	namespacedv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/v1alpha1"
 )
 
 func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes,
-		v1alpha1.SchemeBuilder.AddToScheme,
-		namespacev1alpha1.SchemeBuilder.AddToScheme,
+		clusterv1alpha1.SchemeBuilder.AddToScheme,
+		namespacedv1alpha1.SchemeBuilder.AddToScheme,
 		clusterapplications.SchemeBuilder.AddToScheme,
 		namespacedapplications.SchemeBuilder.AddToScheme,
 		clusterapplicationsets.SchemeBuilder.AddToScheme,
