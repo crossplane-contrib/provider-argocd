@@ -8,7 +8,7 @@ import (
 // TokenParameters define the desired state of an ArgoCD Project Token
 type TokenParameters struct {
 	// Project is the project associated with the token
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1.Project
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1.Project
 	// +crossplane:generate:reference:refFieldName=ProjectRef
 	// +crossplane:generate:reference:selectorFieldName=ProjectSelector
 	Project *string `json:"project"`

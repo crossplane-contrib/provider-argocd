@@ -20,26 +20,40 @@ import (
 	xpcontroller "github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	ctrl "sigs.k8s.io/controller-runtime"
 
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applications"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/applicationsets"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/config"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/projects"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/repositories"
-	"github.com/crossplane-contrib/provider-argocd/pkg/controller/tokens"
+	clusterapplications "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/applications"
+	namespacedapplications "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/applications"
+	clusterapplicationsets "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/applicationsets"
+	namespacedapplicationsets "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/applicationsets"
+	clustercluster "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/cluster"
+	namespacedcluster "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/cluster"
+	clusterconfig "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/config"
+	namespacedconfig "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/config"
+	clusterprojects "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/projects"
+	namespacedprojects "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/projects"
+	clusterrepositories "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/repositories"
+	namespacedrepositories "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/repositories"
+	clustertokens "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/tokens"
+	namespacedtokens "github.com/crossplane-contrib/provider-argocd/pkg/controller/cluster/tokens"
 )
 
 // Setup creates all argocd API controllers with the supplied logger and adds
 // them to the supplied manager.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 	for _, setup := range []func(ctrl.Manager, xpcontroller.Options) error{
-		config.Setup,
-		repositories.Setup,
-		projects.Setup,
-		cluster.Setup,
-		applications.Setup,
-		applicationsets.Setup,
-		tokens.Setup,
+		clusterapplications.Setup,
+		clusterapplicationsets.Setup,
+		clustercluster.Setup,
+		clusterconfig.Setup,
+		clusterprojects.Setup,
+		clusterrepositories.Setup,
+		clustertokens.Setup,
+		namespacedapplications.Setup,
+		namespacedapplicationsets.Setup,
+		namespacedcluster.Setup,
+		namespacedconfig.Setup,
+		namespacedprojects.Setup,
+		namespacedrepositories.Setup,
+		namespacedtokens.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err

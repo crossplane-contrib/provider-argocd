@@ -88,6 +88,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 type connector struct {
 	kube              client.Client
 	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, project.ProjectServiceClient)
+	usage             clients.LegacyTracker
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -95,10 +96,12 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if !ok {
 		return nil, errors.New(errNotProject)
 	}
-	cfg, err := clients.GetConfig(ctx, c.kube, cr)
+
+	cfg, err := clients.GetConfig(ctx, c.kube, c.usage, nil, cr)
 	if err != nil {
 		return nil, err
 	}
+
 	conn, argocdClient := c.newArgocdClientFn(cfg)
 	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
 }

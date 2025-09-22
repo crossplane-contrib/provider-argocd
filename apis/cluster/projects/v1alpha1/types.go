@@ -24,7 +24,7 @@ import (
 // ProjectParameters define the desired state of an ArgoCD Git Project
 type ProjectParameters struct {
 	// SourceRepos contains list of repository URLs which can be used for deployment
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1.Repository
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1.Repository
 	// +crossplane:generate:reference:refFieldName=SourceReposRefs
 	// +crossplane:generate:reference:selectorFieldName=SourceReposSelector
 	// +optional
@@ -76,7 +76,7 @@ type ProjectParameters struct {
 // ApplicationDestination holds information about the application's destination
 type ApplicationDestination struct {
 	// Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.Cluster
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1.Cluster
 	// +crossplane:generate:reference:refFieldName=ServerRef
 	// +crossplane:generate:reference:selectorFieldName=ServerSelector
 	// +optional

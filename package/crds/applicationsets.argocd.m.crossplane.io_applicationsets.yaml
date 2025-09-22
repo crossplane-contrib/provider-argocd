@@ -56,20 +56,6 @@ spec:
           spec:
             description: A ApplicationSetSpec defines the desired state of a ApplicationSet.
             properties:
-              deletionPolicy:
-                default: Delete
-                description: |-
-                  DeletionPolicy specifies what will happen to the underlying external
-                  when this managed resource is deleted - either "Delete" or "Orphan" the
-                  external resource.
-                  This field is planned to be deprecated in favor of the ManagementPolicies
-                  field in a future release. Currently, both could be set independently and
-                  non-default values would be honored if the feature flag is enabled.
-                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
-                enum:
-                - Orphan
-                - Delete
-                type: string
               forProvider:
                 description: ApplicationSetParameters are the configurable fields
                   of a ApplicationSet.
@@ -199,6 +185,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -242,6 +232,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -286,6 +279,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -329,6 +326,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -1598,6 +1598,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -1641,6 +1645,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -1685,6 +1692,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -1728,6 +1739,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -2975,6 +2989,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -3018,6 +3036,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -3062,6 +3083,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -3105,6 +3130,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -4327,6 +4355,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -4370,6 +4402,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -4414,6 +4449,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -4457,6 +4496,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -5741,6 +5783,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -5787,6 +5833,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -5832,6 +5882,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -5879,6 +5933,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -7282,6 +7340,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -7328,6 +7390,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -7373,6 +7439,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -7420,6 +7490,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -8800,6 +8874,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -8846,6 +8924,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -8891,6 +8973,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -8938,6 +9024,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -10293,6 +10383,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -10339,6 +10433,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -10384,6 +10482,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -10431,6 +10533,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -11808,6 +11914,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -11854,6 +11964,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -11899,6 +12013,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -11946,6 +12064,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -13625,6 +13747,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -13671,6 +13797,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -13716,6 +13846,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -13763,6 +13897,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -15472,6 +15610,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -15518,6 +15660,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -15563,6 +15709,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -15610,6 +15760,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -17002,6 +17156,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -17045,6 +17203,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -17089,6 +17250,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -17132,6 +17297,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -18424,6 +18592,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -18470,6 +18642,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -18515,6 +18691,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -18562,6 +18742,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -19965,6 +20149,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -20011,6 +20199,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -20056,6 +20248,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -20103,6 +20299,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -21483,6 +21683,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -21529,6 +21733,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -21574,6 +21782,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -21621,6 +21833,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -22976,6 +23192,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -23022,6 +23242,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -23067,6 +23291,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -23114,6 +23342,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -24491,6 +24723,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -24537,6 +24773,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -24582,6 +24822,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -24629,6 +24873,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -26308,6 +26556,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -26354,6 +26606,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -26399,6 +26655,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -26446,6 +26706,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -28155,6 +28419,10 @@ spec:
                                                         description: Name of the referenced
                                                           object.
                                                         type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           referencing.
@@ -28201,6 +28469,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -28246,6 +28518,10 @@ spec:
                                                       name:
                                                         description: Name of the referenced
                                                           object.
+                                                        type: string
+                                                      namespace:
+                                                        description: Namespace of
+                                                          the referenced object
                                                         type: string
                                                       policy:
                                                         description: Policies for
@@ -28293,6 +28569,10 @@ spec:
                                                           an object with matching
                                                           labels is selected.
                                                         type: object
+                                                      namespace:
+                                                        description: Namespace for
+                                                          the selector
+                                                        type: string
                                                       policy:
                                                         description: Policies for
                                                           selection.
@@ -29689,6 +29969,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -29732,6 +30016,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -29776,6 +30063,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -29819,6 +30110,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -31057,6 +31351,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -31100,6 +31398,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -31144,6 +31445,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -31187,6 +31492,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -32720,6 +33028,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -32763,6 +33075,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -32807,6 +33122,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -32850,6 +33169,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -34412,6 +34734,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -34455,6 +34781,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -34499,6 +34828,10 @@ spec:
                                               description: Name of the referenced
                                                 object.
                                               type: string
+                                            namespace:
+                                              description: Namespace of the referenced
+                                                object
+                                              type: string
                                             policy:
                                               description: Policies for referencing.
                                               properties:
@@ -34542,6 +34875,9 @@ spec:
                                               description: MatchLabels ensures an
                                                 object with matching labels is selected.
                                               type: object
+                                            namespace:
+                                              description: Namespace for the selector
+                                              type: string
                                             policy:
                                               description: Policies for selection.
                                               properties:
@@ -35898,6 +36234,9 @@ spec:
                                   name:
                                     description: Name of the referenced object.
                                     type: string
+                                  namespace:
+                                    description: Namespace of the referenced object
+                                    type: string
                                   policy:
                                     description: Policies for referencing.
                                     properties:
@@ -35941,6 +36280,9 @@ spec:
                                     description: MatchLabels ensures an object with
                                       matching labels is selected.
                                     type: object
+                                  namespace:
+                                    description: Namespace for the selector
+                                    type: string
                                   policy:
                                     description: Policies for selection.
                                     properties:
@@ -35983,6 +36325,9 @@ spec:
                                 properties:
                                   name:
                                     description: Name of the referenced object.
+                                    type: string
+                                  namespace:
+                                    description: Namespace of the referenced object
                                     type: string
                                   policy:
                                     description: Policies for referencing.
@@ -36027,6 +36372,9 @@ spec:
                                     description: MatchLabels ensures an object with
                                       matching labels is selected.
                                     type: object
+                                  namespace:
+                                    description: Namespace for the selector
+                                    type: string
                                   policy:
                                     description: Policies for selection.
                                     properties:
@@ -37108,10 +37456,6 @@ spec:
                   through a Crossplane feature flag.
                   ManagementPolicies specify the array of actions Crossplane is allowed to
                   take on the managed and external resources.
-                  This field is planned to replace the DeletionPolicy field in a future
-                  release. Currently, both could be set independently and non-default
-                  values would be honored if the feature flag is enabled. If both are
-                  custom, the DeletionPolicy field will be ignored.
                   See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
                   and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
                 items:
@@ -37129,41 +37473,21 @@ spec:
                 type: array
               providerConfigRef:
                 default:
+                  kind: ClusterProviderConfig
                   name: default
                 description: |-
                   ProviderConfigReference specifies how the provider that will be used to
                   create, observe, update, and delete this managed resource should be
                   configured.
                 properties:
+                  kind:
+                    description: Kind of the referenced object.
+                    type: string
                   name:
                     description: Name of the referenced object.
                     type: string
-                  policy:
-                    description: Policies for referencing.
-                    properties:
-                      resolution:
-                        default: Required
-                        description: |-
-                          Resolution specifies whether resolution of this reference is required.
-                          The default is 'Required', which means the reconcile will fail if the
-                          reference cannot be resolved. 'Optional' means this reference will be
-                          a no-op if it cannot be resolved.
-                        enum:
-                        - Required
-                        - Optional
-                        type: string
-                      resolve:
-                        description: |-
-                          Resolve specifies when this reference should be resolved. The default
-                          is 'IfNotPresent', which will attempt to resolve the reference only when
-                          the corresponding field is not present. Use 'Always' to resolve the
-                          reference on every reconcile.
-                        enum:
-                        - Always
-                        - IfNotPresent
-                        type: string
-                    type: object
                 required:
+                - kind
                 - name
                 type: object
               writeConnectionSecretToRef:
@@ -37176,12 +37500,8 @@ spec:
                   name:
                     description: Name of the secret.
                     type: string
-                  namespace:
-                    description: Namespace of the secret.
-                    type: string
                 required:
                 - name
-                - namespace
                 type: object
             required:
             - forProvider

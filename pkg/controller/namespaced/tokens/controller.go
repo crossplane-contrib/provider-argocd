@@ -22,7 +22,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/namespaced/projects/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/projects"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
@@ -73,6 +73,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 type connector struct {
 	kube              client.Client
 	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, project.ProjectServiceClient)
+	usage             clients.ModernTracker
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -80,7 +81,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if !ok {
 		return nil, errors.New(errNotToken)
 	}
-	cfg, err := clients.GetConfig(ctx, c.kube, cr)
+	cfg, err := clients.GetConfig(ctx, c.kube, nil, c.usage, cr)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +304,7 @@ func (e *external) upsertConnectionSecret(ctx context.Context, token *v1alpha1.T
 	if token.GetWriteConnectionSecretToReference() == nil {
 		return nil
 	}
-	secret := resource.ConnectionSecretFor(token, v1alpha1.TokenGroupVersionKind)
+	secret := resource.LocalConnectionSecretFor(token, v1alpha1.TokenGroupVersionKind)
 	secret.Data["token"] = data
 	if err := e.kube.Create(ctx, secret); err != nil {
 		if kerrors.IsAlreadyExists(err) {

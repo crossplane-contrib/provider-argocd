@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 	extv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -157,35 +158,35 @@ type HydrateTo struct {
 // ApplicationDestination holds information about the application's destination
 type ApplicationDestination struct {
 	// Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.Cluster
-	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.ServerAddress()
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/namespaced/cluster/v1alpha1.Cluster
+	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/namespaced/cluster/v1alpha1.ServerAddress()
 	// +crossplane:generate:reference:refFieldName=ServerRef
 	// +crossplane:generate:reference:selectorFieldName=ServerSelector
 	// +optional
 	Server *string `json:"server,omitempty"`
 	// ServerRef is a reference to Cluster used to set Server
 	// +optional
-	ServerRef *xpv1.Reference `json:"serverRef,omitempty"`
+	ServerRef *xpv1.NamespacedReference `json:"serverRef,omitempty"`
 	// ServerSelector selects references to Cluster used to set Server
 	// +optional
-	ServerSelector *xpv1.Selector `json:"serverSelector,omitempty"`
+	ServerSelector *xpv1.NamespacedSelector `json:"serverSelector,omitempty"`
 	// Namespace specifies the target namespace for the application's resources.
 	// The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
 	// +optional
 	Namespace *string `json:"namespace,omitempty"`
 	// Name is an alternate way of specifying the target cluster by its symbolic name
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.Cluster
-	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.ServerName()
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/namespaced/cluster/v1alpha1.Cluster
+	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/namespaced/cluster/v1alpha1.ServerName()
 	// +crossplane:generate:reference:refFieldName=NameRef
 	// +crossplane:generate:reference:selectorFieldName=NameSelector
 	// +optional
 	Name *string `json:"name,omitempty"`
 	// NameRef is a reference to a Cluster used to set Name
 	// +optional
-	NameRef *xpv1.Reference `json:"nameRef,omitempty"`
+	NameRef *xpv1.NamespacedReference `json:"nameRef,omitempty"`
 	// NameSelector is a reference to a Cluster used to set Name
 	// +optional
-	NameSelector *xpv1.Selector `json:"nameSelector,omitempty"`
+	NameSelector *xpv1.NamespacedSelector `json:"nameSelector,omitempty"`
 	// contains filtered or unexported fields
 }
 
@@ -198,8 +199,8 @@ type ConnectionState struct {
 
 // A ApplicationSpec defines the desired state of an ArgoCD Application.
 type ApplicationSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       ApplicationParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              ApplicationParameters `json:"forProvider"`
 }
 
 // A ApplicationStatus represents the observed state of an ArgoCD Application.

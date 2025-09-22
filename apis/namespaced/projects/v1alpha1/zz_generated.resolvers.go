@@ -20,9 +20,8 @@ package v1alpha1
 
 import (
 	"context"
-	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
-	v1alpha12 "github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1"
-	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
+	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/cluster/v1alpha1"
+	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/repositories/v1alpha1"
 	reference "github.com/crossplane/crossplane-runtime/v2/pkg/reference"
 	errors "github.com/pkg/errors"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
@@ -30,13 +29,13 @@ import (
 
 // ResolveReferences of this Project.
 func (mg *Project) ResolveReferences(ctx context.Context, c client.Reader) error {
-	r := reference.NewAPIResolver(c, mg)
+	r := reference.NewAPINamespacedResolver(c, mg)
 
-	var rsp reference.ResolutionResponse
-	var mrsp reference.MultiResolutionResponse
+	var rsp reference.NamespacedResolutionResponse
+	var mrsp reference.MultiNamespacedResolutionResponse
 	var err error
 
-	mrsp, err = r.ResolveMultiple(ctx, reference.MultiResolutionRequest{
+	mrsp, err = r.ResolveMultiple(ctx, reference.MultiNamespacedResolutionRequest{
 		CurrentValues: mg.Spec.ForProvider.SourceRepos,
 		Extract:       reference.ExternalName(),
 		Namespace:     mg.GetNamespace(),
@@ -54,7 +53,7 @@ func (mg *Project) ResolveReferences(ctx context.Context, c client.Reader) error
 	mg.Spec.ForProvider.SourceReposRefs = mrsp.ResolvedReferences
 
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Destinations); i3++ {
-		rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+		rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 			CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Destinations[i3].Server),
 			Extract:      reference.ExternalName(),
 			Namespace:    mg.GetNamespace(),
@@ -78,20 +77,20 @@ func (mg *Project) ResolveReferences(ctx context.Context, c client.Reader) error
 
 // ResolveReferences of this Token.
 func (mg *Token) ResolveReferences(ctx context.Context, c client.Reader) error {
-	r := reference.NewAPIResolver(c, mg)
+	r := reference.NewAPINamespacedResolver(c, mg)
 
-	var rsp reference.ResolutionResponse
+	var rsp reference.NamespacedResolutionResponse
 	var err error
 
-	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Project),
 		Extract:      reference.ExternalName(),
 		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.ProjectRef,
 		Selector:     mg.Spec.ForProvider.ProjectSelector,
 		To: reference.To{
-			List:    &v1alpha12.ProjectList{},
-			Managed: &v1alpha12.Project{},
+			List:    &ProjectList{},
+			Managed: &Project{},
 		},
 	})
 	if err != nil {

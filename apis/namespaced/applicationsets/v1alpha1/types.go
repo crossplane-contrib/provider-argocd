@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -618,8 +619,8 @@ type ApplicationSetTemplateMeta struct {
 
 // A ApplicationSetSpec defines the desired state of a ApplicationSet.
 type ApplicationSetSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       ApplicationSetParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              ApplicationSetParameters `json:"forProvider"`
 }
 
 // A ApplicationSetStatus represents the observed state of a ApplicationSet.

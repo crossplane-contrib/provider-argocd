@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -137,8 +138,8 @@ type ConnectionState struct {
 
 // A RepositorySpec defines the desired state of an ArgoCD Repository.
 type RepositorySpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       RepositoryParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              RepositoryParameters `json:"forProvider"`
 }
 
 // A RepositoryStatus represents the observed state of an ArgoCD Repository.

@@ -20,7 +20,7 @@ package v1alpha1
 
 import (
 	"context"
-	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
+	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/cluster/v1alpha1"
 	reference "github.com/crossplane/crossplane-runtime/v2/pkg/reference"
 	errors "github.com/pkg/errors"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,14 +28,14 @@ import (
 
 // ResolveReferences of this ApplicationSet.
 func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader) error {
-	r := reference.NewAPIResolver(c, mg)
+	r := reference.NewAPINamespacedResolver(c, mg)
 
-	var rsp reference.ResolutionResponse
+	var rsp reference.NamespacedResolutionResponse
 	var err error
 
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].List != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].List.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
 				Namespace:    mg.GetNamespace(),
@@ -56,7 +56,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].List != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].List.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
 				Namespace:    mg.GetNamespace(),
@@ -77,7 +77,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Clusters != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Clusters.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
 				Namespace:    mg.GetNamespace(),
@@ -98,7 +98,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Clusters != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Clusters.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
 				Namespace:    mg.GetNamespace(),
@@ -119,7 +119,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Git != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Git.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
 				Namespace:    mg.GetNamespace(),
@@ -140,7 +140,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Git != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Git.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
 				Namespace:    mg.GetNamespace(),
@@ -161,7 +161,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].SCMProvider != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].SCMProvider.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
 				Namespace:    mg.GetNamespace(),
@@ -182,7 +182,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].SCMProvider != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].SCMProvider.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
 				Namespace:    mg.GetNamespace(),
@@ -203,7 +203,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
 				Namespace:    mg.GetNamespace(),
@@ -224,7 +224,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
 				Namespace:    mg.GetNamespace(),
@@ -245,7 +245,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].PullRequest != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].PullRequest.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
 				Namespace:    mg.GetNamespace(),
@@ -266,7 +266,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].PullRequest != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].PullRequest.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
 				Namespace:    mg.GetNamespace(),
@@ -289,7 +289,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -314,7 +314,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -339,7 +339,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -364,7 +364,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -389,7 +389,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -414,7 +414,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -439,7 +439,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -464,7 +464,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -489,7 +489,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -514,7 +514,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -539,7 +539,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -564,7 +564,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -589,7 +589,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -614,7 +614,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Matrix.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -637,7 +637,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
 				Namespace:    mg.GetNamespace(),
@@ -658,7 +658,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Matrix != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
 				Namespace:    mg.GetNamespace(),
@@ -681,7 +681,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -706,7 +706,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -731,7 +731,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -756,7 +756,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -781,7 +781,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -806,7 +806,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -831,7 +831,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -856,7 +856,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -881,7 +881,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -906,7 +906,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -931,7 +931,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -956,7 +956,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -981,7 +981,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
 						Namespace:    mg.GetNamespace(),
@@ -1006,7 +1006,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
 			for i5 := 0; i5 < len(mg.Spec.ForProvider.Generators[i3].Merge.Generators); i5++ {
 				if mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin != nil {
-					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+					rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
 						Namespace:    mg.GetNamespace(),
@@ -1029,7 +1029,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
 				Namespace:    mg.GetNamespace(),
@@ -1050,7 +1050,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Merge != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
 				Namespace:    mg.GetNamespace(),
@@ -1071,7 +1071,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Plugin != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Plugin.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
 				Namespace:    mg.GetNamespace(),
@@ -1092,7 +1092,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	}
 	for i3 := 0; i3 < len(mg.Spec.ForProvider.Generators); i3++ {
 		if mg.Spec.ForProvider.Generators[i3].Plugin != nil {
-			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+			rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Plugin.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
 				Namespace:    mg.GetNamespace(),
@@ -1111,7 +1111,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 
 		}
 	}
-	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Template.Spec.Destination.Server),
 		Extract:      reference.ExternalName(),
 		Namespace:    mg.GetNamespace(),
@@ -1128,7 +1128,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	mg.Spec.ForProvider.Template.Spec.Destination.Server = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.Template.Spec.Destination.ServerRef = rsp.ResolvedReference
 
-	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Template.Spec.Destination.Name),
 		Extract:      v1alpha1.ServerName(),
 		Namespace:    mg.GetNamespace(),

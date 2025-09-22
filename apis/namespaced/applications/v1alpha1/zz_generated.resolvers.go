@@ -20,7 +20,7 @@ package v1alpha1
 
 import (
 	"context"
-	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
+	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/cluster/v1alpha1"
 	reference "github.com/crossplane/crossplane-runtime/v2/pkg/reference"
 	errors "github.com/pkg/errors"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,12 +28,12 @@ import (
 
 // ResolveReferences of this Application.
 func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) error {
-	r := reference.NewAPIResolver(c, mg)
+	r := reference.NewAPINamespacedResolver(c, mg)
 
-	var rsp reference.ResolutionResponse
+	var rsp reference.NamespacedResolutionResponse
 	var err error
 
-	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Destination.Server),
 		Extract:      v1alpha1.ServerAddress(),
 		Namespace:    mg.GetNamespace(),
@@ -50,7 +50,7 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 	mg.Spec.ForProvider.Destination.Server = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.Destination.ServerRef = rsp.ResolvedReference
 
-	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Destination.Name),
 		Extract:      v1alpha1.ServerName(),
 		Namespace:    mg.GetNamespace(),
@@ -67,7 +67,7 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 	mg.Spec.ForProvider.Destination.Name = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Spec.ForProvider.Destination.NameRef = rsp.ResolvedReference
 
-	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Status.AtProvider.Sync.ComparedTo.Destination.Server),
 		Extract:      v1alpha1.ServerAddress(),
 		Namespace:    mg.GetNamespace(),
@@ -84,7 +84,7 @@ func (mg *Application) ResolveReferences(ctx context.Context, c client.Reader) e
 	mg.Status.AtProvider.Sync.ComparedTo.Destination.Server = reference.ToPtrValue(rsp.ResolvedValue)
 	mg.Status.AtProvider.Sync.ComparedTo.Destination.ServerRef = rsp.ResolvedReference
 
-	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
+	rsp, err = r.Resolve(ctx, reference.NamespacedResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Status.AtProvider.Sync.ComparedTo.Destination.Name),
 		Extract:      v1alpha1.ServerName(),
 		Namespace:    mg.GetNamespace(),

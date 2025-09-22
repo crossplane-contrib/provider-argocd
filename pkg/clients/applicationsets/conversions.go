@@ -10,7 +10,7 @@ import (
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
 )
 
-// Converter helps to convert ArgoCD types to api types of this provider and vise-versa
+// ClusterConverter helps to convert ArgoCD types to api types of this provider and vise-versa
 // From & To shall both be defined for each type conversion, to prevent diverge from ArgoCD Types
 // goverter:converter
 // goverter:useZeroValueOnPointerInconsistency
@@ -22,7 +22,7 @@ import (
 // goverter:output:file ./zz_generated.conversion.go
 // goverter:output:package github.com/crossplane-contrib/provider-argocd/pkg/clients/applicationsets
 // +k8s:deepcopy-gen=false
-type Converter interface {
+type ClusterConverter interface {
 
 	// goverter:ignore ServerRef
 	// goverter:ignore ServerSelector
@@ -36,7 +36,7 @@ type Converter interface {
 	// goverter:ignore AppsetNamespace
 	FromArgoApplicationSetSpec(in *argocdv1alpha1.ApplicationSetSpec) *v1alpha1.ApplicationSetParameters
 
-	FromArgoApplicationSetStatus(in *argocdv1alpha1.ApplicationSetStatus) *v1alpha1.ArgoApplicationSetStatus
+	FromArgoApplicationSetStatus(in *argocdv1alpha1.ApplicationSetStatus) v1alpha1.ArgoApplicationSetStatus
 	ToArgoApplicationSetStatus(in *v1alpha1.ArgoApplicationSetStatus) *argocdv1alpha1.ApplicationSetStatus
 }
 

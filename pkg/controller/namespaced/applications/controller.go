@@ -36,7 +36,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/namespaced/applications/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/applications"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
@@ -87,6 +87,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 type connector struct {
 	kube              client.Client
 	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, applications.ServiceClient)
+	usage             clients.ModernTracker
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -94,7 +95,8 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if !ok {
 		return nil, errors.New(errNotApplication)
 	}
-	cfg, err := clients.GetConfig(ctx, c.kube, cr)
+
+	cfg, err := clients.GetConfig(ctx, c.kube, nil, c.usage, cr)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +201,7 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalDelete{}, errors.New(errNotApplication)
 	}
 	query := application.ApplicationDeleteRequest{
-		Name:              clients.StringToPtr(meta.GetExternalName(cr)),
+		Name:              ptr.To(meta.GetExternalName(cr)),
 		AppNamespace:      cr.Spec.ForProvider.AppNamespace,
 		Cascade:           cr.Spec.ForProvider.DeleteCascade,
 		PropagationPolicy: cr.Spec.ForProvider.DeletePropagationPolicy,
@@ -229,13 +231,13 @@ func generateApplicationObservation(app *argocdv1alpha1.Application) v1alpha1.Ar
 		return v1alpha1.ArgoApplicationStatus{}
 	}
 
-	converter := &applications.ConverterImpl{}
+	converter := &applications.NamespacedConverterImpl{}
 	status := converter.FromArgoApplicationStatus(&app.Status)
 	return *status
 }
 
 func generateCreateApplicationRequest(cr *v1alpha1.Application) *application.ApplicationCreateRequest {
-	converter := &applications.ConverterImpl{}
+	converter := &applications.NamespacedConverterImpl{}
 
 	spec := converter.ToArgoApplicationSpec(&cr.Spec.ForProvider)
 
@@ -258,7 +260,7 @@ func generateCreateApplicationRequest(cr *v1alpha1.Application) *application.App
 }
 
 func generateUpdateApplicationRequest(cr *v1alpha1.Application) *application.ApplicationUpdateRequest {
-	converter := applications.ConverterImpl{}
+	converter := applications.NamespacedConverterImpl{}
 
 	spec := converter.ToArgoApplicationSpec(&cr.Spec.ForProvider)
 

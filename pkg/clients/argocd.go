@@ -18,21 +18,26 @@ package clients
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/argoproj/argo-cd/v3/pkg/apiclient"
 	argocd "github.com/argoproj/argo-cd/v3/pkg/apiclient"
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/google/go-cmp/cmp"
-	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	kclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
+	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/common"
+	namespacedv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/v1alpha1"
 )
 
 // NewClient creates new argocd Client with provided argocd Configurations/Credentials.
@@ -49,39 +54,47 @@ func NewClient(opts *argocd.ClientOptions) *argocd.Client {
 
 // GetConfig constructs a Config that can be used to authenticate to argocd
 // API by the argocd Go client
-func GetConfig(ctx context.Context, c client.Client, mg resource.LegacyManaged) (*argocd.ClientOptions, error) {
-	switch {
-	case mg.GetProviderConfigReference() != nil:
-		return UseProviderConfig(ctx, c, mg)
+func GetConfig(ctx context.Context,
+	c client.Client,
+	lt LegacyTracker,
+	mt ModernTracker,
+	mg resource.Managed,
+) (*apiclient.ClientOptions, error) {
+	var (
+		cfg *common.ProviderConfigSpec
+		err error
+	)
+
+	switch m := mg.(type) {
+	case resource.LegacyManaged:
+		cfg, err = resolveProviderConfigLegacy(ctx, c, m, lt)
+	case resource.ModernManaged:
+		cfg, err = resolveProviderConfigModern(ctx, c, m, mt)
 	default:
-		return nil, errors.New("providerConfigRef is not given")
+		return nil, errors.New("resource is not a managed")
 	}
+
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot resolve provider config")
+	}
+
+	return getAPIOpts(ctx, c, *cfg)
 }
 
 // UseProviderConfig to produce a config that can be used to authenticate to AWS.
-func UseProviderConfig(ctx context.Context, c client.Client, mg resource.LegacyManaged) (*argocd.ClientOptions, error) {
-	pc := &v1alpha1.ProviderConfig{}
-	if err := c.Get(ctx, types.NamespacedName{Name: mg.GetProviderConfigReference().Name}, pc); err != nil {
-		return nil, errors.Wrap(err, "cannot get referenced Provider")
-	}
+func getAPIOpts(ctx context.Context, c client.Client, cfg common.ProviderConfigSpec) (*argocd.ClientOptions, error) {
+	insecure := ptr.Deref(cfg.Insecure, false)
+	plaintext := ptr.Deref(cfg.PlainText, false)
 
-	t := resource.NewLegacyProviderConfigUsageTracker(c, &v1alpha1.ProviderConfigUsage{})
-	if err := t.Track(ctx, mg); err != nil {
-		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
-	}
-
-	insecure := ptr.Deref(pc.Spec.Insecure, false)
-	plaintext := ptr.Deref(pc.Spec.PlainText, false)
-
-	authToken, err := authFromCredentials(ctx, c, pc.Spec.Credentials)
+	authToken, err := authFromCredentials(ctx, c, cfg.Credentials)
 	if err != nil {
 		return nil, err
 	}
-	grpcWeb := ptr.Deref(pc.Spec.GRPCWeb, false)
-	grpcWebRoot := ptr.Deref(pc.Spec.GRPCWebRootPath, "")
+	grpcWeb := ptr.Deref(cfg.GRPCWeb, false)
+	grpcWebRoot := ptr.Deref(cfg.GRPCWebRootPath, "")
 
 	return &argocd.ClientOptions{
-		ServerAddr:      pc.Spec.ServerAddr,
+		ServerAddr:      cfg.ServerAddr,
 		Insecure:        insecure,
 		PlainText:       plaintext,
 		AuthToken:       authToken,
@@ -90,7 +103,7 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.LegacyM
 	}, nil
 }
 
-func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.ProviderCredentials) (string, error) { //nolint:gocyclo
+func authFromCredentials(ctx context.Context, c client.Client, creds common.ProviderCredentials) (string, error) { //nolint:gocyclo
 	switch s := creds.Source; s {
 	case xpv1.CredentialsSourceSecret:
 		csr := creds.SecretRef
@@ -112,7 +125,7 @@ func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.Pr
 			return "", errors.Wrap(err, "cannot read credentials file")
 		}
 		return string(token), nil
-	case v1alpha1.CredentialsSourceAzureWorkloadIdentity:
+	case common.CredentialsSourceAzureWorkloadIdentity:
 		options := &azidentity.WorkloadIdentityCredentialOptions{}
 		if creds.AzureWorkloadIdentityOptions != nil {
 			if creds.AzureWorkloadIdentityOptions.ClientID != nil {
@@ -142,30 +155,81 @@ func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.Pr
 	}
 }
 
-// LateInitializeStringPtr returns `from` if `in` is nil and `from` is non-empty,
-// in other cases it returns `in`.
-func LateInitializeStringPtr(in *string, from string) *string {
-	if in == nil && from != "" {
-		return &from
+func resolveProviderConfigLegacy(ctx context.Context, client kclient.Client, mg resource.LegacyManaged, lt LegacyTracker) (*common.ProviderConfigSpec, error) {
+	configRef := mg.GetProviderConfigReference()
+	if configRef == nil {
+		return nil, errProviderConfigNotSet
 	}
-	return in
+
+	pc := &clusterv1alpha1.ProviderConfig{}
+	if err := client.Get(ctx, types.NamespacedName{Name: configRef.Name}, pc); err != nil {
+		return nil, errors.Wrap(err, errGetProviderConfig.Error())
+	}
+
+	if err := lt.Track(ctx, mg); err != nil {
+		return nil, errors.Wrap(err, errFailedToTrackUsage.Error())
+	}
+
+	return legacyToModernProviderConfigSpec(pc)
 }
 
-// LateInitializeInt64Ptr returns `from` if `in` is nil and `from` is non-empty,
-// in other cases it returns `in`.
-func LateInitializeInt64Ptr(in *int64, from int64) *int64 {
-	if in == nil && from != 0 {
-		return &from
+func resolveProviderConfigModern(ctx context.Context, crClient kclient.Client, mg resource.ModernManaged, mt ModernTracker) (*common.ProviderConfigSpec, error) {
+	configRef := mg.GetProviderConfigReference()
+	if configRef == nil {
+		return nil, errProviderConfigNotSet
 	}
-	return in
+
+	pcRuntimeObj, err := crClient.Scheme().New(namespacedv1alpha1.SchemeGroupVersion.WithKind(configRef.Kind))
+	if err != nil {
+		return nil, errors.Wrapf(err, "referenced provider config kind %q is invalid for %s/%s", configRef.Kind, mg.GetNamespace(), mg.GetName())
+	}
+	pcObj, ok := pcRuntimeObj.(resource.ProviderConfig)
+	if !ok {
+		return nil, errors.Errorf("referenced provider config kind %q is not a provider config type %s/%s", configRef.Kind, mg.GetNamespace(), mg.GetName())
+	}
+
+	// Namespace will be ignored if the PC is a cluster-scoped type
+	if err := crClient.Get(ctx, types.NamespacedName{Name: configRef.Name, Namespace: mg.GetNamespace()}, pcObj); err != nil {
+		return nil, errors.Wrap(err, errGetProviderConfig.Error())
+	}
+
+	var pcSpec common.ProviderConfigSpec
+	switch pc := pcObj.(type) {
+	case *namespacedv1alpha1.ProviderConfig:
+		enrichLocalSecretRefs(pc, mg)
+		pcSpec = pc.Spec
+	case *namespacedv1alpha1.ClusterProviderConfig:
+		pcSpec = pc.Spec
+	default:
+		// TODO(tydanny)
+		return nil, errors.New("unknown")
+	}
+
+	if err := mt.Track(ctx, mg); err != nil {
+		return nil, errors.Wrap(err, errFailedToTrackUsage.Error())
+	}
+	return &pcSpec, nil
 }
 
-// StringToPtr converts string to *string
-func StringToPtr(s string) *string {
-	if s == "" {
-		return nil
+func legacyToModernProviderConfigSpec(pc *clusterv1alpha1.ProviderConfig) (*common.ProviderConfigSpec, error) {
+	// TODO(tydanny): this is hacky and potentially lossy, generate or manually implement
+	if pc == nil {
+		return nil, nil
 	}
-	return &s
+	data, err := json.Marshal(pc.Spec)
+	if err != nil {
+		return nil, err
+	}
+
+	var mSpec common.ProviderConfigSpec
+	err = json.Unmarshal(data, &mSpec)
+	return &mSpec, err
+}
+
+func enrichLocalSecretRefs(pc *namespacedv1alpha1.ProviderConfig, mg resource.Managed) {
+	if pc != nil && pc.Spec.Credentials.SecretRef != nil {
+		pc.Spec.Credentials.SecretRef.Namespace = mg.GetNamespace()
+	}
 }
 
 // StringValue converts a *string to string
@@ -190,6 +254,24 @@ func BoolValue(ptr *bool) bool {
 		return *ptr
 	}
 	return false
+}
+
+// LateInitializeStringPtr returns `from` if `in` is nil and `from` is non-empty,
+// in other cases it returns `in`.
+func LateInitializeStringPtr(in *string, from string) *string {
+	if in == nil && from != "" {
+		return &from
+	}
+	return in
+}
+
+// LateInitializeInt64Ptr returns `from` if `in` is nil and `from` is non-empty,
+// in other cases it returns `in`.
+func LateInitializeInt64Ptr(in *int64, from int64) *int64 {
+	if in == nil && from != 0 {
+		return &from
+	}
+	return in
 }
 
 // IsBoolEqualToBoolPtr compares a *bool with bool

@@ -41,7 +41,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/namespaced/cluster/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
@@ -94,6 +94,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 type connector struct {
 	kube              client.Client
 	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, argocdcluster.ClusterServiceClient)
+	usage             clients.ModernTracker
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -101,10 +102,12 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if !ok {
 		return nil, errors.New(errNotCluster)
 	}
-	cfg, err := clients.GetConfig(ctx, c.kube, cr)
+
+	cfg, err := clients.GetConfig(ctx, c.kube, nil, c.usage, cr)
 	if err != nil {
 		return nil, err
 	}
+
 	conn, argocdClient := c.newArgocdClientFn(cfg)
 	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
 }

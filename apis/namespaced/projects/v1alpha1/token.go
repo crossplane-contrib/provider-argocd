@@ -2,24 +2,25 @@ package v1alpha1
 
 import (
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // TokenParameters define the desired state of an ArgoCD Project Token
 type TokenParameters struct {
 	// Project is the project associated with the token
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1.Project
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/namespaced/projects/v1alpha1.Project
 	// +crossplane:generate:reference:refFieldName=ProjectRef
 	// +crossplane:generate:reference:selectorFieldName=ProjectSelector
 	Project *string `json:"project"`
 
 	// ProjectRefs is a reference to a Project used to set Project
 	// +optional
-	ProjectRef *xpv1.Reference `json:"projectRef,omitempty"`
+	ProjectRef *xpv1.NamespacedReference `json:"projectRef,omitempty"`
 
 	// ProjectSelector selects reference to a Project used to ProjectRef
 	// +optional
-	ProjectSelector *xpv1.Selector `json:"projectSelector,omitempty"`
+	ProjectSelector *xpv1.NamespacedSelector `json:"projectSelector,omitempty"`
 
 	// Role is the role associated with the token.
 	Role string `json:"role"`
@@ -59,8 +60,8 @@ type TokenObservation struct {
 
 // A TokenSpec defines the desired state of an ArgoCD Token.
 type TokenSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       TokenParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              TokenParameters `json:"forProvider"`
 }
 
 // A TokenStatus represents the observed state of an ArgoCD Project Token.

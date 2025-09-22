@@ -20,9 +20,8 @@ package v1alpha1
 
 import (
 	"context"
-	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
-	v1alpha12 "github.com/crossplane-contrib/provider-argocd/apis/projects/v1alpha1"
-	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/repositories/v1alpha1"
+	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
+	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
 	reference "github.com/crossplane/crossplane-runtime/v2/pkg/reference"
 	errors "github.com/pkg/errors"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
@@ -90,8 +89,8 @@ func (mg *Token) ResolveReferences(ctx context.Context, c client.Reader) error {
 		Reference:    mg.Spec.ForProvider.ProjectRef,
 		Selector:     mg.Spec.ForProvider.ProjectSelector,
 		To: reference.To{
-			List:    &v1alpha12.ProjectList{},
-			Managed: &v1alpha12.Project{},
+			List:    &ProjectList{},
+			Managed: &Project{},
 		},
 	})
 	if err != nil {

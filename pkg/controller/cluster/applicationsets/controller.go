@@ -84,6 +84,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 type connector struct {
 	kube              client.Client
 	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, appsets.ServiceClient)
+	tracker           clients.LegacyTracker
 }
 
 // Connect typically produces an ExternalClient by:
@@ -97,7 +98,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, errors.New(errNotApplicationSet)
 	}
 
-	cfg, err := clients.GetConfig(ctx, c.kube, cr)
+	cfg, err := clients.GetConfig(ctx, c.kube, c.tracker, nil, cr)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +153,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func generateApplicationObservation(appset *argov1alpha1.ApplicationSet) v1alpha1.ArgoApplicationSetStatus {
-	converter := &appsets.ConverterImpl{}
+	converter := &appsets.ClusterConverterImpl{}
 	return converter.FromArgoApplicationSetStatus(&appset.Status)
 }
 
@@ -170,7 +171,7 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (e *external) generateCreateApplicationSetRequest(cr *v1alpha1.ApplicationSet) *applicationset.ApplicationSetCreateRequest {
-	converter := &appsets.ConverterImpl{}
+	converter := &appsets.ClusterConverterImpl{}
 	targetSpec := converter.ToArgoApplicationSetSpec(&cr.Spec.ForProvider)
 
 	req := &applicationset.ApplicationSetCreateRequest{

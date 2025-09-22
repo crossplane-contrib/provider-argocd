@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -202,8 +203,8 @@ type ClusterObservation struct {
 
 // A ClusterSpec defines the desired state of an ArgoCD Cluster.
 type ClusterSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       ClusterParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              ClusterParameters `json:"forProvider"`
 }
 
 // A ClusterStatus represents the observed state of an ArgoCD Cluster.

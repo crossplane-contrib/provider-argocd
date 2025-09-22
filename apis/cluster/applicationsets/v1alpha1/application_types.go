@@ -143,7 +143,7 @@ type HydrateTo struct {
 // ApplicationDestination holds information about the application's destination
 type ApplicationDestination struct {
 	// Server specifies the URL of the target cluster and must be set to the Kubernetes control plane API
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.Cluster
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1.Cluster
 	// +crossplane:generate:reference:refFieldName=ServerRef
 	// +crossplane:generate:reference:selectorFieldName=ServerSelector
 	// +optional
@@ -159,8 +159,8 @@ type ApplicationDestination struct {
 	// +optional
 	Namespace *string `json:"namespace,omitempty"`
 	// Name is an alternate way of specifying the target cluster by its symbolic name
-	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.Cluster
-	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1.ServerName()
+	// +crossplane:generate:reference:type=github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1.Cluster
+	// +crossplane:generate:reference:extractor=github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1.ServerName()
 	// +crossplane:generate:reference:refFieldName=NameRef
 	// +crossplane:generate:reference:selectorFieldName=NameSelector
 	// +optional
