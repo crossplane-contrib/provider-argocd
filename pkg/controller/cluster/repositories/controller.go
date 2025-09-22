@@ -58,7 +58,7 @@ const (
 
 // Setup adds a controller that reconciles repositories.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
-	name := managed.ControllerName(v1alpha1.RepositoryKind)
+	name := managed.ControllerName(v1alpha1.RepositoryGroupKind)
 
 	opts := []managed.ReconcilerOption{
 		managed.WithExternalConnecter(&connector{

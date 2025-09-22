@@ -60,7 +60,7 @@ const (
 
 // Setup adds a controller that reconciles cluster.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
-	name := managed.ControllerName(v1alpha1.ClusterKind)
+	name := managed.ControllerName(v1alpha1.ClusterGroupKind)
 
 	opts := []managed.ReconcilerOption{
 		managed.WithExternalConnecter(&connector{

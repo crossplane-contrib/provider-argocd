@@ -53,7 +53,7 @@ const (
 
 // Setup adds a controller that reconciles applications.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
-	name := managed.ControllerName(v1alpha1.ApplicationKind)
+	name := managed.ControllerName(v1alpha1.ApplicationGroupKind)
 
 	opts := []managed.ReconcilerOption{
 		managed.WithExternalConnecter(&connector{

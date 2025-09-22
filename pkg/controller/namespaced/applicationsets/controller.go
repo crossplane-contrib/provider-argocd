@@ -50,7 +50,7 @@ const (
 
 // Setup adds a controller that reconciles ApplicationSet managed resources.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
-	name := managed.ControllerName(v1alpha1.ApplicationSetKind)
+	name := managed.ControllerName(v1alpha1.ApplicationSetGroupKind)
 
 	opts := []managed.ReconcilerOption{
 		managed.WithExternalConnecter(&connector{
