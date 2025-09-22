@@ -33,6 +33,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 
 	of := resource.ProviderConfigKinds{
 		Config:    v1alpha1.ProviderConfigGroupVersionKind,
+		Usage:     v1alpha1.ProviderConfigUsageGroupVersionKind,
 		UsageList: v1alpha1.ProviderConfigUsageListGroupVersionKind,
 	}
 
