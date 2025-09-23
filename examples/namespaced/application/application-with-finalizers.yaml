@@ -1,0 +1,21 @@
+---
+# Example using finalizers
+apiVersion: applications.argocd.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  name: example-application-finalizers
+  namespace: example
+spec:
+  providerConfigRef:
+    name: argocd-provider
+  forProvider:
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    destination:
+      namespace: default
+      server: https://kubernetes.default.svc
+    project: default
+    source:
+      repoURL: https://github.com/bonilla-cesar/argocd
+      path: resources/cm
+      targetRevision: HEAD

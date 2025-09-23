@@ -64,9 +64,9 @@ fi
 # setup package cache
 echo_step "setting up local package cache"
 CACHE_PATH="${projectdir}/.work/inttest-package-cache"
-mkdir -p "${CACHE_PATH}"
+mkdir -p "${CACHE_PATH}/xpkg.crossplane.io"
 echo "created cache dir at ${CACHE_PATH}"
-"${UP}" alpha xpkg xp-extract --from-xpkg "${OUTPUT_DIR}"/xpkg/"${HOSTOS}"_"${SAFEHOSTARCH}"/"${PACKAGE_NAME}"-"${VERSION}".xpkg -o "${CACHE_PATH}/${PACKAGE_NAME}.gz" && chmod 644 "${CACHE_PATH}/${PACKAGE_NAME}.gz"
+"${UP}" alpha xpkg xp-extract --from-xpkg "${OUTPUT_DIR}"/xpkg/linux_"${SAFEHOSTARCH}"/"${PACKAGE_NAME}"-"${VERSION}".xpkg -o "${CACHE_PATH}/xpkg.crossplane.io/${PACKAGE_NAME}:latest.gz" && chmod 644 "${CACHE_PATH}/xpkg.crossplane.io/${PACKAGE_NAME}:latest.gz"
 
 # create kind cluster with extra mounts
 KIND_NODE_IMAGE="kindest/node:${KIND_NODE_IMAGE_TAG}"
@@ -84,7 +84,7 @@ EOF
 echo "${KIND_CONFIG}" | "${KIND}" create cluster --name="${K8S_CLUSTER}" --wait=5m --image="${KIND_NODE_IMAGE}" --config=-
 
 # tag controller image and load it into kind cluster
-PACKAGE_NAME_REF="xpkg.upbound.io/$PACKAGE_NAME"
+PACKAGE_NAME_REF="xpkg.crossplane.io/$PACKAGE_NAME"
 docker tag "${CONTROLLER_IMAGE}" "${PACKAGE_NAME_REF}"
 "${KIND}" load docker-image "${PACKAGE_NAME_REF}" --name="${K8S_CLUSTER}"
 
@@ -132,7 +132,7 @@ echo "${PVC_YAML}" | "${KUBECTL}" create -f -
 # install crossplane from stable channel
 echo_step "installing crossplane from stable channel"
 "${HELM}" repo add crossplane-stable https://charts.crossplane.io/stable/
-chart_version="1.14.5"
+chart_version="2.0.2"
 echo_info "using crossplane version ${chart_version}"
 echo
 # we replace empty dir with our PVC so that the /cache dir in the kind node
@@ -151,7 +151,7 @@ kind: Provider
 metadata:
   name: "${PACKAGE_NAME}"
 spec:
-  package: "${PACKAGE_NAME}"
+  package: xpkg.crossplane.io/provider-argocd:latest
   packagePullPolicy: Never
 EOF
 )"
@@ -191,7 +191,7 @@ echo "${INSTALL_YAML}" | "${KUBECTL}" delete -f -
 timeout=60
 current=0
 step=3
-while [[ $(kubectl get providerrevision.pkg.crossplane.io -o name | wc -l) != "0" ]]; do
+while [[ $(kubectl get providerrevision.pkg.crossplane.io -o name | wc -l) -ne 0 ]]; do
   echo "waiting for provider to be deleted for another $step seconds"
   current=$current+$step
   if ! [[ $timeout > $current ]]; then

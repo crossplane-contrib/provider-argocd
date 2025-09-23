@@ -1,0 +1,14 @@
+---
+apiVersion: projects.argocd.crossplane.io/v1alpha1
+kind: Project
+metadata:
+  name: example-project
+  namespace: example
+spec:
+  forProvider:
+    sourceNamespaces:
+      - default
+    projectLabels:
+      argocd.crossplane.io/global-project: "true"
+  providerConfigRef:
+    name: argocd-provider

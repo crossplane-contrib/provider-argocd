@@ -1,0 +1,40 @@
+---
+# Example using a KubeconfigSecretRef
+apiVersion: applications.argocd.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  name: example-application-server-name-ref
+  namespace: example
+spec:
+  providerConfigRef:
+    name: argocd-provider
+  forProvider:
+    destination:
+      namespace: default
+      serverSelector:
+        matchLabels:
+          purpose: dev
+    project: default
+    source:
+      repoURL: https://github.com/stefanprodan/podinfo/
+      path: charts/podinfo
+      targetRevision: HEAD
+---
+apiVersion: applications.argocd.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  name: example-application-destination-name-ref
+spec:
+  providerConfigRef:
+    name: argocd-provider
+  forProvider:
+    destination:
+      namespace: default
+      nameSelector:
+        matchLabels:
+          purpose: dev
+    project: default
+    source:
+      repoURL: https://github.com/stefanprodan/podinfo/
+      path: charts/podinfo
+      targetRevision: HEAD

@@ -1,0 +1,11 @@
+---
+apiVersion: projects.argocd.crossplane.io/v1alpha1
+kind: Token
+metadata:
+  name: example-token
+  namespace: example
+spec:
+  forProvider:
+    project: example-project
+    role: example-role
+    id: example-token
