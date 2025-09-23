@@ -1,0 +1,15 @@
+---
+apiVersion: cluster.argocd.crossplane.io/v1alpha1
+kind: Cluster
+metadata:
+  name: example-cluster
+  namespace: example
+spec:
+  forProvider:
+    server: https://kubernetes.default.svc
+    name: example-cluster
+    config:
+      tlsClientConfig:
+        insecure: true
+  providerConfigRef:
+    name: argocd-provider

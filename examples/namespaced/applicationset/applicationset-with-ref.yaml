@@ -1,0 +1,35 @@
+---
+apiVersion: applicationsets.argocd.crossplane.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: example-application-ref
+  namespace: example
+spec:
+  providerConfigRef:
+    name: argocd-provider
+  forProvider:
+    generators:
+      - list:
+          elements:
+            - cluster: engineering-dev
+            - cluster: engineering-prod
+    template:
+      metadata:
+        name: '{{cluster}}-guestbook'
+      spec:
+        project: default
+        syncPolicy:
+          syncOptions:
+            - CreateNamespace=true
+          automated:
+            prune: true
+            selfHeal: true
+        source:
+          repoURL: https://github.com/argoproj/argo-cd.git
+          targetRevision: HEAD
+          path: applicationset/examples/list-generator/guestbook/{{cluster}}
+        destination:
+          namespace: guestbook-{{cluster}}
+          nameSelector:
+            matchLabels:
+              purpose: dev

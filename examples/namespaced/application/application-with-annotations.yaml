@@ -1,0 +1,22 @@
+---
+# Example using annotations
+apiVersion: applications.argocd.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  name: example-application-annotations
+  namespace: example
+spec:
+  providerConfigRef:
+    name: argocd-provider
+  forProvider:
+    annotations:
+      notifications.argoproj.io/subscribe.on-deployed.slack: slack-channel-name
+      notifications.argoproj.io/subscribe.on-failure.slack: slack-channel-name
+    destination:
+      namespace: default
+      server: https://kubernetes.default.svc
+    project: default
+    source:
+      repoURL: https://github.com/bonilla-cesar/argocd
+      path: resources/cm
+      targetRevision: HEAD

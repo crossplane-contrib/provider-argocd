@@ -1,0 +1,53 @@
+---
+# argocd provider that references the secret credentials
+apiVersion: argocd.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: argocd-provider
+  namespace: example
+spec:
+  serverAddr: argocd-server.argocd.svc:443
+  insecure: true
+  plainText: false
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: argocd-credentials
+      key: authToken
+---
+# argocd provider that uses gRPC-web
+apiVersion: argocd.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: argocd-provider
+  namespace: example
+spec:
+  serverAddr: argocd-server.argocd.svc:443
+  insecure: true
+  plainText: false
+  grpcWeb: true
+  grpcWebRootPath: /
+  credentials:
+    source: Secret
+    secretRef:
+      namespace: crossplane-system
+      name: argocd-credentials
+      key: authToken
+---
+# argocd provider that uses AzureWorkloadIdentity authentication
+apiVersion: argocd.crossplane.io/v1alpha1
+kind: ProviderConfig
+metadata:
+  name: argocd-provider
+  namespace: example
+spec:
+  serverAddr: argocd-server.argocd.svc:443
+  credentials:
+    source: AzureWorkloadIdentity
+    audiences:
+      - argocd-server.argocd.svc/.default
+    azureWorkloadIdentityOptions:
+      clientID: <client-id> # Optional, defaults to env var
+      tenantID: <tenant-id> # Optional, defaults to env var
+      tokenFilePath: <token-file-path> # Optional, defaults to env var

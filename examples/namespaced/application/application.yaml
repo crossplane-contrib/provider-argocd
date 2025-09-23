@@ -1,0 +1,18 @@
+---
+apiVersion: applications.argocd.crossplane.io/v1alpha1
+kind: Application
+metadata:
+  name: example-application
+  namespace: example
+spec:
+  providerConfigRef:
+    name: argocd-provider
+  forProvider:
+    destination:
+      namespace: default
+      server: https://kubernetes.default.svc
+    project: default
+    source:
+      repoURL: https://github.com/stefanprodan/podinfo/
+      path: charts/podinfo
+      targetRevision: HEAD
