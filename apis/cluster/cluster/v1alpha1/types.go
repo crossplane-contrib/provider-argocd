@@ -25,7 +25,7 @@ import (
 type ClusterParameters struct {
 	// Server is the API server URL of the Kubernetes cluster. Optional if using a kubeconfig
 	// +optional
-	Server *string `json:"server"`
+	Server *string `json:"server,omitempty"`
 	// Name of the cluster. If omitted, will use the server address. Optional if using a kubeconfig
 	// +optional
 	Name *string `json:"name"`
@@ -61,7 +61,7 @@ type ClusterConfig struct {
 	BearerTokenSecretRef *SecretReference `json:"bearerTokenSecretRef,omitempty"`
 	// TLSClientConfig contains settings to enable transport layer security
 	// +optional
-	TLSClientConfig *TLSClientConfig `json:"tlsClientConfig"`
+	TLSClientConfig *TLSClientConfig `json:"tlsClientConfig,omitempty"`
 	// AWSAuthConfig contains IAM authentication configuration
 	// +optional
 	AWSAuthConfig *AWSAuthConfig `json:"awsAuthConfig,omitempty"`
