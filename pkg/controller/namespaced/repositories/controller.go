@@ -42,6 +42,7 @@ import (
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/repositories"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
+	namespacedv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/v1alpha1"
 )
 
 const (
@@ -63,6 +64,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 		managed.WithExternalConnecter(&connector{
 			kube:              mgr.GetClient(),
 			newArgocdClientFn: repositories.NewRepositoryServiceClient,
+			usage: 		   resource.NewProviderConfigUsageTracker(mgr.GetClient(), &namespacedv1alpha1.ProviderConfigUsage{}),
 		}),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),

@@ -42,6 +42,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
+	clusterscopev1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
@@ -66,6 +67,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 		managed.WithExternalConnecter(&connector{
 			kube:              mgr.GetClient(),
 			newArgocdClientFn: cluster.NewClusterServiceClient,
+			usage:             resource.NewLegacyProviderConfigUsageTracker(mgr.GetClient(), &clusterscopev1alpha1.ProviderConfigUsage{}),
 		}),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),

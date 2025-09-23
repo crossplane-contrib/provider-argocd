@@ -38,6 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
+	clusterscopev1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	appsets "github.com/crossplane-contrib/provider-argocd/pkg/clients/applicationsets"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
@@ -56,6 +57,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 		managed.WithExternalConnecter(&connector{
 			kube:              mgr.GetClient(),
 			newArgocdClientFn: appsets.NewApplicationSetServiceClient,
+			usage:             resource.NewLegacyProviderConfigUsageTracker(mgr.GetClient(), &clusterscopev1alpha1.ProviderConfigUsage{}),
 		}),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
@@ -84,7 +86,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 type connector struct {
 	kube              client.Client
 	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, appsets.ServiceClient)
-	tracker           clients.LegacyTracker
+	usage             clients.LegacyTracker
 }
 
 // Connect typically produces an ExternalClient by:
@@ -98,7 +100,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, errors.New(errNotApplicationSet)
 	}
 
-	cfg, err := clients.GetConfig(ctx, c.kube, c.tracker, nil, cr)
+	cfg, err := clients.GetConfig(ctx, c.kube, c.usage, nil, cr)
 	if err != nil {
 		return nil, err
 	}
