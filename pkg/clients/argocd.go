@@ -23,8 +23,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	argocd "github.com/argoproj/argo-cd/v3/pkg/apiclient"
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -49,7 +49,7 @@ func NewClient(opts *argocd.ClientOptions) *argocd.Client {
 
 // GetConfig constructs a Config that can be used to authenticate to argocd
 // API by the argocd Go client
-func GetConfig(ctx context.Context, c client.Client, mg resource.Managed) (*argocd.ClientOptions, error) {
+func GetConfig(ctx context.Context, c client.Client, mg resource.LegacyManaged) (*argocd.ClientOptions, error) {
 	switch {
 	case mg.GetProviderConfigReference() != nil:
 		return UseProviderConfig(ctx, c, mg)
@@ -59,13 +59,13 @@ func GetConfig(ctx context.Context, c client.Client, mg resource.Managed) (*argo
 }
 
 // UseProviderConfig to produce a config that can be used to authenticate to AWS.
-func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed) (*argocd.ClientOptions, error) {
+func UseProviderConfig(ctx context.Context, c client.Client, mg resource.LegacyManaged) (*argocd.ClientOptions, error) {
 	pc := &v1alpha1.ProviderConfig{}
 	if err := c.Get(ctx, types.NamespacedName{Name: mg.GetProviderConfigReference().Name}, pc); err != nil {
 		return nil, errors.Wrap(err, "cannot get referenced Provider")
 	}
 
-	t := resource.NewProviderConfigUsageTracker(c, &v1alpha1.ProviderConfigUsage{})
+	t := resource.NewLegacyProviderConfigUsageTracker(c, &v1alpha1.ProviderConfigUsage{})
 	if err := t.Track(ctx, mg); err != nil {
 		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
@@ -91,7 +91,7 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.Managed
 }
 
 func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.ProviderCredentials) (string, error) { //nolint:gocyclo
-	switch s := creds.Source; s { //nolint:exhaustive
+	switch s := creds.Source; s {
 	case xpv1.CredentialsSourceSecret:
 		csr := creds.SecretRef
 		if csr == nil {

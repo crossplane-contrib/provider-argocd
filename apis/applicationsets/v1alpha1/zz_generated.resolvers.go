@@ -21,7 +21,7 @@ package v1alpha1
 import (
 	"context"
 	v1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
-	reference "github.com/crossplane/crossplane-runtime/pkg/reference"
+	reference "github.com/crossplane/crossplane-runtime/v2/pkg/reference"
 	errors "github.com/pkg/errors"
 	client "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -38,6 +38,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].List.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].List.Template.Spec.Destination.ServerRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].List.Template.Spec.Destination.ServerSelector,
 				To: reference.To{
@@ -58,6 +59,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].List.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].List.Template.Spec.Destination.NameRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].List.Template.Spec.Destination.NameSelector,
 				To: reference.To{
@@ -78,6 +80,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Clusters.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Clusters.Template.Spec.Destination.ServerRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Clusters.Template.Spec.Destination.ServerSelector,
 				To: reference.To{
@@ -98,6 +101,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Clusters.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Clusters.Template.Spec.Destination.NameRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Clusters.Template.Spec.Destination.NameSelector,
 				To: reference.To{
@@ -118,6 +122,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Git.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Git.Template.Spec.Destination.ServerRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Git.Template.Spec.Destination.ServerSelector,
 				To: reference.To{
@@ -138,6 +143,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Git.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Git.Template.Spec.Destination.NameRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Git.Template.Spec.Destination.NameSelector,
 				To: reference.To{
@@ -158,6 +164,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].SCMProvider.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].SCMProvider.Template.Spec.Destination.ServerRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].SCMProvider.Template.Spec.Destination.ServerSelector,
 				To: reference.To{
@@ -178,6 +185,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].SCMProvider.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].SCMProvider.Template.Spec.Destination.NameRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].SCMProvider.Template.Spec.Destination.NameSelector,
 				To: reference.To{
@@ -198,6 +206,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource.Template.Spec.Destination.ServerRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource.Template.Spec.Destination.ServerSelector,
 				To: reference.To{
@@ -218,6 +227,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource.Template.Spec.Destination.NameRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].ClusterDecisionResource.Template.Spec.Destination.NameSelector,
 				To: reference.To{
@@ -238,6 +248,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].PullRequest.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].PullRequest.Template.Spec.Destination.ServerRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].PullRequest.Template.Spec.Destination.ServerSelector,
 				To: reference.To{
@@ -258,6 +269,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].PullRequest.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].PullRequest.Template.Spec.Destination.NameRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].PullRequest.Template.Spec.Destination.NameSelector,
 				To: reference.To{
@@ -280,6 +292,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -304,6 +317,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].List.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -328,6 +342,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -352,6 +367,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Clusters.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -376,6 +392,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -400,6 +417,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Git.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -424,6 +442,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -448,6 +467,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].SCMProvider.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -472,6 +492,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -496,6 +517,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -520,6 +542,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -544,6 +567,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].PullRequest.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -568,6 +592,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -592,6 +617,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Generators[i5].Plugin.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -614,6 +640,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Template.Spec.Destination.ServerRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Template.Spec.Destination.ServerSelector,
 				To: reference.To{
@@ -634,6 +661,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Matrix.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Matrix.Template.Spec.Destination.NameRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Matrix.Template.Spec.Destination.NameSelector,
 				To: reference.To{
@@ -656,6 +684,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -680,6 +709,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].List.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -704,6 +734,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -728,6 +759,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Clusters.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -752,6 +784,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -776,6 +809,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Git.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -800,6 +834,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -824,6 +859,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].SCMProvider.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -848,6 +884,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -872,6 +909,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].ClusterDecisionResource.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -896,6 +934,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -920,6 +959,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].PullRequest.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -944,6 +984,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin.Template.Spec.Destination.Server),
 						Extract:      reference.ExternalName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin.Template.Spec.Destination.ServerRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin.Template.Spec.Destination.ServerSelector,
 						To: reference.To{
@@ -968,6 +1009,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 					rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 						CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin.Template.Spec.Destination.Name),
 						Extract:      v1alpha1.ServerName(),
+						Namespace:    mg.GetNamespace(),
 						Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin.Template.Spec.Destination.NameRef,
 						Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Generators[i5].Plugin.Template.Spec.Destination.NameSelector,
 						To: reference.To{
@@ -990,6 +1032,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Template.Spec.Destination.ServerRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Template.Spec.Destination.ServerSelector,
 				To: reference.To{
@@ -1010,6 +1053,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Merge.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Merge.Template.Spec.Destination.NameRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Merge.Template.Spec.Destination.NameSelector,
 				To: reference.To{
@@ -1030,6 +1074,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Plugin.Template.Spec.Destination.Server),
 				Extract:      reference.ExternalName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Plugin.Template.Spec.Destination.ServerRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Plugin.Template.Spec.Destination.ServerSelector,
 				To: reference.To{
@@ -1050,6 +1095,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 			rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 				CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Generators[i3].Plugin.Template.Spec.Destination.Name),
 				Extract:      v1alpha1.ServerName(),
+				Namespace:    mg.GetNamespace(),
 				Reference:    mg.Spec.ForProvider.Generators[i3].Plugin.Template.Spec.Destination.NameRef,
 				Selector:     mg.Spec.ForProvider.Generators[i3].Plugin.Template.Spec.Destination.NameSelector,
 				To: reference.To{
@@ -1068,6 +1114,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Template.Spec.Destination.Server),
 		Extract:      reference.ExternalName(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.Template.Spec.Destination.ServerRef,
 		Selector:     mg.Spec.ForProvider.Template.Spec.Destination.ServerSelector,
 		To: reference.To{
@@ -1084,6 +1131,7 @@ func (mg *ApplicationSet) ResolveReferences(ctx context.Context, c client.Reader
 	rsp, err = r.Resolve(ctx, reference.ResolutionRequest{
 		CurrentValue: reference.FromPtrValue(mg.Spec.ForProvider.Template.Spec.Destination.Name),
 		Extract:      v1alpha1.ServerName(),
+		Namespace:    mg.GetNamespace(),
 		Reference:    mg.Spec.ForProvider.Template.Spec.Destination.NameRef,
 		Selector:     mg.Spec.ForProvider.Template.Spec.Destination.NameSelector,
 		To: reference.To{
