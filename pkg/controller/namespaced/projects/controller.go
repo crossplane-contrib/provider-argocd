@@ -38,10 +38,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/namespaced/projects/v1alpha1"
+	namespacedv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/projects"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
-	namespacedv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/v1alpha1"
 )
 
 const (
@@ -61,7 +61,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 		managed.WithExternalConnecter(&connector{
 			kube:              mgr.GetClient(),
 			newArgocdClientFn: projects.NewProjectServiceClient,
-			usage: 		   resource.NewProviderConfigUsageTracker(mgr.GetClient(), &namespacedv1alpha1.ProviderConfigUsage{}),
+			usage:             resource.NewProviderConfigUsageTracker(mgr.GetClient(), &namespacedv1alpha1.ProviderConfigUsage{}),
 		}),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),

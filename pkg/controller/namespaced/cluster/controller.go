@@ -42,11 +42,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/namespaced/cluster/v1alpha1"
+	namespacedv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
-	namespacedv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespaced/v1alpha1"
-	
 )
 
 const (
