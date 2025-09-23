@@ -128,6 +128,10 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		Repo: meta.GetExternalName(cr),
 	}
 
+	if cr.Spec.ForProvider.Project != nil {
+		repoQuery.AppProject = *cr.Spec.ForProvider.Project
+	}
+
 	observedRepository, err := e.client.Get(ctx, &repoQuery)
 
 	if err != nil && repositories.IsErrorPermissionDenied(err) || repositories.IsErrorRepositoryNotFound(err) {
@@ -273,6 +277,10 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.Ext
 	}
 	repoQuery := repository.RepoQuery{
 		Repo: meta.GetExternalName(cr),
+	}
+
+	if cr.Spec.ForProvider.Project != nil {
+		repoQuery.AppProject = *cr.Spec.ForProvider.Project
 	}
 
 	_, err := e.client.DeleteRepository(ctx, &repoQuery)

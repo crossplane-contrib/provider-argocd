@@ -255,6 +255,112 @@ func TestObserve(t *testing.T) {
 				err: nil,
 			},
 		},
+		"SuccessfulWithAppProject": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockRepositoryServiceClient) {
+					mcs.EXPECT().Get(
+						context.Background(),
+						&argocdRepository.RepoQuery{
+							Repo:       testRepositoryExternalName,
+							AppProject: "test-project",
+						},
+					).Return(
+						&argocdv1alpha1.Repository{
+							Repo:    testRepo,
+							Name:    testRepositoryExternalName,
+							Project: "test-project",
+						}, nil)
+				}),
+				cr: Repository(
+					withExternalName(testRepositoryExternalName),
+					withSpec(v1alpha1.RepositoryParameters{
+						Name:           ptr.To(testRepositoryExternalName),
+						Repo:           testRepo,
+						Project:        ptr.To("test-project"),
+						Insecure:       &testInsecure,
+						EnableLFS:      &testEnableLFS,
+						InheritedCreds: &testInheritedCreds,
+						EnableOCI:      &testEnableOCI,
+					}),
+				),
+			},
+			want: want{
+				cr: Repository(
+					withExternalName(testRepositoryExternalName),
+					withSpec(v1alpha1.RepositoryParameters{
+						Name:           ptr.To(testRepositoryExternalName),
+						Repo:           testRepo,
+						Project:        ptr.To("test-project"),
+						Insecure:       &testInsecure,
+						EnableLFS:      &testEnableLFS,
+						InheritedCreds: &testInheritedCreds,
+						EnableOCI:      &testEnableOCI,
+					}),
+					withConditions(xpv1.Available()),
+					withObservation(v1alpha1.RepositoryObservation{
+						ConnectionState: v1alpha1.ConnectionState{},
+					}),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:          true,
+					ResourceUpToDate:        true,
+					ResourceLateInitialized: false,
+				},
+				err: nil,
+			},
+		},
+		"SuccessfulWithoutAppProject": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockRepositoryServiceClient) {
+					mcs.EXPECT().Get(
+						context.Background(),
+						&argocdRepository.RepoQuery{
+							Repo: testRepositoryExternalName,
+						},
+					).Return(
+						&argocdv1alpha1.Repository{
+							Repo: testRepo,
+							Name: testRepositoryExternalName,
+						}, nil)
+				}),
+				cr: Repository(
+					withExternalName(testRepositoryExternalName),
+					withSpec(v1alpha1.RepositoryParameters{
+						Name:           ptr.To(testRepositoryExternalName),
+						Repo:           testRepo,
+						Project:        nil, // Explicitly nil
+						Insecure:       &testInsecure,
+						EnableLFS:      &testEnableLFS,
+						InheritedCreds: &testInheritedCreds,
+						EnableOCI:      &testEnableOCI,
+					}),
+				),
+			},
+			want: want{
+				cr: Repository(
+					withExternalName(testRepositoryExternalName),
+					withSpec(v1alpha1.RepositoryParameters{
+						Name:           ptr.To(testRepositoryExternalName),
+						Repo:           testRepo,
+						Project:        nil,
+						Insecure:       &testInsecure,
+						EnableLFS:      &testEnableLFS,
+						InheritedCreds: &testInheritedCreds,
+						EnableOCI:      &testEnableOCI,
+					}),
+					withConditions(xpv1.Available()),
+					withObservation(v1alpha1.RepositoryObservation{
+						ConnectionState: v1alpha1.ConnectionState{},
+					}),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:          true,
+					ResourceUpToDate:        true,
+					ResourceLateInitialized: false,
+				},
+				err: nil,
+			},
+		},
 	}
 
 	for name, tc := range cases {
@@ -549,6 +655,67 @@ func TestDelete(t *testing.T) {
 					}),
 				),
 				err: errors.Wrap(errBoom, errDeleteFailed),
+			},
+		},
+		"SuccessfulWithAppProject": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockRepositoryServiceClient) {
+					mcs.EXPECT().DeleteRepository(
+						context.Background(),
+						&argocdRepository.RepoQuery{
+							Repo:       testRepositoryExternalName,
+							AppProject: "test-project",
+						},
+					).Return(
+						&argocdRepository.RepoResponse{}, nil)
+				}),
+				cr: Repository(
+					withExternalName(testRepositoryExternalName),
+					withSpec(v1alpha1.RepositoryParameters{
+						Repo:    testRepositoryExternalName,
+						Project: ptr.To("test-project"),
+					}),
+				),
+			},
+			want: want{
+				cr: Repository(
+					withExternalName(testRepositoryExternalName),
+					withSpec(v1alpha1.RepositoryParameters{
+						Repo:    testRepositoryExternalName,
+						Project: ptr.To("test-project"),
+					}),
+				),
+				err: nil,
+			},
+		},
+		"SuccessfulWithoutAppProject": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockRepositoryServiceClient) {
+					mcs.EXPECT().DeleteRepository(
+						context.Background(),
+						&argocdRepository.RepoQuery{
+							Repo: testRepositoryExternalName,
+						},
+					).Return(
+						&argocdRepository.RepoResponse{}, nil)
+				}),
+				cr: Repository(
+					withExternalName(testRepositoryExternalName),
+					withSpec(v1alpha1.RepositoryParameters{
+						Repo:    testRepositoryExternalName,
+						Project: nil, // Explicitly nil
+					}),
+				),
+			},
+			want: want{
+				cr: Repository(
+					withExternalName(testRepositoryExternalName),
+					withSpec(v1alpha1.RepositoryParameters{
+						Repo:    testRepositoryExternalName,
+						Project: nil,
+					}),
+				),
+				err: nil,
 			},
 		},
 	}
