@@ -293,3 +293,11 @@ func IsInt64EqualToInt64Ptr(ip *int64, i int64) bool {
 	}
 	return true
 }
+
+// StringToPtr converts string to *string
+func StringToPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}

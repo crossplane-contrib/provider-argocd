@@ -35,7 +35,6 @@ import (
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -461,7 +460,7 @@ func generateUpdateRepositoryOptions(p *v1alpha1.RepositoryParameters) *reposito
 
 func isRepositoryUpToDate(rr *v1alpha1.Repository, o *v1alpha1.RepositoryObservation, r *argocdv1alpha1.Repository) bool { //nolint:gocyclo
 	p := rr.Spec.ForProvider
-	if !cmp.Equal(p.Username, ptr.To(r.Username)) {
+	if !cmp.Equal(p.Username, clients.StringToPtr(r.Username)) {
 		return false
 	}
 	if !clients.IsBoolEqualToBoolPtr(p.Insecure, r.Insecure) {
@@ -470,10 +469,10 @@ func isRepositoryUpToDate(rr *v1alpha1.Repository, o *v1alpha1.RepositoryObserva
 	if !clients.IsBoolEqualToBoolPtr(p.EnableLFS, r.EnableLFS) {
 		return false
 	}
-	if !cmp.Equal(p.Type, ptr.To(r.Type)) {
+	if !cmp.Equal(p.Type, clients.StringToPtr(r.Type)) {
 		return false
 	}
-	if !cmp.Equal(p.Name, ptr.To(r.Name)) {
+	if !cmp.Equal(p.Name, clients.StringToPtr(r.Name)) {
 		return false
 	}
 	if !clients.IsBoolEqualToBoolPtr(p.EnableOCI, r.EnableOCI) {
@@ -488,7 +487,7 @@ func isRepositoryUpToDate(rr *v1alpha1.Repository, o *v1alpha1.RepositoryObserva
 	if !clients.IsInt64EqualToInt64Ptr(p.GithubAppInstallationID, r.GithubAppInstallationId) {
 		return false
 	}
-	if !cmp.Equal(p.GitHubAppEnterpriseBaseURL, ptr.To(r.GitHubAppEnterpriseBaseURL)) {
+	if !cmp.Equal(p.GitHubAppEnterpriseBaseURL, clients.StringToPtr(r.GitHubAppEnterpriseBaseURL)) {
 		return false
 	}
 	if !cmp.Equal(rr.Status.AtProvider.Password, o.Password) {
