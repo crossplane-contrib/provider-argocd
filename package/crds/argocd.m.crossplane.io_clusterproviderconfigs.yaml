@@ -29,8 +29,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: A ProviderConfig configures how argocd controller should connect
-          to argocd API.
+        description: A ClusterProviderConfig configures how argocd controller should
+          connect to argocd API.
         properties:
           apiVersion:
             description: |-

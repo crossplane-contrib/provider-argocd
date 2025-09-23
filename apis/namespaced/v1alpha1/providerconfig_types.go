@@ -79,7 +79,7 @@ type ProviderConfigUsageList struct {
 
 // +kubebuilder:object:root=true
 
-// A ProviderConfig configures how argocd controller should connect to argocd API.
+// A ClusterProviderConfig configures how argocd controller should connect to argocd API.
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:printcolumn:name="SECRET-NAME",type="string",JSONPath=".spec.credentials.secretRef.name",priority=1
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,provider,argocd}
@@ -94,9 +94,9 @@ type ClusterProviderConfig struct {
 
 // +kubebuilder:object:root=true
 
-// ProviderConfigList contains a list of ProviderConfig
+// ClusterProviderConfigList contains a list of ProviderConfig
 type ClusterProviderConfigList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ProviderConfig `json:"items"`
+	Items           []ClusterProviderConfig `json:"items"`
 }
