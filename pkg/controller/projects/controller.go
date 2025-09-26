@@ -159,7 +159,12 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalCreation{}, errors.Wrap(err, errCreateFailed)
 	}
 
-	meta.SetExternalName(cr, resp.Name)
+	if name := meta.GetExternalName(cr); name == "" {
+		meta.SetExternalName(cr, resp.Name)
+	} else if name != resp.Name {
+		// This should not happen because we set the name to the CR name if it was not provided by the user.
+		return managed.ExternalCreation{}, errors.New(errKubeUpdateFailed)
+	}
 
 	return managed.ExternalCreation{}, errors.Wrap(nil, errKubeUpdateFailed)
 }
@@ -337,10 +342,15 @@ func generateProjectObservation(r *argocdv1alpha1.AppProject) v1alpha1.ProjectOb
 func generateCreateProjectOptions(p *v1alpha1.Project) *project.ProjectCreateRequest {
 	projSpec := generateProjectSpec(&p.Spec.ForProvider)
 
+	projName := meta.GetExternalName(p)
+	if projName == "" {
+		projName = p.Name
+	}
+
 	projectCreateRequest := &project.ProjectCreateRequest{
 		Project: &argocdv1alpha1.AppProject{
 			Spec:       projSpec,
-			ObjectMeta: metav1.ObjectMeta{Name: p.Name, Labels: p.Spec.ForProvider.ProjectLabels},
+			ObjectMeta: metav1.ObjectMeta{Name: projName, Labels: p.Spec.ForProvider.ProjectLabels},
 		},
 		Upsert: false,
 	}
