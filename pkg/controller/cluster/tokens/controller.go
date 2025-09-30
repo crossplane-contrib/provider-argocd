@@ -24,7 +24,7 @@ import (
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
 	clients "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/projects"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/projects"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
 )
 

@@ -155,10 +155,21 @@ func (c *ConverterImpl) ToArgoDestination(source v1alpha11.ApplicationDestinatio
 }
 func (c *ConverterImpl) intstrIntOrStringToIntstrIntOrString(source intstr.IntOrString) intstr.IntOrString {
 	var intstrIntOrString intstr.IntOrString
-	intstrIntOrString.Type = intstr.Type(source.Type)
+	intstrIntOrString.Type = c.intstrTypeToIntstrType(source.Type)
 	intstrIntOrString.IntVal = source.IntVal
 	intstrIntOrString.StrVal = source.StrVal
 	return intstrIntOrString
+}
+func (c *ConverterImpl) intstrTypeToIntstrType(source intstr.Type) intstr.Type {
+	var intstrType intstr.Type
+	switch source {
+	case intstr.Int:
+		intstrType = intstr.Int
+	case intstr.String:
+		intstrType = intstr.String
+	default: // ignored
+	}
+	return intstrType
 }
 func (c *ConverterImpl) pIntstrIntOrStringToPIntstrIntOrString(source *intstr.IntOrString) *intstr.IntOrString {
 	var pIntstrIntOrString *intstr.IntOrString
@@ -171,14 +182,12 @@ func (c *ConverterImpl) pIntstrIntOrStringToPIntstrIntOrString(source *intstr.In
 func (c *ConverterImpl) pRuntimeRawExtensionToV1JSON(source *runtime.RawExtension) v1.JSON {
 	var v1JSON v1.JSON
 	if source != nil {
-		var v1JSON2 v1.JSON
 		if (*source).Raw != nil {
-			v1JSON2.Raw = make([]uint8, len((*source).Raw))
+			v1JSON.Raw = make([]uint8, len((*source).Raw))
 			for i := 0; i < len((*source).Raw); i++ {
-				v1JSON2.Raw[i] = (*source).Raw[i]
+				v1JSON.Raw[i] = (*source).Raw[i]
 			}
 		}
-		v1JSON = v1JSON2
 	}
 	return v1JSON
 }
@@ -1936,10 +1945,25 @@ func (c *ConverterImpl) v1JSONToV1JSON(source v1.JSON) v1.JSON {
 	}
 	return v1JSON
 }
+func (c *ConverterImpl) v1LabelSelectorOperatorToV1LabelSelectorOperator(source v11.LabelSelectorOperator) v11.LabelSelectorOperator {
+	var v1LabelSelectorOperator v11.LabelSelectorOperator
+	switch source {
+	case v11.LabelSelectorOpDoesNotExist:
+		v1LabelSelectorOperator = v11.LabelSelectorOpDoesNotExist
+	case v11.LabelSelectorOpExists:
+		v1LabelSelectorOperator = v11.LabelSelectorOpExists
+	case v11.LabelSelectorOpIn:
+		v1LabelSelectorOperator = v11.LabelSelectorOpIn
+	case v11.LabelSelectorOpNotIn:
+		v1LabelSelectorOperator = v11.LabelSelectorOpNotIn
+	default: // ignored
+	}
+	return v1LabelSelectorOperator
+}
 func (c *ConverterImpl) v1LabelSelectorRequirementToV1LabelSelectorRequirement(source v11.LabelSelectorRequirement) v11.LabelSelectorRequirement {
 	var v1LabelSelectorRequirement v11.LabelSelectorRequirement
 	v1LabelSelectorRequirement.Key = source.Key
-	v1LabelSelectorRequirement.Operator = v11.LabelSelectorOperator(source.Operator)
+	v1LabelSelectorRequirement.Operator = c.v1LabelSelectorOperatorToV1LabelSelectorOperator(source.Operator)
 	if source.Values != nil {
 		v1LabelSelectorRequirement.Values = make([]string, len(source.Values))
 		for i := 0; i < len(source.Values); i++ {

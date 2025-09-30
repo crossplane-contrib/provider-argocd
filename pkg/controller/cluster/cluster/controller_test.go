@@ -32,8 +32,8 @@ import (
 	"k8s.io/utils/ptr"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/cluster"
-	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/mock/cluster"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/cluster"
+	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/mock/cluster"
 )
 
 var (

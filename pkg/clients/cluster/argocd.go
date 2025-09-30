@@ -69,10 +69,10 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.LegacyM
 	if err := t.Track(ctx, mg); err != nil {
 		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
-	return getClientOptions(ctx, c, &pc.Spec)
+	return GetClientOptions(ctx, c, &pc.Spec)
 }
 
-func getClientOptions(ctx context.Context, c client.Client, pcSpec *v1alpha1.ProviderConfigSpec) (*argocd.ClientOptions, error) {
+func GetClientOptions(ctx context.Context, c client.Client, pcSpec *v1alpha1.ProviderConfigSpec) (*argocd.ClientOptions, error) {
 	insecure := ptr.Deref(pcSpec.Insecure, false)
 	plaintext := ptr.Deref(pcSpec.PlainText, false)
 

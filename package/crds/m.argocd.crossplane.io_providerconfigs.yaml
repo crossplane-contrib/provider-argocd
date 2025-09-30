@@ -16,7 +16,7 @@ spec:
     listKind: ProviderConfigList
     plural: providerconfigs
     singular: providerconfig
-  scope: Namespace
+  scope: Namespaced
   versions:
   - additionalPrinterColumns:
     - jsonPath: .metadata.creationTimestamp

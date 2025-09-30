@@ -20,7 +20,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/argoproj/argo-cd/v3/pkg/apiclient"
 	"github.com/argoproj/argo-cd/v3/pkg/apiclient/applicationset"
 	argov1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	"github.com/argoproj/argo-cd/v3/util/io"
@@ -39,7 +38,8 @@ import (
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
 	clients "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
-	appsets "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/applicationsets"
+	appsetsconverter "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/converter/applicationsets"
+	appsets "github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/applicationsets"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
 )
 
@@ -50,13 +50,16 @@ const (
 
 // Setup adds a controller that reconciles ApplicationSet managed resources.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
+	return SetupWithExternalConnector(mgr, o, &connector{
+		kube: mgr.GetClient(),
+	})
+}
+
+func SetupWithExternalConnector(mgr ctrl.Manager, o xpcontroller.Options, ec managed.ExternalConnecter) error {
 	name := managed.ControllerName(v1alpha1.ApplicationSetKind)
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnecter(&connector{
-			kube:              mgr.GetClient(),
-			newArgocdClientFn: appsets.NewApplicationSetServiceClient,
-		}),
+		managed.WithExternalConnecter(ec),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
 		managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
@@ -82,8 +85,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 }
 
 type connector struct {
-	kube              client.Client
-	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, appsets.ServiceClient)
+	kube client.Client
 }
 
 // Connect typically produces an ExternalClient by:
@@ -102,12 +104,17 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, err
 	}
 
-	conn, argocdClient := c.newArgocdClientFn(cfg)
-	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
+	return NewExternal(func() (io.Closer, appsets.ServiceClient) {
+		return appsets.NewApplicationSetServiceClient(cfg)
+	}), nil
+}
+
+func NewExternal(newArgocdClientFn func() (io.Closer, appsets.ServiceClient)) managed.ExternalClient {
+	conn, argocdClient := newArgocdClientFn()
+	return &external{client: argocdClient, conn: conn}
 }
 
 type external struct {
-	kube   client.Client
 	client appsets.ServiceClient
 	conn   io.Closer
 }
@@ -152,7 +159,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func generateApplicationObservation(appset *argov1alpha1.ApplicationSet) v1alpha1.ArgoApplicationSetStatus {
-	converter := &appsets.ConverterImpl{}
+	converter := &appsetsconverter.ConverterImpl{}
 	return *converter.FromArgoApplicationSetStatus(&appset.Status)
 }
 
@@ -170,7 +177,7 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 }
 
 func (e *external) generateCreateApplicationSetRequest(cr *v1alpha1.ApplicationSet) *applicationset.ApplicationSetCreateRequest {
-	converter := &appsets.ConverterImpl{}
+	converter := &appsetsconverter.ConverterImpl{}
 	targetSpec := converter.ToArgoApplicationSetSpec(&cr.Spec.ForProvider)
 
 	req := &applicationset.ApplicationSetCreateRequest{

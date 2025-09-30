@@ -20,22 +20,27 @@ import (
 	"reflect"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	clusterapis "github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
 )
+
+// Copy types from cluster-scope apis replace references with namespace types:
+//go:generate go run -modfile ../../../../tools/go.mod -tags generate github.com/mistermx/copystruct/cmd/copystruct ../../../cluster/projects/v1alpha1 zz_generated.project_types.copied.go ProjectParameters,ProjectObservation
+//go:generate sed -i s|github\.com/crossplane-contrib/provider-argocd/apis/cluster|github.com/crossplane-contrib/provider-argocd/apis/namespace|g zz_generated.project_types.copied.go
+//go:generate sed -i s|v1\.Reference|v1.NamespacedReference|g zz_generated.project_types.copied.go
+//go:generate sed -i s|v1\.Selector|v1.NamespacedSelector|g zz_generated.project_types.copied.go
 
 // A ProjectSpec defines the desired state of an ArgoCD Project.
 type ProjectSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       clusterapis.ProjectParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              ProjectParameters `json:"forProvider"`
 }
 
 // A ProjectStatus represents the observed state of an ArgoCD Project.
 type ProjectStatus struct {
 	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          clusterapis.ProjectObservation `json:"atProvider,omitempty"`
+	AtProvider          ProjectObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -45,7 +50,7 @@ type ProjectStatus struct {
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespace,categories={crossplane,managed,argocd}
+// +kubebuilder:resource:scope=Namespaced,categories={crossplane,managed,argocd}
 type Project struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

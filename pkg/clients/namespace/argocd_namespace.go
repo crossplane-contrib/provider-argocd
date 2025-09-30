@@ -26,21 +26,23 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/namespace/v1alpha1"
+	clusterclients "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
 )
 
-// GetConfig constructs a Config that can be used to authenticate to argocd
+// GetConfigV2 constructs a Config that can be used to authenticate to argocd
 // API by the argocd Go client
-func GetConfigV2(ctx context.Context, c client.Client, mg resource.ModernManaged) (*argocd.ClientOptions, error) {
+func GetConfig(ctx context.Context, c client.Client, mg resource.ModernManaged) (*argocd.ClientOptions, error) {
 	switch {
 	case mg.GetProviderConfigReference() != nil:
-		return UseProviderConfigV2(ctx, c, mg)
+		return UseProviderConfig(ctx, c, mg)
 	default:
 		return nil, errors.New("providerConfigRef is not given")
 	}
 }
 
-// UseProviderConfig to produce a config that can be used to authenticate to AWS.
-func UseProviderConfigV2(ctx context.Context, c client.Client, mg resource.ModernManaged) (*argocd.ClientOptions, error) {
+// UseProviderConfigV2 to produce a config that can be used to authenticate to argocd
+// API by the argocd Go client
+func UseProviderConfig(ctx context.Context, c client.Client, mg resource.ModernManaged) (*argocd.ClientOptions, error) {
 	pc := &v1alpha1.ProviderConfig{}
 	if err := c.Get(ctx, types.NamespacedName{Name: mg.GetProviderConfigReference().Name}, pc); err != nil {
 		return nil, errors.Wrap(err, "cannot get referenced Provider")
@@ -50,5 +52,5 @@ func UseProviderConfigV2(ctx context.Context, c client.Client, mg resource.Moder
 	if err := t.Track(ctx, mg); err != nil {
 		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
-	return getClientOptions(ctx, c, &pc.Spec)
+	return clusterclients.GetClientOptions(ctx, c, &pc.Spec)
 }

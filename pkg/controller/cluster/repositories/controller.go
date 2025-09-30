@@ -40,7 +40,7 @@ import (
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
 	clients "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/repositories"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/repositories"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
 )
 

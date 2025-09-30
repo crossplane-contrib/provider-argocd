@@ -20,22 +20,27 @@ import (
 	"reflect"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	clusterapis "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
 )
+
+// Copy types from cluster-scope apis replace references with namespace types:
+//go:generate go run -modfile ../../../../tools/go.mod -tags generate github.com/mistermx/copystruct/cmd/copystruct ../../../cluster/repositories/v1alpha1 zz_generated.repository_types.copied.go RepositoryParameters,RepositoryObservation
+//go:generate sed -i s|github\.com/crossplane-contrib/provider-argocd/apis/cluster|github.com/crossplane-contrib/provider-argocd/apis/namespace|g zz_generated.repository_types.copied.go
+//go:generate sed -i s|v1\.Reference|v1.NamespacedReference|g zz_generated.repository_types.copied.go
+//go:generate sed -i s|v1\.Selector|v1.NamespacedSelector|g zz_generated.repository_types.copied.go
 
 // A RepositorySpec defines the desired state of an ArgoCD Repository.
 type RepositorySpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       clusterapis.RepositoryParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              RepositoryParameters `json:"forProvider"`
 }
 
 // A RepositoryStatus represents the observed state of an ArgoCD Repository.
 type RepositoryStatus struct {
 	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          clusterapis.RepositoryObservation `json:"atProvider,omitempty"`
+	AtProvider          RepositoryObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/argoproj/argo-cd/v3/pkg/apiclient"
 	argocdcluster "github.com/argoproj/argo-cd/v3/pkg/apiclient/cluster"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	"github.com/argoproj/argo-cd/v3/util/io"
@@ -43,7 +42,7 @@ import (
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
 	clients "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/cluster"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/cluster"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
 )
 
@@ -60,13 +59,16 @@ const (
 
 // Setup adds a controller that reconciles cluster.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
+	return SetupWithExternalConnector(mgr, o, &connector{
+		kube: mgr.GetClient(),
+	})
+}
+
+func SetupWithExternalConnector(mgr ctrl.Manager, o xpcontroller.Options, ec managed.ExternalConnecter) error {
 	name := managed.ControllerName(v1alpha1.ClusterKind)
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnecter(&connector{
-			kube:              mgr.GetClient(),
-			newArgocdClientFn: cluster.NewClusterServiceClient,
-		}),
+		managed.WithExternalConnecter(ec),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
 		managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
@@ -92,8 +94,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 }
 
 type connector struct {
-	kube              client.Client
-	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, argocdcluster.ClusterServiceClient)
+	kube client.Client
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -105,8 +106,14 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if err != nil {
 		return nil, err
 	}
-	conn, argocdClient := c.newArgocdClientFn(cfg)
-	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
+	return NewExternal(c.kube, func() (io.Closer, cluster.ServiceClient) {
+		return cluster.NewClusterServiceClient(cfg)
+	}), nil
+}
+
+func NewExternal(kube client.Client, newArgocdClientFn func() (io.Closer, cluster.ServiceClient)) managed.ExternalClient {
+	conn, argocdClient := newArgocdClientFn()
+	return &external{client: argocdClient, conn: conn}
 }
 
 type external struct {

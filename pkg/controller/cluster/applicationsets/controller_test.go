@@ -34,8 +34,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/applicationsets"
-	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/mock/applicationsets"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/applicationsets"
+	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/mock/applicationsets"
 )
 
 // Unlike many Kubernetes projects Crossplane does not use third party testing

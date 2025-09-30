@@ -4,22 +4,27 @@ import (
 	"reflect"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	clusterapis "github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
 )
+
+// Copy types from cluster-scope apis replace references with namespace types:
+//go:generate go run -modfile ../../../../tools/go.mod -tags generate github.com/mistermx/copystruct/cmd/copystruct ../../../cluster/projects/v1alpha1 zz_generated.token_types.copied.go TokenParameters,TokenObservation
+//go:generate sed -i s|github\.com/crossplane-contrib/provider-argocd/apis/cluster|github.com/crossplane-contrib/provider-argocd/apis/namespace|g zz_generated.token_types.copied.go
+//go:generate sed -i s|v1\.Reference|v1.NamespacedReference|g zz_generated.token_types.copied.go
+//go:generate sed -i s|v1\.Selector|v1.NamespacedSelector|g zz_generated.token_types.copied.go
 
 // A TokenSpec defines the desired state of an ArgoCD Token.
 type TokenSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       clusterapis.TokenParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              TokenParameters `json:"forProvider"`
 }
 
 // A TokenStatus represents the observed state of an ArgoCD Project Token.
 type TokenStatus struct {
 	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          clusterapis.TokenObservation `json:"atProvider,omitempty"`
+	AtProvider          TokenObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -32,7 +37,7 @@ type TokenStatus struct {
 // +kubebuilder:printcolumn:name="EXPIRES-AT",type="string",JSONPath=".status.atProvider.exp"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespace,categories={crossplane,managed,argocd}
+// +kubebuilder:resource:scope=Namespaced,categories={crossplane,managed,argocd}
 type Token struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

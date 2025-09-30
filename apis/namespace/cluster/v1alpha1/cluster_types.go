@@ -20,22 +20,27 @@ import (
 	"reflect"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	clusterapis "github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
 )
+
+// Copy types from cluster-scope apis replace references with namespace types:
+//go:generate go run -modfile ../../../../tools/go.mod -tags generate github.com/mistermx/copystruct/cmd/copystruct ../../../cluster/cluster/v1alpha1 zz_generated.types.copied.go ClusterParameters,ClusterObservation
+//go:generate sed -i s|github\.com/crossplane-contrib/provider-argocd/apis/cluster|github.com/crossplane-contrib/provider-argocd/apis/namespace|g zz_generated.types.copied.go
+//go:generate sed -i s|commonv1\.Reference|commonv1.NamespacedReference|g zz_generated.types.copied.go
+//go:generate sed -i s|commonv1\.Selector|commonv1.NamespacedSelector|g zz_generated.types.copied.go
 
 // A ClusterSpec defines the desired state of an ArgoCD Cluster.
 type ClusterSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       clusterapis.ClusterParameters `json:"forProvider"`
+	xpv2.ManagedResourceSpec `json:",inline"`
+	ForProvider              ClusterParameters `json:"forProvider"`
 }
 
 // A ClusterStatus represents the observed state of an ArgoCD Cluster.
 type ClusterStatus struct {
 	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          clusterapis.ClusterObservation `json:"atProvider,omitempty"`
+	AtProvider          ClusterObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -45,7 +50,7 @@ type ClusterStatus struct {
 // +kubebuilder:printcolumn:name="SYNCED",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Namespace,categories={crossplane,managed,argocd}
+// +kubebuilder:resource:scope=Namespaced,categories={crossplane,managed,argocd}
 type Cluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

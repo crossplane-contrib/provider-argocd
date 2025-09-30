@@ -20,8 +20,8 @@ import (
 	"k8s.io/utils/ptr"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
-	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/mock/projects"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/projects"
+	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/mock/projects"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/projects"
 )
 
 var (

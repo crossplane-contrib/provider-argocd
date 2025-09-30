@@ -10,12 +10,12 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/applications"
+	applicationsconverter "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/converter/applications"
 )
 
 // IsApplicationUpToDate converts ApplicationParameters to its ArgoCD Counterpart and returns if they equal
 func IsApplicationUpToDate(cr *v1alpha1.ApplicationParameters, remote *argocdv1alpha1.Application) bool {
-	converter := applications.ConverterImpl{}
+	converter := applicationsconverter.ConverterImpl{}
 	cluster := converter.ToArgoApplicationSpec(cr)
 
 	opts := []cmp.Option{

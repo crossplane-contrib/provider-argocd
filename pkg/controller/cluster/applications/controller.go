@@ -38,7 +38,8 @@ import (
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
 	clients "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
-	"github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/applications"
+	applicationsconverter "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/converter/applications"
+	"github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/applications"
 	"github.com/crossplane-contrib/provider-argocd/pkg/features"
 )
 
@@ -53,13 +54,16 @@ const (
 
 // Setup adds a controller that reconciles applications.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
+	return SetupWithExternalConnector(mgr, o, &connector{
+		kube: mgr.GetClient(),
+	})
+}
+
+func SetupWithExternalConnector(mgr ctrl.Manager, o xpcontroller.Options, ec managed.ExternalConnecter) error {
 	name := managed.ControllerName(v1alpha1.ApplicationKind)
 
 	opts := []managed.ReconcilerOption{
-		managed.WithExternalConnecter(&connector{
-			kube:              mgr.GetClient(),
-			newArgocdClientFn: applications.NewApplicationServiceClient,
-		}),
+		managed.WithExternalConnecter(ec),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
 		managed.WithInitializers(managed.NewNameAsExternalName(mgr.GetClient())),
@@ -98,13 +102,17 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if err != nil {
 		return nil, err
 	}
+	return NewExternal(func() (io.Closer, applications.ServiceClient) {
+		return c.newArgocdClientFn(cfg)
+	}), nil
+}
 
-	conn, argocdClient := c.newArgocdClientFn(cfg)
-	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
+func NewExternal(newArgocdClientFn func() (io.Closer, applications.ServiceClient)) managed.ExternalClient {
+	conn, argocdClient := newArgocdClientFn()
+	return &external{client: argocdClient, conn: conn}
 }
 
 type external struct {
-	kube   client.Client
 	client applications.ServiceClient
 	conn   io.Closer
 }
@@ -229,13 +237,13 @@ func generateApplicationObservation(app *argocdv1alpha1.Application) v1alpha1.Ar
 		return v1alpha1.ArgoApplicationStatus{}
 	}
 
-	converter := &applications.ConverterImpl{}
+	converter := &applicationsconverter.ConverterImpl{}
 	status := converter.FromArgoApplicationStatus(&app.Status)
 	return *status
 }
 
 func generateCreateApplicationRequest(cr *v1alpha1.Application) *application.ApplicationCreateRequest {
-	converter := &applications.ConverterImpl{}
+	converter := &applicationsconverter.ConverterImpl{}
 
 	spec := converter.ToArgoApplicationSpec(&cr.Spec.ForProvider)
 
@@ -258,7 +266,7 @@ func generateCreateApplicationRequest(cr *v1alpha1.Application) *application.App
 }
 
 func generateUpdateApplicationRequest(cr *v1alpha1.Application) *application.ApplicationUpdateRequest {
-	converter := applications.ConverterImpl{}
+	converter := applicationsconverter.ConverterImpl{}
 
 	spec := converter.ToArgoApplicationSpec(&cr.Spec.ForProvider)
 
