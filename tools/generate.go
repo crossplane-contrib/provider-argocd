@@ -24,6 +24,7 @@ package tools
 import (
 	_ "github.com/crossplane/crossplane-tools/cmd/angryjet" //nolint:typecheck
 	_ "github.com/jmattheis/goverter/cmd/goverter"          //nolint:typecheck
+	_ "github.com/mistermx/copystruct/cmd/copystruct"       //nolint:typecheck
 	_ "sigs.k8s.io/controller-tools/cmd/controller-gen"     //nolint:typecheck
 
 	// Workaround to vendor mockgen (https://github.com/golang/mock/issues/415#issuecomment-602547154)
