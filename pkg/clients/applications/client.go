@@ -33,10 +33,20 @@ type ServiceClient interface {
 	Delete(ctx context.Context, in *application.ApplicationDeleteRequest, opts ...grpc.CallOption) (*application.ApplicationResponse, error)
 }
 
-// NewApplicationServiceClient creates a new API client from a set of config options, or fails fatally if the new client creation fails.
-func NewApplicationServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, ServiceClient) {
-	conn, repoIf := apiclient.NewClientOrDie(clientOpts).NewApplicationClientOrDie()
-	return conn, repoIf
+// NewApplicationServiceClient creates a new API client from a set of config
+// options. Any error from constructing the underlying argo-cd client or
+// opening the application gRPC connection is returned to the caller so the
+// reconciler can retry with backoff instead of crashing the controller process.
+func NewApplicationServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, ServiceClient, error) {
+	client, err := apiclient.NewClient(clientOpts)
+	if err != nil {
+		return nil, nil, err
+	}
+	conn, repoIf, err := client.NewApplicationClient()
+	if err != nil {
+		return nil, nil, err
+	}
+	return conn, repoIf, nil
 }
 
 // IsErrorApplicationNotFound helper function to test for errorNotFound error.
