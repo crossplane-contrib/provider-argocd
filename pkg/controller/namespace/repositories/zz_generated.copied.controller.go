@@ -92,7 +92,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 
 type connector struct {
 	kube              client.Client
-	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, repository.RepositoryServiceClient)
+	newArgocdClientFn func(clientOpts *apiclient.ClientOptions) (io.Closer, repository.RepositoryServiceClient, error)
 }
 
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -104,7 +104,10 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if err != nil {
 		return nil, err
 	}
-	conn, argocdClient := c.newArgocdClientFn(cfg)
+	conn, argocdClient, err := c.newArgocdClientFn(cfg)
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot create argocd client")
+	}
 	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
 }
 
