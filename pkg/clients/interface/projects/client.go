@@ -31,10 +31,20 @@ type ProjectServiceClient interface {
 	DeleteToken(ctx context.Context, in *project.ProjectTokenDeleteRequest, opts ...grpc.CallOption) (*project.EmptyResponse, error)
 }
 
-// NewProjectServiceClient creates a new API client from a set of config options, or fails fatally if the new client creation fails.
-func NewProjectServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, project.ProjectServiceClient) {
-	conn, repoIf := apiclient.NewClientOrDie(clientOpts).NewProjectClientOrDie()
-	return conn, repoIf
+// NewProjectServiceClient creates a new API client from a set of config
+// options. Any error from constructing the underlying argo-cd client or
+// opening the project gRPC connection is returned to the caller so the
+// reconciler can retry with backoff instead of crashing the controller process.
+func NewProjectServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, project.ProjectServiceClient, error) {
+	client, err := apiclient.NewClient(clientOpts)
+	if err != nil {
+		return nil, nil, err
+	}
+	conn, repoIf, err := client.NewProjectClient()
+	if err != nil {
+		return nil, nil, err
+	}
+	return conn, repoIf, nil
 }
 
 // IsErrorProjectNotFound helper function to test for errorProjectNotFound error.

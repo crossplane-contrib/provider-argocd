@@ -106,14 +106,17 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if err != nil {
 		return nil, err
 	}
-	return NewExternal(c.kube, func() (io.Closer, cluster.ServiceClient) {
+	return NewExternal(c.kube, func() (io.Closer, cluster.ServiceClient, error) {
 		return cluster.NewClusterServiceClient(cfg)
-	}), nil
+	})
 }
 
-func NewExternal(kube client.Client, newArgocdClientFn func() (io.Closer, cluster.ServiceClient)) managed.ExternalClient {
-	conn, argocdClient := newArgocdClientFn()
-	return &external{client: argocdClient, conn: conn}
+func NewExternal(kube client.Client, newArgocdClientFn func() (io.Closer, cluster.ServiceClient, error)) (managed.ExternalClient, error) {
+	conn, argocdClient, err := newArgocdClientFn()
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot create argocd client")
+	}
+	return &external{client: argocdClient, conn: conn}, nil
 }
 
 type external struct {

@@ -104,14 +104,17 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, err
 	}
 
-	return NewExternal(func() (io.Closer, appsets.ServiceClient) {
+	return NewExternal(func() (io.Closer, appsets.ServiceClient, error) {
 		return appsets.NewApplicationSetServiceClient(cfg)
-	}), nil
+	})
 }
 
-func NewExternal(newArgocdClientFn func() (io.Closer, appsets.ServiceClient)) managed.ExternalClient {
-	conn, argocdClient := newArgocdClientFn()
-	return &external{client: argocdClient, conn: conn}
+func NewExternal(newArgocdClientFn func() (io.Closer, appsets.ServiceClient, error)) (managed.ExternalClient, error) {
+	conn, argocdClient, err := newArgocdClientFn()
+	if err != nil {
+		return nil, errors.Wrap(err, "cannot create argocd client")
+	}
+	return &external{client: argocdClient, conn: conn}, nil
 }
 
 type external struct {
