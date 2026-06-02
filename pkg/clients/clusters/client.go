@@ -28,10 +28,20 @@ type ServiceClient interface {
 	Delete(ctx context.Context, in *cluster.ClusterQuery, opts ...grpc.CallOption) (*cluster.ClusterResponse, error)
 }
 
-// NewClusterServiceClient creates a new API client from a set of config options, or fails fatally if the new client creation fails.
-func NewClusterServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, cluster.ClusterServiceClient) {
-	conn, repoIf := apiclient.NewClientOrDie(clientOpts).NewClusterClientOrDie()
-	return conn, repoIf
+// NewClusterServiceClient creates a new API client from a set of config
+// options. Any error from constructing the underlying argo-cd client or
+// opening the cluster gRPC connection is returned to the caller so the
+// reconciler can retry with backoff instead of crashing the controller process.
+func NewClusterServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, cluster.ClusterServiceClient, error) {
+	client, err := apiclient.NewClient(clientOpts)
+	if err != nil {
+		return nil, nil, err
+	}
+	conn, repoIf, err := client.NewClusterClient()
+	if err != nil {
+		return nil, nil, err
+	}
+	return conn, repoIf, nil
 }
 
 // IsErrorClusterNotFound helper function to test for errorClusterNotFound error.

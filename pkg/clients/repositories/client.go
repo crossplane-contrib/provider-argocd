@@ -30,10 +30,20 @@ type RepositoryServiceClient interface {
 	DeleteRepository(ctx context.Context, in *repository.RepoQuery, opts ...grpc.CallOption) (*repository.RepoResponse, error)
 }
 
-// NewRepositoryServiceClient creates a new API client from a set of config options, or fails fatally if the new client creation fails.
-func NewRepositoryServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, repository.RepositoryServiceClient) {
-	conn, repoIf := apiclient.NewClientOrDie(clientOpts).NewRepoClientOrDie()
-	return conn, repoIf
+// NewRepositoryServiceClient creates a new API client from a set of config
+// options. Any error from constructing the underlying argo-cd client or
+// opening the repository gRPC connection is returned to the caller so the
+// reconciler can retry with backoff instead of crashing the controller process.
+func NewRepositoryServiceClient(clientOpts *apiclient.ClientOptions) (io.Closer, repository.RepositoryServiceClient, error) {
+	client, err := apiclient.NewClient(clientOpts)
+	if err != nil {
+		return nil, nil, err
+	}
+	conn, repoIf, err := client.NewRepoClient()
+	if err != nil {
+		return nil, nil, err
+	}
+	return conn, repoIf, nil
 }
 
 // IsErrorRepositoryNotFound helper function to test for errorRepositoryNotFound error.

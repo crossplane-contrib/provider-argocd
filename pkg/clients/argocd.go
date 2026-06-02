@@ -35,16 +35,17 @@ import (
 	"github.com/crossplane-contrib/provider-argocd/apis/v1alpha1"
 )
 
-// NewClient creates new argocd Client with provided argocd Configurations/Credentials.
-func NewClient(opts *argocd.ClientOptions) *argocd.Client {
-	var cl argocd.Client
-	var err error
-	cl, err = argocd.NewClient(opts)
-
+// NewClient creates new argocd Client with provided argocd
+// Configurations/Credentials. Any error from constructing the underlying
+// argo-cd client (for example, a transient DNS failure while resolving the
+// server address) is returned to the caller so the reconciler can retry with
+// backoff instead of panicking and crashing the controller process.
+func NewClient(opts *argocd.ClientOptions) (*argocd.Client, error) {
+	cl, err := argocd.NewClient(opts)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &cl
+	return &cl, nil
 }
 
 // GetConfig constructs a Config that can be used to authenticate to argocd
