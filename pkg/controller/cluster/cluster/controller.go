@@ -116,7 +116,7 @@ func NewExternal(kube client.Client, newArgocdClientFn func() (io.Closer, cluste
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create argocd client")
 	}
-	return &external{client: argocdClient, conn: conn}, nil
+	return &external{kube: kube, client: argocdClient, conn: conn}, nil
 }
 
 type external struct {
