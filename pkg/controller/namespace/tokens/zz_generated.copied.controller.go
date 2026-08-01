@@ -36,6 +36,7 @@ const (
 	errGetRoleFailed     = "failed to get ArgoCD Project Role, verify role name and project configuration"
 	errCreateTokenFailed = "failed to create ArgoCD Project Token, verify permissions and token configuration"
 	errDeleteFailed      = "failed to delete ArgoCD Project Token, token may require manual cleanup"
+	errKubeUpdateFailed  = "cannot update Argocd Project Token custom resource"
 )
 
 // Setup adds a controller that reconciles tokens.
