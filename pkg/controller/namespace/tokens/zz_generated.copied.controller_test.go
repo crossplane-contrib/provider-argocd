@@ -18,8 +18,11 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	"go.uber.org/mock/gomock"
+	corev1 "k8s.io/api/core/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/namespace/projects/v1alpha1"
 	mockclient "github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/mock/projects"
@@ -41,6 +44,7 @@ var (
 
 type args struct {
 	client projects.ProjectServiceClient
+	kube   client.Client
 	cr     *v1alpha1.Token
 }
 
@@ -79,6 +83,14 @@ func withObservation(p v1alpha1.TokenObservation) TokenModifier {
 
 func withConditions(c ...xpv1.Condition) TokenModifier {
 	return func(r *v1alpha1.Token) { r.Status.ConditionedStatus.Conditions = c }
+}
+
+func withWriteConnectionSecretToRef(name string) TokenModifier {
+	return func(r *v1alpha1.Token) {
+		r.Spec.WriteConnectionSecretToReference = &xpv1.LocalSecretReference{
+			Name: name,
+		}
+	}
 }
 
 func createTestJWTToken() string {
@@ -858,11 +870,153 @@ func TestCreate(t *testing.T) {
 				err:    errors.Wrap(errBoom, errCreateTokenFailed),
 			},
 		},
+		"SuccessfulWritesConnectionSecret": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockProjectServiceClient) {
+					mcs.EXPECT().CreateToken(
+						context.Background(),
+						&project.ProjectTokenCreateRequest{
+							Project:   testProjectName,
+							Role:      testRoleName,
+							ExpiresIn: testExpiresInZero,
+						},
+					).Return(
+						&project.ProjectTokenResponse{
+							Token: createTestJWTToken(),
+						}, nil)
+				}),
+				kube: &test.MockClient{
+					MockCreate: test.NewMockCreateFn(nil, func(obj client.Object) error {
+						secret, ok := obj.(*corev1.Secret)
+						if !ok {
+							return errors.New("expected a *corev1.Secret")
+						}
+						if diff := cmp.Diff(createTestJWTToken(), string(secret.Data["token"])); diff != "" {
+							return errors.Errorf("unexpected secret token data: -want, +got:\n%s", diff)
+						}
+						return nil
+					}),
+				},
+				cr: Token(
+					withWriteConnectionSecretToRef("test-token"),
+					withSpec(v1alpha1.TokenParameters{
+						Project:   &testProjectName,
+						Role:      testRoleName,
+						ExpiresIn: ptr.To("0"),
+					}),
+				),
+			},
+			want: want{
+				cr: Token(
+					withExternalName(testTokenExternalName),
+					withWriteConnectionSecretToRef("test-token"),
+					withSpec(v1alpha1.TokenParameters{
+						Project:   &testProjectName,
+						Role:      testRoleName,
+						ExpiresIn: ptr.To("0"),
+					}),
+				),
+				result: managed.ExternalCreation{},
+				err:    nil,
+			},
+		},
+		"ConnectionSecretCreateFailed": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockProjectServiceClient) {
+					mcs.EXPECT().CreateToken(
+						context.Background(),
+						&project.ProjectTokenCreateRequest{
+							Project:   testProjectName,
+							Role:      testRoleName,
+							ExpiresIn: testExpiresInZero,
+						},
+					).Return(
+						&project.ProjectTokenResponse{
+							Token: createTestJWTToken(),
+						}, nil)
+				}),
+				kube: &test.MockClient{
+					MockCreate: test.NewMockCreateFn(errBoom),
+				},
+				cr: Token(
+					withWriteConnectionSecretToRef("test-token"),
+					withSpec(v1alpha1.TokenParameters{
+						Project:   &testProjectName,
+						Role:      testRoleName,
+						ExpiresIn: ptr.To("0"),
+					}),
+				),
+			},
+			want: want{
+				cr: Token(
+					withExternalName(testTokenExternalName),
+					withWriteConnectionSecretToRef("test-token"),
+					withSpec(v1alpha1.TokenParameters{
+						Project:   &testProjectName,
+						Role:      testRoleName,
+						ExpiresIn: ptr.To("0"),
+					}),
+				),
+				result: managed.ExternalCreation{},
+				err:    errors.Wrap(errors.Wrapf(errBoom, "failed to create secret: %s", "test-token"), errCreateTokenFailed),
+			},
+		},
+		"ConnectionSecretAlreadyExistsIsUpdated": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockProjectServiceClient) {
+					mcs.EXPECT().CreateToken(
+						context.Background(),
+						&project.ProjectTokenCreateRequest{
+							Project:   testProjectName,
+							Role:      testRoleName,
+							ExpiresIn: testExpiresInZero,
+						},
+					).Return(
+						&project.ProjectTokenResponse{
+							Token: createTestJWTToken(),
+						}, nil)
+				}),
+				kube: &test.MockClient{
+					MockCreate: test.NewMockCreateFn(kerrors.NewAlreadyExists(corev1.Resource("secrets"), "test-token")),
+					MockUpdate: test.NewMockUpdateFn(nil, func(obj client.Object) error {
+						secret, ok := obj.(*corev1.Secret)
+						if !ok {
+							return errors.New("expected a *corev1.Secret")
+						}
+						if diff := cmp.Diff(createTestJWTToken(), string(secret.Data["token"])); diff != "" {
+							return errors.Errorf("unexpected secret token data: -want, +got:\n%s", diff)
+						}
+						return nil
+					}),
+				},
+				cr: Token(
+					withWriteConnectionSecretToRef("test-token"),
+					withSpec(v1alpha1.TokenParameters{
+						Project:   &testProjectName,
+						Role:      testRoleName,
+						ExpiresIn: ptr.To("0"),
+					}),
+				),
+			},
+			want: want{
+				cr: Token(
+					withExternalName(testTokenExternalName),
+					withWriteConnectionSecretToRef("test-token"),
+					withSpec(v1alpha1.TokenParameters{
+						Project:   &testProjectName,
+						Role:      testRoleName,
+						ExpiresIn: ptr.To("0"),
+					}),
+				),
+				result: managed.ExternalCreation{},
+				err:    nil,
+			},
+		},
 	}
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			e := &external{client: tc.client}
+			e := &external{client: tc.client, kube: tc.args.kube}
 			o, err := e.Create(context.Background(), tc.args.cr)
 
 			if diff := cmp.Diff(tc.want.err, err, test.EquateErrors()); diff != "" {

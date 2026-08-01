@@ -34,7 +34,6 @@ const (
 	errGetRoleFailed     = "failed to get ArgoCD Project Role, verify role name and project configuration"
 	errCreateTokenFailed = "failed to create ArgoCD Project Token, verify permissions and token configuration"
 	errDeleteFailed      = "failed to delete ArgoCD Project Token, token may require manual cleanup"
-	errKubeUpdateFailed  = "cannot update Argocd Project Token custom resource"
 )
 
 // Setup adds a controller that reconciles tokens.
@@ -180,7 +179,11 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	}
 	meta.SetExternalName(cr, claims.ID)
 
-	return managed.ExternalCreation{}, errors.Wrap(nil, errKubeUpdateFailed)
+	if err := e.upsertConnectionSecret(ctx, cr, []byte(token)); err != nil {
+		return managed.ExternalCreation{}, errors.Wrap(err, errCreateTokenFailed)
+	}
+
+	return managed.ExternalCreation{}, nil
 }
 
 func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
