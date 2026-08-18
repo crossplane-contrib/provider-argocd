@@ -141,6 +141,10 @@ func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.Pr
 			return "", errors.Wrap(err, "cannot get token from Azure")
 		}
 		return token.Token, nil
+	case xpv2.CredentialsSourceNone,
+		xpv2.CredentialsSourceInjectedIdentity,
+		xpv2.CredentialsSourceEnvironment:
+		return "", errors.Errorf("credentials source %s is not currently supported", s)
 	default:
 		return "", errors.Errorf("credentials source %s is not currently supported", s)
 	}

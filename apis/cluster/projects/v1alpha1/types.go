@@ -49,7 +49,7 @@ type ProjectParameters struct {
 	Roles []ProjectRole `json:"roles,omitempty"`
 	// ClusterResourceWhitelist contains list of whitelisted cluster level resources
 	// +optional
-	ClusterResourceWhitelist []metav1.GroupKind `json:"clusterResourceWhitelist,omitempty"`
+	ClusterResourceWhitelist []ClusterResourceRestrictionItem `json:"clusterResourceWhitelist,omitempty"`
 	// NamespaceResourceBlacklist contains list of blacklisted namespace level resources
 	// +optional
 	NamespaceResourceBlacklist []metav1.GroupKind `json:"namespaceResourceBlacklist,omitempty"`
@@ -67,7 +67,7 @@ type ProjectParameters struct {
 	SignatureKeys []SignatureKey `json:"signatureKeys,omitempty"`
 	// ClusterResourceBlacklist contains list of blacklisted cluster level resources
 	// +optional
-	ClusterResourceBlacklist []metav1.GroupKind `json:"clusterResourceBlacklist,omitempty"`
+	ClusterResourceBlacklist []ClusterResourceRestrictionItem `json:"clusterResourceBlacklist,omitempty"`
 	// ProjectLabels labels that will be applied to the AppProject
 	// +optional
 	ProjectLabels map[string]string `json:"projectLabels,omitempty"`
@@ -182,6 +182,14 @@ type SyncWindow struct {
 type SignatureKey struct {
 	// The ID of the key in hexadecimal notation
 	KeyID string `json:"keyID"`
+}
+
+type ClusterResourceRestrictionItem struct {
+	Group string `json:"group"`
+	Kind  string `json:"kind"`
+	// Name is the name of the restricted resource. Glob patterns using Go's filepath.Match syntax are supported.
+	// Unlike the group and kind fields, if no name is specified, all resources of the specified group/kind are matched.
+	Name string `json:"name,omitempty"`
 }
 
 // ProjectObservation represents an argocd Project.

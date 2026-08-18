@@ -148,12 +148,12 @@ func TestObserve(t *testing.T) {
 									},
 									SyncPolicy: &argocdv1alpha1.SyncPolicy{
 										Automated: &argocdv1alpha1.SyncPolicyAutomated{
-											SelfHeal: true,
+											SelfHeal: new(true),
 										},
 									},
 								},
 								Status: argocdv1alpha1.ApplicationStatus{
-									Health: argocdv1alpha1.HealthStatus{
+									Health: argocdv1alpha1.AppHealthStatus{
 										Status: "Healthy",
 									},
 									Sync: argocdv1alpha1.SyncStatus{
@@ -277,12 +277,12 @@ func TestObserve(t *testing.T) {
 									},
 									SyncPolicy: &argocdv1alpha1.SyncPolicy{
 										Automated: &argocdv1alpha1.SyncPolicyAutomated{
-											SelfHeal: true,
+											SelfHeal: new(true),
 										},
 									},
 								},
 								Status: argocdv1alpha1.ApplicationStatus{
-									Health: argocdv1alpha1.HealthStatus{
+									Health: argocdv1alpha1.AppHealthStatus{
 										Status: "Healthy",
 									},
 									Sync: argocdv1alpha1.SyncStatus{
@@ -406,7 +406,7 @@ func TestObserve(t *testing.T) {
 									},
 								},
 								Status: argocdv1alpha1.ApplicationStatus{
-									Health: argocdv1alpha1.HealthStatus{
+									Health: argocdv1alpha1.AppHealthStatus{
 										Status: "Missing",
 									},
 									Sync: argocdv1alpha1.SyncStatus{

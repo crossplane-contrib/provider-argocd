@@ -254,8 +254,15 @@ func lateInitializeProject(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppP
 		}
 	}
 
-	if p.ClusterResourceWhitelist == nil {
-		p.ClusterResourceWhitelist = r.ClusterResourceWhitelist
+	if p.ClusterResourceWhitelist == nil && r.ClusterResourceWhitelist != nil {
+		p.ClusterResourceWhitelist = make([]v1alpha1.ClusterResourceRestrictionItem, len(r.ClusterResourceWhitelist))
+		for i, item := range r.ClusterResourceWhitelist {
+			p.ClusterResourceWhitelist[i] = v1alpha1.ClusterResourceRestrictionItem{
+				Group: item.Group,
+				Kind:  item.Kind,
+				Name:  item.Name,
+			}
+		}
 	}
 
 	if p.NamespaceResourceBlacklist == nil {
@@ -307,8 +314,15 @@ func lateInitializeProject(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppP
 			}
 		}
 	}
-	if p.ClusterResourceBlacklist == nil {
-		p.ClusterResourceBlacklist = r.ClusterResourceBlacklist
+	if p.ClusterResourceBlacklist == nil && r.ClusterResourceBlacklist != nil {
+		p.ClusterResourceBlacklist = make([]v1alpha1.ClusterResourceRestrictionItem, len(r.ClusterResourceBlacklist))
+		for i, item := range r.ClusterResourceBlacklist {
+			p.ClusterResourceBlacklist[i] = v1alpha1.ClusterResourceRestrictionItem{
+				Group: item.Group,
+				Kind:  item.Kind,
+				Name:  item.Name,
+			}
+		}
 	}
 }
 
@@ -401,7 +415,14 @@ func generateProjectSpec(p *v1alpha1.ProjectParameters) argocdv1alpha1.AppProjec
 		}
 	}
 	if p.ClusterResourceWhitelist != nil {
-		projSpec.ClusterResourceWhitelist = p.ClusterResourceWhitelist
+		projSpec.ClusterResourceWhitelist = make([]argocdv1alpha1.ClusterResourceRestrictionItem, len(p.ClusterResourceWhitelist))
+		for i, item := range p.ClusterResourceWhitelist {
+			projSpec.ClusterResourceWhitelist[i] = argocdv1alpha1.ClusterResourceRestrictionItem{
+				Group: item.Group,
+				Kind:  item.Kind,
+				Name:  item.Name,
+			}
+		}
 	}
 	if p.NamespaceResourceBlacklist != nil {
 		projSpec.NamespaceResourceBlacklist = p.NamespaceResourceBlacklist
@@ -448,7 +469,14 @@ func generateProjectSpec(p *v1alpha1.ProjectParameters) argocdv1alpha1.AppProjec
 		}
 	}
 	if p.ClusterResourceBlacklist != nil {
-		projSpec.ClusterResourceBlacklist = p.ClusterResourceBlacklist
+		projSpec.ClusterResourceBlacklist = make([]argocdv1alpha1.ClusterResourceRestrictionItem, len(p.ClusterResourceBlacklist))
+		for i, item := range p.ClusterResourceBlacklist {
+			projSpec.ClusterResourceBlacklist[i] = argocdv1alpha1.ClusterResourceRestrictionItem{
+				Group: item.Group,
+				Kind:  item.Kind,
+				Name:  item.Name,
+			}
+		}
 	}
 
 	if p.SourceNamespaces != nil {
@@ -480,13 +508,13 @@ func isProjectUpToDate(p *v1alpha1.ProjectParameters, r *argocdv1alpha1.AppProje
 		!isEqualDestinations(p.Destinations, r.Spec.Destinations),
 		clients.StringValue(p.Description) != r.Spec.Description,
 		!isEqualRoles(p.Roles, r.Spec.Roles),
-		!cmp.Equal(p.ClusterResourceWhitelist, r.Spec.ClusterResourceWhitelist),
+		!isEqualClusterResourceRestrictionItems(p.ClusterResourceWhitelist, r.Spec.ClusterResourceWhitelist),
 		!cmp.Equal(p.NamespaceResourceBlacklist, r.Spec.NamespaceResourceBlacklist),
 		!isEqualOrphanedResources(p.OrphanedResources, r.Spec.OrphanedResources),
 		!isEqualSyncWindows(p.SyncWindows, r.Spec.SyncWindows),
 		!cmp.Equal(p.NamespaceResourceWhitelist, r.Spec.NamespaceResourceWhitelist),
 		!isEqualSignatureKeys(p.SignatureKeys, r.Spec.SignatureKeys),
-		!cmp.Equal(p.ClusterResourceBlacklist, r.Spec.ClusterResourceBlacklist):
+		!isEqualClusterResourceRestrictionItems(p.ClusterResourceBlacklist, r.Spec.ClusterResourceBlacklist):
 		return false
 	}
 	return true
@@ -612,6 +640,21 @@ func isEqualSyncWindows(p v1alpha1.SyncWindows, r argocdv1alpha1.SyncWindows) bo
 			syncWindow.Namespaces != nil && !cmp.Equal(syncWindow.Namespaces, r[i].Namespaces),
 			syncWindow.Clusters != nil && !cmp.Equal(syncWindow.Clusters, r[i].Clusters),
 			syncWindow.ManualSync != nil && *syncWindow.ManualSync != r[i].ManualSync:
+			return false
+		}
+	}
+	return true
+}
+
+func isEqualClusterResourceRestrictionItems(p []v1alpha1.ClusterResourceRestrictionItem, r []argocdv1alpha1.ClusterResourceRestrictionItem) bool {
+	if len(p) != len(r) {
+		return false
+	}
+	for i, item := range p {
+		switch {
+		case item.Kind != r[i].Kind,
+			item.Group != r[i].Group,
+			item.Name != r[i].Name:
 			return false
 		}
 	}

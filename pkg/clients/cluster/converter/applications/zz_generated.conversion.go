@@ -4,8 +4,8 @@
 package converter
 
 import (
+	common "github.com/argoproj/argo-cd/gitops-engine/pkg/sync/common"
 	v1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
-	common "github.com/argoproj/gitops-engine/pkg/sync/common"
 	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	v11 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -465,6 +465,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceToPV1alpha1ApplicationSource2(
 			v1alpha1ApplicationSource.Ref = *(*source).Ref
 		}
 		v1alpha1ApplicationSource.Name = (*source).Name
+		v1alpha1ApplicationSource.TagPrefix = (*source).TagPrefix
 		pV1alpha1ApplicationSource = &v1alpha1ApplicationSource
 	}
 	return pV1alpha1ApplicationSource
@@ -774,17 +775,20 @@ func (c *ConverterImpl) pV1alpha1SyncPolicyAutomatedToPV1alpha1SyncPolicyAutomat
 	if source != nil {
 		var v1alpha1SyncPolicyAutomated v1alpha1.SyncPolicyAutomated
 		if (*source).Prune != nil {
-			v1alpha1SyncPolicyAutomated.Prune = *(*source).Prune
+			xbool := *(*source).Prune
+			v1alpha1SyncPolicyAutomated.Prune = &xbool
 		}
 		if (*source).SelfHeal != nil {
-			v1alpha1SyncPolicyAutomated.SelfHeal = *(*source).SelfHeal
+			xbool2 := *(*source).SelfHeal
+			v1alpha1SyncPolicyAutomated.SelfHeal = &xbool2
 		}
 		if (*source).AllowEmpty != nil {
-			v1alpha1SyncPolicyAutomated.AllowEmpty = *(*source).AllowEmpty
+			xbool3 := *(*source).AllowEmpty
+			v1alpha1SyncPolicyAutomated.AllowEmpty = &xbool3
 		}
 		if (*source).Enabled != nil {
-			xbool := *(*source).Enabled
-			v1alpha1SyncPolicyAutomated.Enabled = &xbool
+			xbool4 := *(*source).Enabled
+			v1alpha1SyncPolicyAutomated.Enabled = &xbool4
 		}
 		pV1alpha1SyncPolicyAutomated = &v1alpha1SyncPolicyAutomated
 	}
@@ -961,6 +965,7 @@ func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource(sou
 	pString4 := source.Ref
 	v1alpha1ApplicationSource.Ref = &pString4
 	v1alpha1ApplicationSource.Name = source.Name
+	v1alpha1ApplicationSource.TagPrefix = source.TagPrefix
 	return v1alpha1ApplicationSource
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource2(source v1alpha11.ApplicationSource) v1alpha1.ApplicationSource {
@@ -983,6 +988,7 @@ func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource2(so
 		v1alpha1ApplicationSource.Ref = *source.Ref
 	}
 	v1alpha1ApplicationSource.Name = source.Name
+	v1alpha1ApplicationSource.TagPrefix = source.TagPrefix
 	return v1alpha1ApplicationSource
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourceTypeToV1alpha1ApplicationSourceType(source v1alpha1.ApplicationSourceType) v1alpha11.ApplicationSourceType {
@@ -1414,6 +1420,7 @@ func (c *ConverterImpl) v1alpha1SyncSourceToV1alpha1SyncSource(source v1alpha11.
 	var v1alpha1SyncSource v1alpha1.SyncSource
 	v1alpha1SyncSource.TargetBranch = source.TargetBranch
 	v1alpha1SyncSource.Path = source.Path
+	v1alpha1SyncSource.RepoURL = source.RepoURL
 	return v1alpha1SyncSource
 }
 func (c *ConverterImpl) v1alpha1SyncStatusCodeToString(source v1alpha1.SyncStatusCode) string {

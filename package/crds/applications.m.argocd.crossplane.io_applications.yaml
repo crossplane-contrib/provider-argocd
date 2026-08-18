@@ -707,6 +707,13 @@ spec:
                         description: RepoURL is the URL to the repository (Git or
                           Helm) that contains the application manifests
                         type: string
+                      tagPrefix:
+                        description: |-
+                          TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                          The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                          For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                          "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                        type: string
                       targetRevision:
                         description: |-
                           TargetRevision defines the revision of the source to sync the application to.
@@ -1127,11 +1134,20 @@ spec:
                           path:
                             description: |-
                               Path is a directory path within the git repository where hydrated manifests should be committed to and synced
-                              from. If hydrateTo is set, this is just the path from which hydrated manifests will be synced.
+                              from. The Path should never point to the root of the repo. If hydrateTo is set, this is just the path from which
+                              hydrated manifests will be synced.
+                            minLength: 1
+                            pattern: ^.{2,}|[^./]$
+                            type: string
+                          repoURL:
+                            description: |-
+                              RepoURL is the URL to the git repository that contains the hydrated manifests. If not set, defaults to
+                              the DrySource.RepoURL.
                             type: string
                           targetBranch:
-                            description: TargetBranch is the branch to which hydrated
-                              manifests should be committed
+                            description: |-
+                              TargetBranch is the branch from which hydrated manifests will be synced.
+                              If HydrateTo is not set, this is also the branch to which hydrated manifests are committed.
                             type: string
                         required:
                         - path
@@ -1526,6 +1542,13 @@ spec:
                         repoURL:
                           description: RepoURL is the URL to the repository (Git or
                             Helm) that contains the application manifests
+                          type: string
+                        tagPrefix:
+                          description: |-
+                            TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                            The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                            For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                            "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                           type: string
                         targetRevision:
                           description: |-
@@ -2160,6 +2183,13 @@ spec:
                               description: RepoURL is the URL to the repository (Git
                                 or Helm) that contains the application manifests
                               type: string
+                            tagPrefix:
+                              description: |-
+                                TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                              type: string
                             targetRevision:
                               description: |-
                                 TargetRevision defines the revision of the source to sync the application to.
@@ -2574,6 +2604,13 @@ spec:
                               repoURL:
                                 description: RepoURL is the URL to the repository
                                   (Git or Helm) that contains the application manifests
+                                type: string
+                              tagPrefix:
+                                description: |-
+                                  TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                  The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                  For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                  "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                                 type: string
                               targetRevision:
                                 description: |-
@@ -3142,6 +3179,13 @@ spec:
                                       (Git or Helm) that contains the application
                                       manifests
                                     type: string
+                                  tagPrefix:
+                                    description: |-
+                                      TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                      The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                      For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                      "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                                    type: string
                                   targetRevision:
                                     description: |-
                                       TargetRevision defines the revision of the source to sync the application to.
@@ -3574,6 +3618,13 @@ spec:
                                       description: RepoURL is the URL to the repository
                                         (Git or Helm) that contains the application
                                         manifests
+                                      type: string
+                                    tagPrefix:
+                                      description: |-
+                                        TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                        The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                        For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                        "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                                       type: string
                                     targetRevision:
                                       description: |-
@@ -4106,6 +4157,13 @@ spec:
                                 description: RepoURL is the URL to the repository
                                   (Git or Helm) that contains the application manifests
                                 type: string
+                              tagPrefix:
+                                description: |-
+                                  TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                  The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                  For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                  "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                                type: string
                               targetRevision:
                                 description: |-
                                   TargetRevision defines the revision of the source to sync the application to.
@@ -4527,6 +4585,13 @@ spec:
                                 repoURL:
                                   description: RepoURL is the URL to the repository
                                     (Git or Helm) that contains the application manifests
+                                  type: string
+                                tagPrefix:
+                                  description: |-
+                                    TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                    The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                    For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                    "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                                   type: string
                                 targetRevision:
                                   description: |-
@@ -5221,6 +5286,13 @@ spec:
                                 description: RepoURL is the URL to the repository
                                   (Git or Helm) that contains the application manifests
                                 type: string
+                              tagPrefix:
+                                description: |-
+                                  TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                  The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                  For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                  "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+                                type: string
                               targetRevision:
                                 description: |-
                                   TargetRevision defines the revision of the source to sync the application to.
@@ -5642,6 +5714,13 @@ spec:
                                 repoURL:
                                   description: RepoURL is the URL to the repository
                                     (Git or Helm) that contains the application manifests
+                                  type: string
+                                tagPrefix:
+                                  description: |-
+                                    TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+                                    The prefix is stripped from tag names before comparison and re-added to the resolved version.
+                                    For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+                                    "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
                                   type: string
                                 targetRevision:
                                   description: |-
