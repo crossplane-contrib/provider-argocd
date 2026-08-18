@@ -19,14 +19,13 @@ package v1alpha1
 // Copy types from cluster-scope apis replace references with namespace types:
 //go:generate go run -modfile ../../../../tools/go.mod -tags generate github.com/mistermx/copystruct/cmd/copystruct ../../../cluster/applications/v1alpha1 zz_generated.types.copied.go ApplicationParameters,ArgoApplicationStatus
 //go:generate sed -i s|github\.com/crossplane-contrib/provider-argocd/apis/cluster|github.com/crossplane-contrib/provider-argocd/apis/namespace|g zz_generated.types.copied.go
-//go:generate sed -i s|v1\.Reference|v1.NamespacedReference|g zz_generated.types.copied.go
-//go:generate sed -i s|v1\.Selector|v1.NamespacedSelector|g zz_generated.types.copied.go
+//go:generate sed -i s|v2\.Reference|v2.NamespacedReference|g zz_generated.types.copied.go
+//go:generate sed -i s|v2\.Selector|v2.NamespacedSelector|g zz_generated.types.copied.go
 
 import (
 	"reflect"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
-	xpv2 "github.com/crossplane/crossplane-runtime/v2/apis/common/v2"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -39,8 +38,8 @@ type ApplicationSpec struct {
 
 // A ApplicationStatus represents the observed state of an ArgoCD Application.
 type ApplicationStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          ArgoApplicationStatus `json:"atProvider,omitempty"`
+	xpv2.ManagedResourceStatus `json:",inline"`
+	AtProvider                 ArgoApplicationStatus `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

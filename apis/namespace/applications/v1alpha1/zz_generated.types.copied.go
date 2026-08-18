@@ -3,8 +3,8 @@
 package v1alpha1
 
 import (
-	v1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	v2 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -88,10 +88,10 @@ type ApplicationDestination struct {
 	Server *string `json:"server,omitempty"`
 	// ServerRef is a reference to Cluster used to set Server
 	// +optional
-	ServerRef *v1.NamespacedReference `json:"serverRef,omitempty"`
+	ServerRef *v2.NamespacedReference `json:"serverRef,omitempty"`
 	// ServerSelector selects references to Cluster used to set Server
 	// +optional
-	ServerSelector *v1.NamespacedSelector `json:"serverSelector,omitempty"`
+	ServerSelector *v2.NamespacedSelector `json:"serverSelector,omitempty"`
 	// Namespace specifies the target namespace for the application's resources.
 	// The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
 	// +optional
@@ -105,10 +105,10 @@ type ApplicationDestination struct {
 	Name *string `json:"name,omitempty"`
 	// NameRef is a reference to a Cluster used to set Name
 	// +optional
-	NameRef *v1.NamespacedReference `json:"nameRef,omitempty"`
+	NameRef *v2.NamespacedReference `json:"nameRef,omitempty"`
 	// NameSelector is a reference to a Cluster used to set Name
 	// +optional
-	NameSelector *v1.NamespacedSelector `json:"nameSelector,omitempty"`
+	NameSelector *v2.NamespacedSelector `json:"nameSelector,omitempty"`
 }
 
 // SyncPolicy controls when a sync will be performed in response to updates in git
@@ -178,7 +178,7 @@ type ApplicationSourceHelm struct {
 	// SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
 	SkipCrds *bool `json:"skipCrds,omitempty" protobuf:"bytes,9,opt,name=skipCrds"`
 	// ValuesObject specifies Helm values to be passed to helm template, defined as a map. This takes precedence over Values.
-	ValuesObject apiextensionsv1.JSON `json:"valuesObject,omitempty" protobuf:"bytes,10,opt,name=valuesObject"`
+	ValuesObject v1.JSON `json:"valuesObject,omitempty" protobuf:"bytes,10,opt,name=valuesObject"`
 	// Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.
 	Namespace *string `json:"namespace,omitempty" protobuf:"bytes,11,opt,name=namespace"`
 	// KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
@@ -262,6 +262,8 @@ type SyncPolicyAutomated struct {
 	SelfHeal *bool `json:"selfHeal,omitempty" protobuf:"bytes,2,opt,name=selfHeal"`
 	// AllowEmpty allows apps have zero live resources (default: false)
 	AllowEmpty *bool `json:"allowEmpty,omitempty" protobuf:"bytes,3,opt,name=allowEmpty"`
+	// Enable allows apps to explicitly control automated sync
+	Enabled *bool `json:"enabled,omitempty" protobuf:"bytes,4,opt,name=enabled"`
 }
 
 // SyncOptions provide per-sync sync-options, e.g. Validate=false
@@ -273,6 +275,8 @@ type RetryStrategy struct {
 	Limit *int64 `json:"limit,omitempty" protobuf:"bytes,1,opt,name=limit"`
 	// Backoff controls how to backoff on subsequent retries of failed syncs
 	Backoff *Backoff `json:"backoff,omitempty" protobuf:"bytes,2,opt,name=backoff,casttype=Backoff"`
+	// Refresh indicates if the latest revision should be used on retry instead of the initial one (default: false)
+	Refresh bool `json:"refresh,omitempty" protobuf:"bytes,3,opt,name=refresh"`
 }
 
 // ManagedNamespaceMetadata controls metadata in the given namespace (if CreateNamespace=true)
@@ -289,6 +293,14 @@ type DrySource struct {
 	TargetRevision string `json:"targetRevision" protobuf:"bytes,2,name=targetRevision"`
 	// Path is a directory path within the Git repository where the manifests are located
 	Path string `json:"path" protobuf:"bytes,3,name=path"`
+	// Helm specifies helm specific options
+	Helm *ApplicationSourceHelm `json:"helm,omitempty" protobuf:"bytes,4,opt,name=helm"`
+	// Kustomize specifies kustomize specific options
+	Kustomize *ApplicationSourceKustomize `json:"kustomize,omitempty" protobuf:"bytes,5,opt,name=kustomize"`
+	// Directory specifies path/directory specific options
+	Directory *ApplicationSourceDirectory `json:"directory,omitempty" protobuf:"bytes,6,opt,name=directory"`
+	// Plugin specifies config management plugin specific options
+	Plugin *ApplicationSourcePlugin `json:"plugin,omitempty" protobuf:"bytes,7,opt,name=plugin"`
 }
 
 // SyncSource specifies a location from which hydrated manifests may be synced. RepoURL is assumed based on the

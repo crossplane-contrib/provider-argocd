@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -62,7 +62,9 @@ type ApplicationPreservedFields struct {
 type ApplicationSetStrategy struct {
 	Type        string                         `json:"type,omitempty" protobuf:"bytes,1,opt,name=type"`
 	RollingSync *ApplicationSetRolloutStrategy `json:"rollingSync,omitempty" protobuf:"bytes,2,opt,name=rollingSync"`
-	// RollingUpdate *ApplicationSetRolloutStrategy `json:"rollingUpdate,omitempty" protobuf:"bytes,3,opt,name=rollingUpdate"`
+	// DeletionOrder allows specifying the order for deleting generated apps when progressive sync is enabled.
+	// accepts values "AllAtOnce" and "Reverse"
+	DeletionOrder string `json:"deletionOrder,omitempty" protobuf:"bytes,3,opt,name=deletionOrder"`
 }
 
 // ApplicationSetRolloutStrategy define the rollout strategy for the ApplicationSet
@@ -258,7 +260,8 @@ type GitDirectoryGeneratorItem struct {
 
 // GitFileGeneratorItem defines a file to scan for resources.
 type GitFileGeneratorItem struct {
-	Path string `json:"path" protobuf:"bytes,1,name=path"`
+	Path    string `json:"path" protobuf:"bytes,1,name=path"`
+	Exclude bool   `json:"exclude,omitempty" protobuf:"bytes,2,name=exclude"`
 }
 
 // SCMProviderGenerator defines a generator that scrapes a SCMaaS API to find candidate repos.
@@ -434,9 +437,10 @@ type PullRequestGenerator struct {
 	Bitbucket           *PullRequestGeneratorBitbucket `json:"bitbucket,omitempty" protobuf:"bytes,8,opt,name=bitbucket"`
 	// Additional provider to use and config for it.
 	AzureDevOps *PullRequestGeneratorAzureDevOps `json:"azuredevops,omitempty" protobuf:"bytes,9,opt,name=azuredevops"`
-
 	// Values contains key/value pairs which are passed directly as parameters to the template
 	Values map[string]string `json:"values,omitempty" protobuf:"bytes,10,name=values"`
+	// ContinueOnRepoNotFoundError is a flag to continue the ApplicationSet Pull Request generator parameters generation even if the repository is not found.
+	ContinueOnRepoNotFoundError bool `json:"continueOnRepoNotFoundError,omitempty" protobuf:"varint,11,opt,name=continueOnRepoNotFoundError"`
 
 	// If you add a new SCM provider, update CustomApiUrl below.
 }
@@ -453,6 +457,8 @@ type PullRequestGeneratorGitea struct {
 	TokenRef *SecretRef `json:"tokenRef,omitempty" protobuf:"bytes,4,opt,name=tokenRef"`
 	// Allow insecure tls, for self-signed certificates; default: false.
 	Insecure bool `json:"insecure,omitempty" protobuf:"varint,5,opt,name=insecure"`
+	// Labels is used to filter the PRs that you want to target
+	Labels []string `json:"labels,omitempty" protobuf:"bytes,6,rep,name=labels"`
 }
 
 // PullRequestGeneratorAzureDevOps defines connection info specific to AzureDevOps.
@@ -557,6 +563,7 @@ type BasicAuthBitbucketServer struct {
 type PullRequestGeneratorFilter struct {
 	BranchMatch       *string `json:"branchMatch,omitempty" protobuf:"bytes,1,opt,name=branchMatch"`
 	TargetBranchMatch *string `json:"targetBranchMatch,omitempty" protobuf:"bytes,2,opt,name=targetBranchMatch"`
+	TitleMatch        *string `json:"titleMatch,omitempty" protobuf:"bytes,3,op,name=titleMatch"`
 }
 
 // SecretRef is a utility struct for a reference to a secret key.
@@ -618,14 +625,14 @@ type ApplicationSetTemplateMeta struct {
 
 // A ApplicationSetSpec defines the desired state of a ApplicationSet.
 type ApplicationSetSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       ApplicationSetParameters `json:"forProvider"`
+	xpv2.ClusterManagedResourceSpec `json:",inline"`
+	ForProvider                     ApplicationSetParameters `json:"forProvider"`
 }
 
 // A ApplicationSetStatus represents the observed state of a ApplicationSet.
 type ApplicationSetStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          ArgoApplicationSetStatus `json:"atProvider,omitempty"`
+	xpv2.ManagedResourceStatus `json:",inline"`
+	AtProvider                 ArgoApplicationSetStatus `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

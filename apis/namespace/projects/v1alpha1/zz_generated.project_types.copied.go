@@ -3,8 +3,8 @@
 package v1alpha1
 
 import (
-	v1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v2 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // ProjectParameters define the desired state of an ArgoCD Git Project
@@ -17,10 +17,10 @@ type ProjectParameters struct {
 	SourceRepos []string `json:"sourceRepos,omitempty"`
 	// SourceReposRefs is a reference to an array of Repository used to set SourceRepos
 	// +optional
-	SourceReposRefs []v1.NamespacedReference `json:"sourceReposRefs,omitempty"`
+	SourceReposRefs []v2.NamespacedReference `json:"sourceReposRefs,omitempty"`
 	// SourceReposSelector selects references to Repositories used to set SourceRepos
 	// +optional
-	SourceReposSelector *v1.NamespacedSelector `json:"sourceReposSelector,omitempty"`
+	SourceReposSelector *v2.NamespacedSelector `json:"sourceReposSelector,omitempty"`
 	// Destinations contains list of destinations available for deployment
 	// +optional
 	Destinations []ApplicationDestination `json:"destinations,omitempty"`
@@ -35,10 +35,10 @@ type ProjectParameters struct {
 	Roles []ProjectRole `json:"roles,omitempty"`
 	// ClusterResourceWhitelist contains list of whitelisted cluster level resources
 	// +optional
-	ClusterResourceWhitelist []metav1.GroupKind `json:"clusterResourceWhitelist,omitempty"`
+	ClusterResourceWhitelist []v1.GroupKind `json:"clusterResourceWhitelist,omitempty"`
 	// NamespaceResourceBlacklist contains list of blacklisted namespace level resources
 	// +optional
-	NamespaceResourceBlacklist []metav1.GroupKind `json:"namespaceResourceBlacklist,omitempty"`
+	NamespaceResourceBlacklist []v1.GroupKind `json:"namespaceResourceBlacklist,omitempty"`
 	// OrphanedResources specifies if controller should monitor orphaned resources of apps in this project
 	// +optional
 	OrphanedResources *OrphanedResourcesMonitorSettings `json:"orphanedResources,omitempty"`
@@ -47,13 +47,13 @@ type ProjectParameters struct {
 	SyncWindows SyncWindows `json:"syncWindows,omitempty"`
 	// NamespaceResourceWhitelist contains list of whitelisted namespace level resources
 	// +optional
-	NamespaceResourceWhitelist []metav1.GroupKind `json:"namespaceResourceWhitelist,omitempty"`
+	NamespaceResourceWhitelist []v1.GroupKind `json:"namespaceResourceWhitelist,omitempty"`
 	// SignatureKeys contains a list of PGP key IDs that commits in Git must be signed with in order to be allowed for sync
 	// +optional
 	SignatureKeys []SignatureKey `json:"signatureKeys,omitempty"`
 	// ClusterResourceBlacklist contains list of blacklisted cluster level resources
 	// +optional
-	ClusterResourceBlacklist []metav1.GroupKind `json:"clusterResourceBlacklist,omitempty"`
+	ClusterResourceBlacklist []v1.GroupKind `json:"clusterResourceBlacklist,omitempty"`
 	// ProjectLabels labels that will be applied to the AppProject
 	// +optional
 	ProjectLabels map[string]string `json:"projectLabels,omitempty"`
@@ -69,10 +69,10 @@ type ApplicationDestination struct {
 	Server *string `json:"server,omitempty"`
 	// ServerRef is a reference to an Cluster used to set Server
 	// +optional
-	ServerRef *v1.NamespacedReference `json:"serverRef,omitempty"`
+	ServerRef *v2.NamespacedReference `json:"serverRef,omitempty"`
 	// SourceReposSelector selects references to Repositories used to set SourceRepos
 	// +optional
-	ServerSelector *v1.NamespacedSelector `json:"serverSelector,omitempty"`
+	ServerSelector *v2.NamespacedSelector `json:"serverSelector,omitempty"`
 	// Namespace specifies the target namespace for the application's resources.
 	// The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
 	// +optional

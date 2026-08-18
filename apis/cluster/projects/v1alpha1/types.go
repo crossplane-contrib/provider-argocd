@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -31,10 +31,10 @@ type ProjectParameters struct {
 	SourceRepos []string `json:"sourceRepos,omitempty"`
 	// SourceReposRefs is a reference to an array of Repository used to set SourceRepos
 	// +optional
-	SourceReposRefs []xpv1.Reference `json:"sourceReposRefs,omitempty"`
+	SourceReposRefs []xpv2.Reference `json:"sourceReposRefs,omitempty"`
 	// SourceReposSelector selects references to Repositories used to set SourceRepos
 	// +optional
-	SourceReposSelector *xpv1.Selector `json:"sourceReposSelector,omitempty"`
+	SourceReposSelector *xpv2.Selector `json:"sourceReposSelector,omitempty"`
 	// Destinations contains list of destinations available for deployment
 	// +optional
 	Destinations []ApplicationDestination `json:"destinations,omitempty"`
@@ -83,10 +83,10 @@ type ApplicationDestination struct {
 	Server *string `json:"server,omitempty"`
 	// ServerRef is a reference to an Cluster used to set Server
 	// +optional
-	ServerRef *xpv1.Reference `json:"serverRef,omitempty"`
+	ServerRef *xpv2.Reference `json:"serverRef,omitempty"`
 	// SourceReposSelector selects references to Repositories used to set SourceRepos
 	// +optional
-	ServerSelector *xpv1.Selector `json:"serverSelector,omitempty"`
+	ServerSelector *xpv2.Selector `json:"serverSelector,omitempty"`
 	// Namespace specifies the target namespace for the application's resources.
 	// The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
 	// +optional
@@ -193,14 +193,14 @@ type ProjectObservation struct {
 
 // A ProjectSpec defines the desired state of an ArgoCD Project.
 type ProjectSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       ProjectParameters `json:"forProvider"`
+	xpv2.ClusterManagedResourceSpec `json:",inline"`
+	ForProvider                     ProjectParameters `json:"forProvider"`
 }
 
 // A ProjectStatus represents the observed state of an ArgoCD Project.
 type ProjectStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          ProjectObservation `json:"atProvider,omitempty"`
+	xpv2.ManagedResourceStatus `json:",inline"`
+	AtProvider                 ProjectObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true
