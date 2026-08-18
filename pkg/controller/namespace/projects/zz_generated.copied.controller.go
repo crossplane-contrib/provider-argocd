@@ -56,7 +56,7 @@ const (
 
 // Setup adds a controller that reconciles projects.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
-	name := managed.ControllerName(v1alpha1.ProjectKind)
+	name := managed.ControllerName(v1alpha1.ProjectKind + "/namespaced")
 
 	opts := append([]managed.ReconcilerOption{
 		managed.WithExternalConnecter(&connector{

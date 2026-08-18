@@ -29,7 +29,7 @@ import (
 // Setup adds a controller that reconciles ProviderConfigs by accounting for
 // their current usage.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
-	name := providerconfig.ControllerName(v1alpha1.ProviderConfigGroupKind)
+	name := providerconfig.ControllerName(v1alpha1.ProviderConfigGroupKind + "/namespaced")
 
 	of := resource.ProviderConfigKinds{
 		Config:    v1alpha1.ProviderConfigGroupVersionKind,

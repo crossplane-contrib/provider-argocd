@@ -62,7 +62,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 }
 
 func SetupWithExternalConnector(mgr ctrl.Manager, o xpcontroller.Options, ec managed.ExternalConnecter) error {
-	name := managed.ControllerName(v1alpha1.ApplicationKind)
+	name := managed.ControllerName(v1alpha1.ApplicationKind + "/namespaced")
 
 	opts := append([]managed.ReconcilerOption{
 		managed.WithExternalConnecter(ec),

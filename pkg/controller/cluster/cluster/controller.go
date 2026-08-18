@@ -65,7 +65,7 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 }
 
 func SetupWithExternalConnector(mgr ctrl.Manager, o xpcontroller.Options, ec managed.ExternalConnecter) error {
-	name := managed.ControllerName(v1alpha1.ClusterKind)
+	name := managed.ControllerName(v1alpha1.ClusterKind + "/cluster")
 
 	opts := append([]managed.ReconcilerOption{
 		managed.WithExternalConnecter(ec),

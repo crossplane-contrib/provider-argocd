@@ -41,7 +41,7 @@ const (
 
 // Setup adds a controller that reconciles tokens.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
-	name := managed.ControllerName(v1alpha1.TokenKind)
+	name := managed.ControllerName(v1alpha1.TokenKind + "/namespaced")
 
 	opts := append([]managed.ReconcilerOption{
 		managed.WithExternalConnecter(&connector{
