@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package apis contains cluster-scoped Kubernetes API for argocd API.
-package cluster
+// Package apis contains namespace-scoped Kubernetes API for argocd API.
+package namespace
 
 import (
 	"k8s.io/apimachinery/pkg/runtime"
