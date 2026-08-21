@@ -24,10 +24,10 @@ import (
 
 	"github.com/argoproj/argo-cd/v3/pkg/apiclient/project"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/test"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	"go.uber.org/mock/gomock"
@@ -89,7 +89,7 @@ func withObservation(p v1alpha1.ProjectObservation) ProjectModifier {
 	return func(r *v1alpha1.Project) { r.Status.AtProvider = p }
 }
 
-func withConditions(c ...xpv1.Condition) ProjectModifier {
+func withConditions(c ...xpv2.Condition) ProjectModifier {
 	return func(r *v1alpha1.Project) { r.Status.ConditionedStatus.Conditions = c }
 }
 
@@ -140,7 +140,7 @@ func TestObserve(t *testing.T) {
 						Description:   &testDescription,
 						ProjectLabels: testLabels,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.ProjectObservation{
 						JWTTokensByRole: map[string]v1alpha1.JWTTokens{},
 					}),
@@ -184,7 +184,7 @@ func TestObserve(t *testing.T) {
 					withSpec(v1alpha1.ProjectParameters{
 						Description: &testDescription,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.ProjectObservation{
 						JWTTokensByRole: map[string]v1alpha1.JWTTokens{},
 					}),
@@ -230,7 +230,7 @@ func TestObserve(t *testing.T) {
 					withSpec(v1alpha1.ProjectParameters{
 						Description: &testDescription2,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.ProjectObservation{
 						JWTTokensByRole: map[string]v1alpha1.JWTTokens{},
 					}),

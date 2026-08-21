@@ -22,10 +22,10 @@ import (
 
 	argocdRepository "github.com/argoproj/argo-cd/v3/pkg/apiclient/repository"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/test"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	"go.uber.org/mock/gomock"
@@ -88,7 +88,7 @@ func withObservation(p v1alpha1.RepositoryObservation) RepositoryModifier {
 	return func(r *v1alpha1.Repository) { r.Status.AtProvider = p }
 }
 
-func withConditions(c ...xpv1.Condition) RepositoryModifier {
+func withConditions(c ...xpv2.Condition) RepositoryModifier {
 	return func(r *v1alpha1.Repository) { r.Status.ConditionedStatus.Conditions = c }
 }
 
@@ -140,7 +140,7 @@ func TestObserve(t *testing.T) {
 						InheritedCreds: &testInheritedCreds,
 						EnableOCI:      &testEnableOCI,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.RepositoryObservation{
 						ConnectionState: v1alpha1.ConnectionState{},
 					}),
@@ -186,7 +186,7 @@ func TestObserve(t *testing.T) {
 						InheritedCreds: &testInheritedCreds,
 						EnableOCI:      &testEnableOCI,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.RepositoryObservation{}),
 				),
 				result: managed.ExternalObservation{
@@ -296,7 +296,7 @@ func TestObserve(t *testing.T) {
 						InheritedCreds: &testInheritedCreds,
 						EnableOCI:      &testEnableOCI,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.RepositoryObservation{
 						ConnectionState: v1alpha1.ConnectionState{},
 					}),
@@ -348,7 +348,7 @@ func TestObserve(t *testing.T) {
 						InheritedCreds: &testInheritedCreds,
 						EnableOCI:      &testEnableOCI,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.RepositoryObservation{
 						ConnectionState: v1alpha1.ConnectionState{},
 					}),

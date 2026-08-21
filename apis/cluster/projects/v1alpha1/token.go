@@ -1,7 +1,7 @@
 package v1alpha1
 
 import (
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -15,11 +15,11 @@ type TokenParameters struct {
 
 	// ProjectRefs is a reference to a Project used to set Project
 	// +optional
-	ProjectRef *xpv1.Reference `json:"projectRef,omitempty"`
+	ProjectRef *xpv2.Reference `json:"projectRef,omitempty"`
 
 	// ProjectSelector selects reference to a Project used to ProjectRef
 	// +optional
-	ProjectSelector *xpv1.Selector `json:"projectSelector,omitempty"`
+	ProjectSelector *xpv2.Selector `json:"projectSelector,omitempty"`
 
 	// Role is the role associated with the token.
 	Role string `json:"role"`
@@ -59,14 +59,14 @@ type TokenObservation struct {
 
 // A TokenSpec defines the desired state of an ArgoCD Token.
 type TokenSpec struct {
-	xpv1.ResourceSpec `json:",inline"`
-	ForProvider       TokenParameters `json:"forProvider"`
+	xpv2.ClusterManagedResourceSpec `json:",inline"`
+	ForProvider                     TokenParameters `json:"forProvider"`
 }
 
 // A TokenStatus represents the observed state of an ArgoCD Project Token.
 type TokenStatus struct {
-	xpv1.ResourceStatus `json:",inline"`
-	AtProvider          TokenObservation `json:"atProvider,omitempty"`
+	xpv2.ManagedResourceStatus `json:",inline"`
+	AtProvider                 TokenObservation `json:"atProvider,omitempty"`
 }
 
 // +kubebuilder:object:root=true

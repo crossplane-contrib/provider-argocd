@@ -21,6 +21,7 @@ type ArgoApplicationStatus struct {
 	// OperationState contains information about any ongoing operations, such as a sync
 	OperationState *OperationState `json:"operationState,omitempty" protobuf:"bytes,7,opt,name=operationState"`
 	// ObservedAt indicates when the application state was updated without querying latest git state
+	//
 	// Deprecated: controller no longer updates ObservedAt field
 	ObservedAt *metav1.Time `json:"observedAt,omitempty" protobuf:"bytes,8,opt,name=observedAt"`
 	// SourceType specifies the type of this application

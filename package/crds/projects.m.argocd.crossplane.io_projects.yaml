@@ -3,7 +3,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.18.0
+    controller-gen.kubebuilder.io/version: v0.21.0
   name: projects.projects.m.argocd.crossplane.io
 spec:
   group: projects.m.argocd.crossplane.io
@@ -62,13 +62,15 @@ spec:
                     description: ClusterResourceBlacklist contains list of blacklisted
                       cluster level resources
                     items:
-                      description: |-
-                        GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying
-                        concepts during lookup stages without having partially valid types
                       properties:
                         group:
                           type: string
                         kind:
+                          type: string
+                        name:
+                          description: |-
+                            Name is the name of the restricted resource. Glob patterns using Go's filepath.Match syntax are supported.
+                            Unlike the group and kind fields, if no name is specified, all resources of the specified group/kind are matched.
                           type: string
                       required:
                       - group
@@ -79,13 +81,15 @@ spec:
                     description: ClusterResourceWhitelist contains list of whitelisted
                       cluster level resources
                     items:
-                      description: |-
-                        GroupKind specifies a Group and a Kind, but does not force a version.  This is useful for identifying
-                        concepts during lookup stages without having partially valid types
                       properties:
                         group:
                           type: string
                         kind:
+                          type: string
+                        name:
+                          description: |-
+                            Name is the name of the restricted resource. Glob patterns using Go's filepath.Match syntax are supported.
+                            Unlike the group and kind fields, if no name is specified, all resources of the specified group/kind are matched.
                           type: string
                       required:
                       - group
@@ -604,6 +608,13 @@ spec:
                 x-kubernetes-list-map-keys:
                 - type
                 x-kubernetes-list-type: map
+              lastHandledReconcileAt:
+                description: |-
+                  LastHandledReconcileAt holds the value of the most recent
+                  reconcile-requested-at annotation token that the controller has
+                  processed. Users can compare this to the annotation to determine
+                  whether a reconcile request has been handled.
+                type: string
               observedGeneration:
                 description: |-
                   ObservedGeneration is the latest metadata.generation

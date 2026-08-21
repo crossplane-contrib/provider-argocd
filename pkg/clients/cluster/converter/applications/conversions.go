@@ -15,12 +15,12 @@ import (
 // goverter:converter
 // goverter:useZeroValueOnPointerInconsistency
 // goverter:ignoreUnexported
-// goverter:extend ExtV1JSONToRuntimeRawExtension
-// goverter:extend PV1alpha1HealthStatusToPV1alpha1HealthStatus
 // goverter:enum:unknown @ignore
 // goverter:struct:comment // +k8s:deepcopy-gen=false
 // goverter:output:file ./zz_generated.conversion.go
 // goverter:output:package github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster/converter/applications
+// goverter:extend ExtV1JSONToRuntimeRawExtension
+// goverter:extend PV1alpha1HealthStatusToPV1alpha1HealthStatus
 // +k8s:deepcopy-gen=false
 type Converter interface {
 

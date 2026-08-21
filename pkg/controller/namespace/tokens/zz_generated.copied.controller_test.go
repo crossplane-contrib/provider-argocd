@@ -11,10 +11,10 @@ import (
 
 	"github.com/argoproj/argo-cd/v3/pkg/apiclient/project"
 	argocdv1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/test"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	"go.uber.org/mock/gomock"
@@ -77,7 +77,7 @@ func withObservation(p v1alpha1.TokenObservation) TokenModifier {
 	return func(r *v1alpha1.Token) { r.Status.AtProvider = p }
 }
 
-func withConditions(c ...xpv1.Condition) TokenModifier {
+func withConditions(c ...xpv2.Condition) TokenModifier {
 	return func(r *v1alpha1.Token) { r.Status.ConditionedStatus.Conditions = c }
 }
 
@@ -146,7 +146,7 @@ func TestObserve(t *testing.T) {
 						Project: &testProjectName,
 						Role:    testRoleName,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.TokenObservation{
 						IssuedAt:  testIssuedAt,
 						ExpiresAt: &testExpiresInZero,
@@ -207,7 +207,7 @@ func TestObserve(t *testing.T) {
 						Project: &testProjectName,
 						Role:    testRoleName,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.TokenObservation{
 						IssuedAt:  testIssuedAt,
 						ExpiresAt: &testExpiresInZero,
@@ -268,7 +268,7 @@ func TestObserve(t *testing.T) {
 						Project: &testProjectName,
 						Role:    testRoleName,
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.TokenObservation{
 						IssuedAt:  testIssuedAt,
 						ExpiresAt: &testExpiresInZero,
@@ -328,7 +328,7 @@ func TestObserve(t *testing.T) {
 						Role:      testRoleName,
 						ExpiresIn: ptr.To("1h"),
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.TokenObservation{
 						IssuedAt:  time.Now().Add(-50 * time.Minute).Unix(),
 						ExpiresAt: ptr.To(time.Now().Add(-1 * time.Minute).Unix()),
@@ -390,7 +390,7 @@ func TestObserve(t *testing.T) {
 						ExpiresIn:   ptr.To("1h"),
 						RenewBefore: ptr.To("10m"),
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.TokenObservation{
 						IssuedAt:  time.Now().Add(-50 * time.Minute).Unix(),
 						ExpiresAt: ptr.To(time.Now().Add(5 * time.Minute).Unix()),
@@ -452,7 +452,7 @@ func TestObserve(t *testing.T) {
 						ExpiresIn:  ptr.To("1h"),
 						RenewAfter: ptr.To("20m"),
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.TokenObservation{
 						IssuedAt:  time.Now().Add(-30 * time.Minute).Unix(),
 						ExpiresAt: ptr.To(time.Now().Add(30 * time.Minute).Unix()),
@@ -512,7 +512,7 @@ func TestObserve(t *testing.T) {
 						Role:      testRoleName,
 						ExpiresIn: ptr.To("1h"),
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.TokenObservation{
 						IssuedAt:  time.Now().Unix(),
 						ExpiresAt: &testExpiresInZero,
@@ -572,7 +572,7 @@ func TestObserve(t *testing.T) {
 						Role:      testRoleName,
 						ExpiresIn: ptr.To("0"),
 					}),
-					withConditions(xpv1.Available()),
+					withConditions(xpv2.Available()),
 					withObservation(v1alpha1.TokenObservation{
 						IssuedAt:  time.Now().Unix(),
 						ExpiresAt: ptr.To(time.Now().Add(1 * time.Hour).Unix()),
