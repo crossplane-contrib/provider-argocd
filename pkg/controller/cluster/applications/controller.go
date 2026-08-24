@@ -55,7 +55,8 @@ const (
 // Setup adds a controller that reconciles applications.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 	return SetupWithExternalConnector(mgr, o, &connector{
-		kube: mgr.GetClient(),
+		kube:              mgr.GetClient(),
+		newArgocdClientFn: applications.NewApplicationServiceClient,
 	})
 }
 
