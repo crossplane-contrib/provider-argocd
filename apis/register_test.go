@@ -52,3 +52,19 @@ func TestAddToSchemeRegistersNamespaceTypes(t *testing.T) {
 		}
 	}
 }
+
+// TestAddToSchemeRegistersNamespaceProviderConfigUsage guards against the
+// namespace-scoped types being registered under the wrong GroupVersionKind.
+// The provider previously panicked on startup because apis/namespace's
+// AddToScheme registered the cluster-scoped types instead of its own,
+// leaving ProviderConfigUsage unregistered for the namespace group version.
+func TestAddToSchemeRegistersNamespaceProviderConfigUsage(t *testing.T) {
+	s := runtime.NewScheme()
+	if err := AddToScheme(s); err != nil {
+		t.Fatalf("AddToScheme() returned unexpected error: %v", err)
+	}
+
+	if !s.Recognizes(namespacev1alpha1.ProviderConfigUsageGroupVersionKind) {
+		t.Fatalf("scheme does not recognize %s after AddToScheme()", namespacev1alpha1.ProviderConfigUsageGroupVersionKind)
+	}
+}
