@@ -3,7 +3,7 @@ package applications
 import (
 	"testing"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
@@ -16,7 +16,7 @@ func TestGetApplicationCondition(t *testing.T) {
 	}
 
 	type want struct {
-		condition xpv1.Condition
+		condition xpv2.Condition
 	}
 
 	cases := map[string]struct {
@@ -28,7 +28,7 @@ func TestGetApplicationCondition(t *testing.T) {
 				status: nil,
 			},
 			want: want{
-				condition: xpv1.Unavailable(),
+				condition: xpv2.Unavailable(),
 			},
 		},
 		"NoOperationState": {
@@ -43,7 +43,7 @@ func TestGetApplicationCondition(t *testing.T) {
 				},
 			},
 			want: want{
-				condition: xpv1.Available(),
+				condition: xpv2.Available(),
 			},
 		},
 		"ReadyWithSyncedStatus": {
@@ -61,7 +61,7 @@ func TestGetApplicationCondition(t *testing.T) {
 				},
 			},
 			want: want{
-				condition: xpv1.Available(),
+				condition: xpv2.Available(),
 			},
 		},
 		"ReadyWithOutOfSyncStatus": {
@@ -79,7 +79,7 @@ func TestGetApplicationCondition(t *testing.T) {
 				},
 			},
 			want: want{
-				condition: xpv1.Available(),
+				condition: xpv2.Available(),
 			},
 		},
 		"NotReadyDueToHealth": {
@@ -97,7 +97,7 @@ func TestGetApplicationCondition(t *testing.T) {
 				},
 			},
 			want: want{
-				condition: xpv1.Unavailable(),
+				condition: xpv2.Unavailable(),
 			},
 		},
 		"NotReadyDueToOperation": {
@@ -115,7 +115,7 @@ func TestGetApplicationCondition(t *testing.T) {
 				},
 			},
 			want: want{
-				condition: xpv1.Unavailable(),
+				condition: xpv2.Unavailable(),
 			},
 		},
 		"NotReadyDueToEmptyOperation": {
@@ -133,7 +133,7 @@ func TestGetApplicationCondition(t *testing.T) {
 				},
 			},
 			want: want{
-				condition: xpv1.Unavailable(),
+				condition: xpv2.Unavailable(),
 			},
 		},
 		"NotReadyWithMultipleIssues": {
@@ -151,7 +151,7 @@ func TestGetApplicationCondition(t *testing.T) {
 				},
 			},
 			want: want{
-				condition: xpv1.Unavailable(),
+				condition: xpv2.Unavailable(),
 			},
 		},
 	}
@@ -159,7 +159,7 @@ func TestGetApplicationCondition(t *testing.T) {
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
 			got := getApplicationCondition(tc.args.status)
-			if diff := cmp.Diff(tc.want.condition, got, cmpopts.IgnoreFields(xpv1.Condition{}, "LastTransitionTime")); diff != "" {
+			if diff := cmp.Diff(tc.want.condition, got, cmpopts.IgnoreFields(xpv2.Condition{}, "LastTransitionTime")); diff != "" {
 				t.Errorf("getApplicationCondition(...): -want, +got:\n%s", diff)
 			}
 		})

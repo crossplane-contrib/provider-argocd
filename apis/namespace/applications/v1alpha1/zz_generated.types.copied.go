@@ -3,8 +3,8 @@
 package v1alpha1
 
 import (
-	v1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	v2 "github.com/crossplane/crossplane/apis/v2/core/v2"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -75,6 +75,11 @@ type ApplicationSource struct {
 	Ref *string `json:"ref,omitempty" protobuf:"bytes,13,opt,name=ref"`
 	// Name is the name of the application source
 	Name string `json:"name,omitempty" protobuf:"bytes,14,opt,name=name"`
+	// TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+	// The prefix is stripped from tag names before comparison and re-added to the resolved version.
+	// For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+	// "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+	TagPrefix string `json:"tagPrefix,omitempty" protobuf:"bytes,15,opt,name=tagPrefix"`
 }
 
 // ApplicationDestination holds information about the application's destination
@@ -88,10 +93,10 @@ type ApplicationDestination struct {
 	Server *string `json:"server,omitempty"`
 	// ServerRef is a reference to Cluster used to set Server
 	// +optional
-	ServerRef *v1.NamespacedReference `json:"serverRef,omitempty"`
+	ServerRef *v2.NamespacedReference `json:"serverRef,omitempty"`
 	// ServerSelector selects references to Cluster used to set Server
 	// +optional
-	ServerSelector *v1.NamespacedSelector `json:"serverSelector,omitempty"`
+	ServerSelector *v2.NamespacedSelector `json:"serverSelector,omitempty"`
 	// Namespace specifies the target namespace for the application's resources.
 	// The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
 	// +optional
@@ -105,10 +110,10 @@ type ApplicationDestination struct {
 	Name *string `json:"name,omitempty"`
 	// NameRef is a reference to a Cluster used to set Name
 	// +optional
-	NameRef *v1.NamespacedReference `json:"nameRef,omitempty"`
+	NameRef *v2.NamespacedReference `json:"nameRef,omitempty"`
 	// NameSelector is a reference to a Cluster used to set Name
 	// +optional
-	NameSelector *v1.NamespacedSelector `json:"nameSelector,omitempty"`
+	NameSelector *v2.NamespacedSelector `json:"nameSelector,omitempty"`
 }
 
 // SyncPolicy controls when a sync will be performed in response to updates in git
@@ -178,7 +183,7 @@ type ApplicationSourceHelm struct {
 	// SkipCrds skips custom resource definition installation step (Helm's --skip-crds)
 	SkipCrds *bool `json:"skipCrds,omitempty" protobuf:"bytes,9,opt,name=skipCrds"`
 	// ValuesObject specifies Helm values to be passed to helm template, defined as a map. This takes precedence over Values.
-	ValuesObject apiextensionsv1.JSON `json:"valuesObject,omitempty" protobuf:"bytes,10,opt,name=valuesObject"`
+	ValuesObject v1.JSON `json:"valuesObject,omitempty" protobuf:"bytes,10,opt,name=valuesObject"`
 	// Namespace is an optional namespace to template with. If left empty, defaults to the app's destination namespace.
 	Namespace *string `json:"namespace,omitempty" protobuf:"bytes,11,opt,name=namespace"`
 	// KubeVersion specifies the Kubernetes API version to pass to Helm when templating manifests. By default, Argo CD
@@ -262,6 +267,8 @@ type SyncPolicyAutomated struct {
 	SelfHeal *bool `json:"selfHeal,omitempty" protobuf:"bytes,2,opt,name=selfHeal"`
 	// AllowEmpty allows apps have zero live resources (default: false)
 	AllowEmpty *bool `json:"allowEmpty,omitempty" protobuf:"bytes,3,opt,name=allowEmpty"`
+	// Enable allows apps to explicitly control automated sync
+	Enabled *bool `json:"enabled,omitempty" protobuf:"bytes,4,opt,name=enabled"`
 }
 
 // SyncOptions provide per-sync sync-options, e.g. Validate=false
@@ -273,6 +280,8 @@ type RetryStrategy struct {
 	Limit *int64 `json:"limit,omitempty" protobuf:"bytes,1,opt,name=limit"`
 	// Backoff controls how to backoff on subsequent retries of failed syncs
 	Backoff *Backoff `json:"backoff,omitempty" protobuf:"bytes,2,opt,name=backoff,casttype=Backoff"`
+	// Refresh indicates if the latest revision should be used on retry instead of the initial one (default: false)
+	Refresh bool `json:"refresh,omitempty" protobuf:"bytes,3,opt,name=refresh"`
 }
 
 // ManagedNamespaceMetadata controls metadata in the given namespace (if CreateNamespace=true)
@@ -289,16 +298,33 @@ type DrySource struct {
 	TargetRevision string `json:"targetRevision" protobuf:"bytes,2,name=targetRevision"`
 	// Path is a directory path within the Git repository where the manifests are located
 	Path string `json:"path" protobuf:"bytes,3,name=path"`
+	// Helm specifies helm specific options
+	Helm *ApplicationSourceHelm `json:"helm,omitempty" protobuf:"bytes,4,opt,name=helm"`
+	// Kustomize specifies kustomize specific options
+	Kustomize *ApplicationSourceKustomize `json:"kustomize,omitempty" protobuf:"bytes,5,opt,name=kustomize"`
+	// Directory specifies path/directory specific options
+	Directory *ApplicationSourceDirectory `json:"directory,omitempty" protobuf:"bytes,6,opt,name=directory"`
+	// Plugin specifies config management plugin specific options
+	Plugin *ApplicationSourcePlugin `json:"plugin,omitempty" protobuf:"bytes,7,opt,name=plugin"`
 }
 
 // SyncSource specifies a location from which hydrated manifests may be synced. RepoURL is assumed based on the
 // associated DrySource config in the SourceHydrator.
 type SyncSource struct {
-	// TargetBranch is the branch to which hydrated manifests should be committed
+	// TargetBranch is the branch from which hydrated manifests will be synced.
+	// If HydrateTo is not set, this is also the branch to which hydrated manifests are committed.
 	TargetBranch string `json:"targetBranch" protobuf:"bytes,1,name=targetBranch"`
 	// Path is a directory path within the git repository where hydrated manifests should be committed to and synced
-	// from. If hydrateTo is set, this is just the path from which hydrated manifests will be synced.
+	// from. The Path should never point to the root of the repo. If hydrateTo is set, this is just the path from which
+	// hydrated manifests will be synced.
+	//
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern=`^.{2,}|[^./]$`
 	Path string `json:"path" protobuf:"bytes,2,name=path"`
+	// RepoURL is the URL to the git repository that contains the hydrated manifests. If not set, defaults to
+	// the DrySource.RepoURL.
+	RepoURL string `json:"repoURL,omitempty" protobuf:"bytes,3,opt,name=repoURL"`
 }
 
 // HydrateTo specifies a location to which hydrated manifests should be pushed as a "staging area" before being moved to
@@ -459,6 +485,7 @@ type ArgoApplicationStatus struct {
 	// OperationState contains information about any ongoing operations, such as a sync
 	OperationState *OperationState `json:"operationState,omitempty" protobuf:"bytes,7,opt,name=operationState"`
 	// ObservedAt indicates when the application state was updated without querying latest git state
+	//
 	// Deprecated: controller no longer updates ObservedAt field
 	ObservedAt *metav1.Time `json:"observedAt,omitempty" protobuf:"bytes,8,opt,name=observedAt"`
 	// SourceType specifies the type of this application

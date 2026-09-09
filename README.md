@@ -195,8 +195,9 @@ Please use the following to reach members of the community:
 
 provider-argocd is run according to the same
 [Governance](https://github.com/crossplane/crossplane/blob/master/GOVERNANCE.md)
-and [Ownership](https://github.com/crossplane/crossplane/blob/master/OWNERS.md)
 structure as the core Crossplane project.
+
+The current maintainer team is listed in [OWNERS.md](./OWNERS.md).
 
 ## Code of Conduct
 

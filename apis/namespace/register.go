@@ -14,18 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package apis contains cluster-scoped Kubernetes API for argocd API.
-package cluster
+// Package apis contains namespace-scoped Kubernetes API for argocd API.
+package namespace
 
 import (
 	"k8s.io/apimachinery/pkg/runtime"
 
-	applicationv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
-	applicationsetsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
-	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
-	projectsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/projects/v1alpha1"
-	repositoriesv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/cluster/repositories/v1alpha1"
-	"github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
+	applicationv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespace/applications/v1alpha1"
+	applicationsetsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespace/applicationsets/v1alpha1"
+	clusterv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespace/cluster/v1alpha1"
+	projectsv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespace/projects/v1alpha1"
+	repositoriesv1alpha1 "github.com/crossplane-contrib/provider-argocd/apis/namespace/repositories/v1alpha1"
+	"github.com/crossplane-contrib/provider-argocd/apis/namespace/v1alpha1"
 )
 
 func init() {

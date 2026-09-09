@@ -3,7 +3,7 @@
 package v1alpha1
 
 import (
-	v1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	v2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 )
 
 // TokenParameters define the desired state of an ArgoCD Project Token
@@ -16,11 +16,11 @@ type TokenParameters struct {
 
 	// ProjectRefs is a reference to a Project used to set Project
 	// +optional
-	ProjectRef *v1.NamespacedReference `json:"projectRef,omitempty"`
+	ProjectRef *v2.NamespacedReference `json:"projectRef,omitempty"`
 
 	// ProjectSelector selects reference to a Project used to ProjectRef
 	// +optional
-	ProjectSelector *v1.NamespacedSelector `json:"projectSelector,omitempty"`
+	ProjectSelector *v2.NamespacedSelector `json:"projectSelector,omitempty"`
 
 	// Role is the role associated with the token.
 	Role string `json:"role"`

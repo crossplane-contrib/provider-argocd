@@ -6,4 +6,5 @@ package tokens
 //go:generate sed -i s|github\.com/crossplane-contrib/provider-argocd/pkg/clients/cluster|github.com/crossplane-contrib/provider-argocd/pkg/clients/namespace|g zz_generated.copied.controller.go
 //go:generate sed -i s|github\.com/crossplane-contrib/provider-argocd/pkg/clients/cluster|github.com/crossplane-contrib/provider-argocd/pkg/clients/namespace|g zz_generated.copied.controller_test.go
 //go:generate sed -i s|resource.ConnectionSecretFor|resource.LocalConnectionSecretFor|g zz_generated.copied.controller.go
-//go:generate sed -i s|xpv1\.SecretReference|xpv1.LocalSecretReference|g zz_generated.copied.controller_test.go
+//go:generate sed -i s|"/cluster"|"/namespaced"|g zz_generated.copied.controller.go
+//go:generate sed -i s|xpv2\.SecretReference|xpv2.LocalSecretReference|g zz_generated.copied.controller_test.go

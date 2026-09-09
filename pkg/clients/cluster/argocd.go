@@ -23,8 +23,8 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	argocd "github.com/argoproj/argo-cd/v3/pkg/apiclient"
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -96,7 +96,7 @@ func GetClientOptions(ctx context.Context, c client.Client, pcSpec *v1alpha1.Pro
 
 func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.ProviderCredentials) (string, error) { //nolint:gocyclo
 	switch s := creds.Source; s {
-	case xpv1.CredentialsSourceSecret:
+	case xpv2.CredentialsSourceSecret:
 		csr := creds.SecretRef
 		if csr == nil {
 			return "", errors.New("no credentials secret referenced")
@@ -106,7 +106,7 @@ func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.Pr
 			return "", errors.Wrap(err, "cannot get credentials secret")
 		}
 		return string(s.Data[csr.Key]), nil
-	case xpv1.CredentialsSourceFilesystem:
+	case xpv2.CredentialsSourceFilesystem:
 		fs := creds.Fs
 		if fs == nil {
 			return "", errors.New("no credentials fs given")
@@ -141,6 +141,10 @@ func authFromCredentials(ctx context.Context, c client.Client, creds v1alpha1.Pr
 			return "", errors.Wrap(err, "cannot get token from Azure")
 		}
 		return token.Token, nil
+	case xpv2.CredentialsSourceNone,
+		xpv2.CredentialsSourceInjectedIdentity,
+		xpv2.CredentialsSourceEnvironment:
+		return "", errors.Errorf("credentials source %s is not currently supported", s)
 	default:
 		return "", errors.Errorf("credentials source %s is not currently supported", s)
 	}

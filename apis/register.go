@@ -21,7 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	clusterapis "github.com/crossplane-contrib/provider-argocd/apis/cluster"
-	namespaceapis "github.com/crossplane-contrib/provider-argocd/apis/cluster"
+	namespaceapis "github.com/crossplane-contrib/provider-argocd/apis/namespace"
 )
 
 func init() {

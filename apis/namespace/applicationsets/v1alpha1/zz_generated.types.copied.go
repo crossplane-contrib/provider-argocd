@@ -3,7 +3,7 @@
 package v1alpha1
 
 import (
-	commonv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	v2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
@@ -65,6 +65,9 @@ type ApplicationSetSyncPolicy struct {
 type ApplicationSetStrategy struct {
 	Type        string                         `json:"type,omitempty" protobuf:"bytes,1,opt,name=type"`
 	RollingSync *ApplicationSetRolloutStrategy `json:"rollingSync,omitempty" protobuf:"bytes,2,opt,name=rollingSync"`
+	// DeletionOrder allows specifying the order for deleting generated apps when progressive sync is enabled.
+	// accepts values "AllAtOnce" and "Reverse"
+	DeletionOrder string `json:"deletionOrder,omitempty" protobuf:"bytes,3,opt,name=deletionOrder"`
 }
 
 // ApplicationPreservedFields ApplicationSetObservation are the preseverable fields on an Application
@@ -165,9 +168,10 @@ type PullRequestGenerator struct {
 	Bitbucket           *PullRequestGeneratorBitbucket `json:"bitbucket,omitempty" protobuf:"bytes,8,opt,name=bitbucket"`
 	// Additional provider to use and config for it.
 	AzureDevOps *PullRequestGeneratorAzureDevOps `json:"azuredevops,omitempty" protobuf:"bytes,9,opt,name=azuredevops"`
-
 	// Values contains key/value pairs which are passed directly as parameters to the template
 	Values map[string]string `json:"values,omitempty" protobuf:"bytes,10,name=values"`
+	// ContinueOnRepoNotFoundError is a flag to continue the ApplicationSet Pull Request generator parameters generation even if the repository is not found.
+	ContinueOnRepoNotFoundError bool `json:"continueOnRepoNotFoundError,omitempty" protobuf:"varint,11,opt,name=continueOnRepoNotFoundError"`
 }
 
 // MatrixGenerator generates the cartesian product of two sets of parameters. The parameters are defined by two nested
@@ -274,7 +278,8 @@ type GitDirectoryGeneratorItem struct {
 
 // GitFileGeneratorItem defines a file to scan for resources.
 type GitFileGeneratorItem struct {
-	Path string `json:"path" protobuf:"bytes,1,name=path"`
+	Path    string `json:"path" protobuf:"bytes,1,name=path"`
+	Exclude bool   `json:"exclude,omitempty" protobuf:"bytes,2,name=exclude"`
 }
 
 // SCMProviderGeneratorGithub defines connection info specific to GitHub.
@@ -289,6 +294,8 @@ type SCMProviderGeneratorGithub struct {
 	AppSecretName string `json:"appSecretName,omitempty" protobuf:"bytes,4,opt,name=appSecretName"`
 	// Scan all branches instead of just the default branch.
 	AllBranches bool `json:"allBranches,omitempty" protobuf:"varint,5,opt,name=allBranches"`
+	// Exclude repositories that are archived.
+	ExcludeArchivedRepos bool `json:"excludeArchivedRepos,omitempty" protobuf:"varint,6,opt,name=excludeArchivedRepos"`
 }
 
 // SCMProviderGeneratorGitlab defines connection info specific to Gitlab.
@@ -311,6 +318,8 @@ type SCMProviderGeneratorGitlab struct {
 	Topic *string `json:"topic,omitempty" protobuf:"bytes,8,opt,name=topic"`
 	// ConfigMap key holding the trusted certificates
 	CARef *ConfigMapKeyRef `json:"caRef,omitempty" protobuf:"bytes,9,opt,name=caRef"`
+	// Include repositories that are archived.
+	IncludeArchivedRepos bool `json:"includeArchivedRepos,omitempty" protobuf:"varint,10,opt,name=includeArchivedRepos"`
 }
 
 // SCMProviderGeneratorBitbucket defines connection info specific to Bitbucket Cloud (API version 2).
@@ -355,6 +364,8 @@ type SCMProviderGeneratorGitea struct {
 	AllBranches bool `json:"allBranches,omitempty" protobuf:"varint,4,opt,name=allBranches"`
 	// Allow self-signed TLS / Certificates; default: false
 	Insecure bool `json:"insecure,omitempty" protobuf:"varint,5,opt,name=insecure"`
+	// Exclude repositories that are archived.
+	ExcludeArchivedRepos bool `json:"excludeArchivedRepos,omitempty" protobuf:"varint,6,opt,name=excludeArchivedRepos"`
 }
 
 // SCMProviderGeneratorAzureDevOps defines connection info specific to Azure DevOps.
@@ -447,6 +458,8 @@ type PullRequestGeneratorGitea struct {
 	TokenRef *SecretRef `json:"tokenRef,omitempty" protobuf:"bytes,4,opt,name=tokenRef"`
 	// Allow insecure tls, for self-signed certificates; default: false.
 	Insecure bool `json:"insecure,omitempty" protobuf:"varint,5,opt,name=insecure"`
+	// Labels is used to filter the PRs that you want to target
+	Labels []string `json:"labels,omitempty" protobuf:"bytes,6,rep,name=labels"`
 }
 
 // PullRequestGeneratorBitbucketServer defines connection info specific to BitbucketServer.
@@ -473,6 +486,7 @@ type PullRequestGeneratorBitbucketServer struct {
 type PullRequestGeneratorFilter struct {
 	BranchMatch       *string `json:"branchMatch,omitempty" protobuf:"bytes,1,opt,name=branchMatch"`
 	TargetBranchMatch *string `json:"targetBranchMatch,omitempty" protobuf:"bytes,2,opt,name=targetBranchMatch"`
+	TitleMatch        *string `json:"titleMatch,omitempty" protobuf:"bytes,3,op,name=titleMatch"`
 }
 
 // PullRequestGeneratorBitbucket defines connection info specific to Bitbucket.
@@ -564,6 +578,11 @@ type ApplicationSource struct {
 	Ref *string `json:"ref,omitempty" protobuf:"bytes,13,opt,name=ref"`
 	// Name is the name of the application source
 	Name *string `json:"name,omitempty" protobuf:"bytes,14,opt,name=name"`
+	// TagPrefix filters git tags to only those with this prefix before evaluating targetRevision as a semver constraint.
+	// The prefix is stripped from tag names before comparison and re-added to the resolved version.
+	// For example, with tagPrefix "component-b/" and targetRevision "1.0.*", tags like "component-b/1.0.0" and
+	// "component-b/1.0.1" are candidates, and the constraint resolves to "component-b/1.0.1".
+	TagPrefix string `json:"tagPrefix,omitempty" protobuf:"bytes,15,opt,name=tagPrefix"`
 }
 
 // ApplicationDestination holds information about the application's destination
@@ -576,10 +595,10 @@ type ApplicationDestination struct {
 	Server *string `json:"server,omitempty"`
 	// ServerRef is a reference to Cluster used to set Server
 	// +optional
-	ServerRef *commonv1.NamespacedReference `json:"serverRef,omitempty"`
+	ServerRef *v2.NamespacedReference `json:"serverRef,omitempty"`
 	// ServerSelector selects references to Cluster used to set Server
 	// +optional
-	ServerSelector *commonv1.NamespacedSelector `json:"serverSelector,omitempty"`
+	ServerSelector *v2.NamespacedSelector `json:"serverSelector,omitempty"`
 	// Namespace specifies the target namespace for the application's resources.
 	// The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
 	// +optional
@@ -593,10 +612,10 @@ type ApplicationDestination struct {
 	Name *string `json:"name,omitempty"`
 	// NameRef is a reference to a Cluster used to set Name
 	// +optional
-	NameRef *commonv1.NamespacedReference `json:"nameRef,omitempty"`
+	NameRef *v2.NamespacedReference `json:"nameRef,omitempty"`
 	// NameSelector is a reference to a Cluster used to set Name
 	// +optional
-	NameSelector *commonv1.NamespacedSelector `json:"nameSelector,omitempty"`
+	NameSelector *v2.NamespacedSelector `json:"nameSelector,omitempty"`
 }
 
 // SyncPolicy controls when a sync will be performed in response to updates in git
@@ -796,6 +815,8 @@ type SyncPolicyAutomated struct {
 	SelfHeal *bool `json:"selfHeal,omitempty" protobuf:"bytes,2,opt,name=selfHeal"`
 	// AllowEmpty allows apps have zero live resources (default: false)
 	AllowEmpty *bool `json:"allowEmpty,omitempty" protobuf:"bytes,3,opt,name=allowEmpty"`
+	// Enable allows apps to explicitly control automated sync
+	Enabled *bool `json:"enabled,omitempty" protobuf:"bytes,4,opt,name=enabled"`
 }
 
 // SyncOptions provide per-sync sync-options, e.g. Validate=false
@@ -807,6 +828,8 @@ type RetryStrategy struct {
 	Limit *int64 `json:"limit,omitempty" protobuf:"bytes,1,opt,name=limit"`
 	// Backoff controls how to backoff on subsequent retries of failed syncs
 	Backoff *Backoff `json:"backoff,omitempty" protobuf:"bytes,2,opt,name=backoff,casttype=Backoff"`
+	// Refresh indicates if the latest revision should be used on retry instead of the initial one (default: false)
+	Refresh bool `json:"refresh,omitempty" protobuf:"bytes,3,opt,name=refresh"`
 }
 
 // ManagedNamespaceMetadata controls metadata in the given namespace (if CreateNamespace=true)
@@ -823,16 +846,33 @@ type DrySource struct {
 	TargetRevision string `json:"targetRevision" protobuf:"bytes,2,name=targetRevision"`
 	// Path is a directory path within the Git repository where the manifests are located
 	Path string `json:"path" protobuf:"bytes,3,name=path"`
+	// Helm specifies helm specific options
+	Helm *ApplicationSourceHelm `json:"helm,omitempty" protobuf:"bytes,4,opt,name=helm"`
+	// Kustomize specifies kustomize specific options
+	Kustomize *ApplicationSourceKustomize `json:"kustomize,omitempty" protobuf:"bytes,5,opt,name=kustomize"`
+	// Directory specifies path/directory specific options
+	Directory *ApplicationSourceDirectory `json:"directory,omitempty" protobuf:"bytes,6,opt,name=directory"`
+	// Plugin specifies config management plugin specific options
+	Plugin *ApplicationSourcePlugin `json:"plugin,omitempty" protobuf:"bytes,7,opt,name=plugin"`
 }
 
 // SyncSource specifies a location from which hydrated manifests may be synced. RepoURL is assumed based on the
 // associated DrySource config in the SourceHydrator.
 type SyncSource struct {
-	// TargetBranch is the branch to which hydrated manifests should be committed
+	// TargetBranch is the branch from which hydrated manifests will be synced.
+	// If HydrateTo is not set, this is also the branch to which hydrated manifests are committed.
 	TargetBranch string `json:"targetBranch" protobuf:"bytes,1,name=targetBranch"`
 	// Path is a directory path within the git repository where hydrated manifests should be committed to and synced
-	// from. If hydrateTo is set, this is just the path from which hydrated manifests will be synced.
+	// from. The Path should never point to the root of the repo. If hydrateTo is set, this is just the path from which
+	// hydrated manifests will be synced.
+	//
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:Pattern=`^.{2,}|[^./]$`
 	Path string `json:"path" protobuf:"bytes,2,name=path"`
+	// RepoURL is the URL to the git repository that contains the hydrated manifests. If not set, defaults to
+	// the DrySource.RepoURL.
+	RepoURL string `json:"repoURL,omitempty" protobuf:"bytes,3,opt,name=repoURL"`
 }
 
 // HydrateTo specifies a location to which hydrated manifests should be pushed as a "staging area" before being moved to
@@ -989,6 +1029,11 @@ type ArgoApplicationSetStatus struct {
 	ApplicationStatus []ApplicationSetApplicationStatus `json:"applicationStatus,omitempty" protobuf:"bytes,2,name=applicationStatus"`
 	// Resources is a list of Applications resources managed by this application set.
 	Resources []ResourceStatus `json:"resources,omitempty" protobuf:"bytes,3,opt,name=resources"`
+	// ResourcesCount is the total number of resources managed by this application set. The count may be higher than actual number of items in the Resources field when
+	// the number of managed resources exceeds the limit imposed by the controller (to avoid making the status field too large).
+	ResourcesCount int64 `json:"resourcesCount,omitempty" protobuf:"varint,4,opt,name=resourcesCount"`
+	// Health contains information about the applicationset's current health status based on the applicationset conditions
+	Health HealthStatus `json:"health,omitempty" protobuf:"bytes,5,opt,name=health"`
 }
 
 // ApplicationSetCondition contains details about an applicationset condition, which is usually an error or warning
@@ -1035,15 +1080,6 @@ type ResourceStatus struct {
 	RequiresDeletionConfirmation bool          `json:"requiresDeletionConfirmation,omitempty" protobuf:"bytes,11,opt,name=requiresDeletionConfirmation"`
 }
 
-// ApplicationSetConditionType represents type of application condition. Type name has following convention:
-// prefix "Error" means error condition
-// prefix "Warning" means warning condition
-// prefix "Info" means informational condition
-type ApplicationSetConditionType string
-
-// ApplicationSetConditionStatus is a type which represents possible comparison results
-type ApplicationSetConditionStatus string
-
 type HealthStatus struct {
 	// Status holds the status code of the application or resource
 	Status string `json:"status,omitempty" protobuf:"bytes,1,opt,name=status"`
@@ -1052,3 +1088,12 @@ type HealthStatus struct {
 	// LastTransitionTime is the time the HealthStatus was set or updated
 	LastTransitionTime *v1.Time `json:"lastTransitionTime,omitempty" protobuf:"bytes,3,opt,name=lastTransitionTime"`
 }
+
+// ApplicationSetConditionType represents type of application condition. Type name has following convention:
+// prefix "Error" means error condition
+// prefix "Warning" means warning condition
+// prefix "Info" means informational condition
+type ApplicationSetConditionType string
+
+// ApplicationSetConditionStatus is a type which represents possible comparison results
+type ApplicationSetConditionStatus string

@@ -4,6 +4,7 @@
 package applicationsets
 
 import (
+	health "github.com/argoproj/argo-cd/gitops-engine/pkg/health"
 	v1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applicationsets/v1alpha1"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -69,6 +70,8 @@ func (c *ConverterImpl) FromArgoApplicationSetStatus(source *v1alpha1.Applicatio
 				v1alpha1ArgoApplicationSetStatus.Resources[k] = c.v1alpha1ResourceStatusToV1alpha1ResourceStatus((*source).Resources[k])
 			}
 		}
+		v1alpha1ArgoApplicationSetStatus.ResourcesCount = (*source).ResourcesCount
+		v1alpha1ArgoApplicationSetStatus.Health = c.v1alpha1HealthStatusToV1alpha1HealthStatus((*source).Health)
 		pV1alpha1ArgoApplicationSetStatus = &v1alpha1ArgoApplicationSetStatus
 	}
 	return pV1alpha1ArgoApplicationSetStatus
@@ -136,6 +139,8 @@ func (c *ConverterImpl) ToArgoApplicationSetStatus(source *v1alpha11.ArgoApplica
 				v1alpha1ApplicationSetStatus.Resources[k] = c.v1alpha1ResourceStatusToV1alpha1ResourceStatus2((*source).Resources[k])
 			}
 		}
+		v1alpha1ApplicationSetStatus.ResourcesCount = (*source).ResourcesCount
+		v1alpha1ApplicationSetStatus.Health = c.v1alpha1HealthStatusToV1alpha1HealthStatus2((*source).Health)
 		pV1alpha1ApplicationSetStatus = &v1alpha1ApplicationSetStatus
 	}
 	return pV1alpha1ApplicationSetStatus
@@ -290,6 +295,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSetStrategyToPV1alpha1ApplicationSet
 		var v1alpha1ApplicationSetStrategy v1alpha11.ApplicationSetStrategy
 		v1alpha1ApplicationSetStrategy.Type = (*source).Type
 		v1alpha1ApplicationSetStrategy.RollingSync = c.pV1alpha1ApplicationSetRolloutStrategyToPV1alpha1ApplicationSetRolloutStrategy((*source).RollingSync)
+		v1alpha1ApplicationSetStrategy.DeletionOrder = (*source).DeletionOrder
 		pV1alpha1ApplicationSetStrategy = &v1alpha1ApplicationSetStrategy
 	}
 	return pV1alpha1ApplicationSetStrategy
@@ -300,6 +306,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSetStrategyToPV1alpha1ApplicationSet
 		var v1alpha1ApplicationSetStrategy v1alpha1.ApplicationSetStrategy
 		v1alpha1ApplicationSetStrategy.Type = (*source).Type
 		v1alpha1ApplicationSetStrategy.RollingSync = c.pV1alpha1ApplicationSetRolloutStrategyToPV1alpha1ApplicationSetRolloutStrategy2((*source).RollingSync)
+		v1alpha1ApplicationSetStrategy.DeletionOrder = (*source).DeletionOrder
 		pV1alpha1ApplicationSetStrategy = &v1alpha1ApplicationSetStrategy
 	}
 	return pV1alpha1ApplicationSetStrategy
@@ -636,6 +643,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceToPV1alpha1ApplicationSource(s
 		v1alpha1ApplicationSource.Ref = &pString4
 		pString5 := (*source).Name
 		v1alpha1ApplicationSource.Name = &pString5
+		v1alpha1ApplicationSource.TagPrefix = (*source).TagPrefix
 		pV1alpha1ApplicationSource = &v1alpha1ApplicationSource
 	}
 	return pV1alpha1ApplicationSource
@@ -664,6 +672,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceToPV1alpha1ApplicationSource2(
 		if (*source).Name != nil {
 			v1alpha1ApplicationSource.Name = *(*source).Name
 		}
+		v1alpha1ApplicationSource.TagPrefix = (*source).TagPrefix
 		pV1alpha1ApplicationSource = &v1alpha1ApplicationSource
 	}
 	return pV1alpha1ApplicationSource
@@ -1392,6 +1401,12 @@ func (c *ConverterImpl) pV1alpha1PullRequestGeneratorGiteaToPV1alpha1PullRequest
 		v1alpha1PullRequestGeneratorGitea.API = (*source).API
 		v1alpha1PullRequestGeneratorGitea.TokenRef = c.pV1alpha1SecretRefToPV1alpha1SecretRef((*source).TokenRef)
 		v1alpha1PullRequestGeneratorGitea.Insecure = (*source).Insecure
+		if (*source).Labels != nil {
+			v1alpha1PullRequestGeneratorGitea.Labels = make([]string, len((*source).Labels))
+			for i := 0; i < len((*source).Labels); i++ {
+				v1alpha1PullRequestGeneratorGitea.Labels[i] = (*source).Labels[i]
+			}
+		}
 		pV1alpha1PullRequestGeneratorGitea = &v1alpha1PullRequestGeneratorGitea
 	}
 	return pV1alpha1PullRequestGeneratorGitea
@@ -1405,6 +1420,12 @@ func (c *ConverterImpl) pV1alpha1PullRequestGeneratorGiteaToPV1alpha1PullRequest
 		v1alpha1PullRequestGeneratorGitea.API = (*source).API
 		v1alpha1PullRequestGeneratorGitea.TokenRef = c.pV1alpha1SecretRefToPV1alpha1SecretRef2((*source).TokenRef)
 		v1alpha1PullRequestGeneratorGitea.Insecure = (*source).Insecure
+		if (*source).Labels != nil {
+			v1alpha1PullRequestGeneratorGitea.Labels = make([]string, len((*source).Labels))
+			for i := 0; i < len((*source).Labels); i++ {
+				v1alpha1PullRequestGeneratorGitea.Labels[i] = (*source).Labels[i]
+			}
+		}
 		pV1alpha1PullRequestGeneratorGitea = &v1alpha1PullRequestGeneratorGitea
 	}
 	return pV1alpha1PullRequestGeneratorGitea
@@ -1474,6 +1495,7 @@ func (c *ConverterImpl) pV1alpha1PullRequestGeneratorToPV1alpha1PullRequestGener
 				v1alpha1PullRequestGenerator.Values[key] = value
 			}
 		}
+		v1alpha1PullRequestGenerator.ContinueOnRepoNotFoundError = (*source).ContinueOnRepoNotFoundError
 		pV1alpha1PullRequestGenerator = &v1alpha1PullRequestGenerator
 	}
 	return pV1alpha1PullRequestGenerator
@@ -1505,6 +1527,7 @@ func (c *ConverterImpl) pV1alpha1PullRequestGeneratorToPV1alpha1PullRequestGener
 				v1alpha1PullRequestGenerator.Values[key] = value
 			}
 		}
+		v1alpha1PullRequestGenerator.ContinueOnRepoNotFoundError = (*source).ContinueOnRepoNotFoundError
 		pV1alpha1PullRequestGenerator = &v1alpha1PullRequestGenerator
 	}
 	return pV1alpha1PullRequestGenerator
@@ -1516,6 +1539,7 @@ func (c *ConverterImpl) pV1alpha1RetryStrategyToPV1alpha1RetryStrategy(source *v
 		pInt64 := (*source).Limit
 		v1alpha1RetryStrategy.Limit = &pInt64
 		v1alpha1RetryStrategy.Backoff = c.pV1alpha1BackoffToPV1alpha1Backoff((*source).Backoff)
+		v1alpha1RetryStrategy.Refresh = (*source).Refresh
 		pV1alpha1RetryStrategy = &v1alpha1RetryStrategy
 	}
 	return pV1alpha1RetryStrategy
@@ -1528,6 +1552,7 @@ func (c *ConverterImpl) pV1alpha1RetryStrategyToPV1alpha1RetryStrategy2(source *
 			v1alpha1RetryStrategy.Limit = *(*source).Limit
 		}
 		v1alpha1RetryStrategy.Backoff = c.pV1alpha1BackoffToPV1alpha1Backoff2((*source).Backoff)
+		v1alpha1RetryStrategy.Refresh = (*source).Refresh
 		pV1alpha1RetryStrategy = &v1alpha1RetryStrategy
 	}
 	return pV1alpha1RetryStrategy
@@ -1661,6 +1686,7 @@ func (c *ConverterImpl) pV1alpha1SCMProviderGeneratorGiteaToPV1alpha1SCMProvider
 		v1alpha1SCMProviderGeneratorGitea.TokenRef = c.pV1alpha1SecretRefToPV1alpha1SecretRef((*source).TokenRef)
 		v1alpha1SCMProviderGeneratorGitea.AllBranches = (*source).AllBranches
 		v1alpha1SCMProviderGeneratorGitea.Insecure = (*source).Insecure
+		v1alpha1SCMProviderGeneratorGitea.ExcludeArchivedRepos = (*source).ExcludeArchivedRepos
 		pV1alpha1SCMProviderGeneratorGitea = &v1alpha1SCMProviderGeneratorGitea
 	}
 	return pV1alpha1SCMProviderGeneratorGitea
@@ -1674,6 +1700,7 @@ func (c *ConverterImpl) pV1alpha1SCMProviderGeneratorGiteaToPV1alpha1SCMProvider
 		v1alpha1SCMProviderGeneratorGitea.TokenRef = c.pV1alpha1SecretRefToPV1alpha1SecretRef2((*source).TokenRef)
 		v1alpha1SCMProviderGeneratorGitea.AllBranches = (*source).AllBranches
 		v1alpha1SCMProviderGeneratorGitea.Insecure = (*source).Insecure
+		v1alpha1SCMProviderGeneratorGitea.ExcludeArchivedRepos = (*source).ExcludeArchivedRepos
 		pV1alpha1SCMProviderGeneratorGitea = &v1alpha1SCMProviderGeneratorGitea
 	}
 	return pV1alpha1SCMProviderGeneratorGitea
@@ -1687,6 +1714,7 @@ func (c *ConverterImpl) pV1alpha1SCMProviderGeneratorGithubToPV1alpha1SCMProvide
 		v1alpha1SCMProviderGeneratorGithub.TokenRef = c.pV1alpha1SecretRefToPV1alpha1SecretRef((*source).TokenRef)
 		v1alpha1SCMProviderGeneratorGithub.AppSecretName = (*source).AppSecretName
 		v1alpha1SCMProviderGeneratorGithub.AllBranches = (*source).AllBranches
+		v1alpha1SCMProviderGeneratorGithub.ExcludeArchivedRepos = (*source).ExcludeArchivedRepos
 		pV1alpha1SCMProviderGeneratorGithub = &v1alpha1SCMProviderGeneratorGithub
 	}
 	return pV1alpha1SCMProviderGeneratorGithub
@@ -1700,6 +1728,7 @@ func (c *ConverterImpl) pV1alpha1SCMProviderGeneratorGithubToPV1alpha1SCMProvide
 		v1alpha1SCMProviderGeneratorGithub.TokenRef = c.pV1alpha1SecretRefToPV1alpha1SecretRef2((*source).TokenRef)
 		v1alpha1SCMProviderGeneratorGithub.AppSecretName = (*source).AppSecretName
 		v1alpha1SCMProviderGeneratorGithub.AllBranches = (*source).AllBranches
+		v1alpha1SCMProviderGeneratorGithub.ExcludeArchivedRepos = (*source).ExcludeArchivedRepos
 		pV1alpha1SCMProviderGeneratorGithub = &v1alpha1SCMProviderGeneratorGithub
 	}
 	return pV1alpha1SCMProviderGeneratorGithub
@@ -1721,6 +1750,7 @@ func (c *ConverterImpl) pV1alpha1SCMProviderGeneratorGitlabToPV1alpha1SCMProvide
 		pString := (*source).Topic
 		v1alpha1SCMProviderGeneratorGitlab.Topic = &pString
 		v1alpha1SCMProviderGeneratorGitlab.CARef = c.pV1alpha1ConfigMapKeyRefToPV1alpha1ConfigMapKeyRef((*source).CARef)
+		v1alpha1SCMProviderGeneratorGitlab.IncludeArchivedRepos = (*source).IncludeArchivedRepos
 		pV1alpha1SCMProviderGeneratorGitlab = &v1alpha1SCMProviderGeneratorGitlab
 	}
 	return pV1alpha1SCMProviderGeneratorGitlab
@@ -1743,6 +1773,7 @@ func (c *ConverterImpl) pV1alpha1SCMProviderGeneratorGitlabToPV1alpha1SCMProvide
 			v1alpha1SCMProviderGeneratorGitlab.Topic = *(*source).Topic
 		}
 		v1alpha1SCMProviderGeneratorGitlab.CARef = c.pV1alpha1ConfigMapKeyRefToPV1alpha1ConfigMapKeyRef2((*source).CARef)
+		v1alpha1SCMProviderGeneratorGitlab.IncludeArchivedRepos = (*source).IncludeArchivedRepos
 		pV1alpha1SCMProviderGeneratorGitlab = &v1alpha1SCMProviderGeneratorGitlab
 	}
 	return pV1alpha1SCMProviderGeneratorGitlab
@@ -1859,12 +1890,22 @@ func (c *ConverterImpl) pV1alpha1SyncPolicyAutomatedToPV1alpha1SyncPolicyAutomat
 	var pV1alpha1SyncPolicyAutomated *v1alpha11.SyncPolicyAutomated
 	if source != nil {
 		var v1alpha1SyncPolicyAutomated v1alpha11.SyncPolicyAutomated
-		pBool := (*source).Prune
-		v1alpha1SyncPolicyAutomated.Prune = &pBool
-		pBool2 := (*source).SelfHeal
-		v1alpha1SyncPolicyAutomated.SelfHeal = &pBool2
-		pBool3 := (*source).AllowEmpty
-		v1alpha1SyncPolicyAutomated.AllowEmpty = &pBool3
+		if (*source).Prune != nil {
+			xbool := *(*source).Prune
+			v1alpha1SyncPolicyAutomated.Prune = &xbool
+		}
+		if (*source).SelfHeal != nil {
+			xbool2 := *(*source).SelfHeal
+			v1alpha1SyncPolicyAutomated.SelfHeal = &xbool2
+		}
+		if (*source).AllowEmpty != nil {
+			xbool3 := *(*source).AllowEmpty
+			v1alpha1SyncPolicyAutomated.AllowEmpty = &xbool3
+		}
+		if (*source).Enabled != nil {
+			xbool4 := *(*source).Enabled
+			v1alpha1SyncPolicyAutomated.Enabled = &xbool4
+		}
 		pV1alpha1SyncPolicyAutomated = &v1alpha1SyncPolicyAutomated
 	}
 	return pV1alpha1SyncPolicyAutomated
@@ -1874,13 +1915,20 @@ func (c *ConverterImpl) pV1alpha1SyncPolicyAutomatedToPV1alpha1SyncPolicyAutomat
 	if source != nil {
 		var v1alpha1SyncPolicyAutomated v1alpha1.SyncPolicyAutomated
 		if (*source).Prune != nil {
-			v1alpha1SyncPolicyAutomated.Prune = *(*source).Prune
+			xbool := *(*source).Prune
+			v1alpha1SyncPolicyAutomated.Prune = &xbool
 		}
 		if (*source).SelfHeal != nil {
-			v1alpha1SyncPolicyAutomated.SelfHeal = *(*source).SelfHeal
+			xbool2 := *(*source).SelfHeal
+			v1alpha1SyncPolicyAutomated.SelfHeal = &xbool2
 		}
 		if (*source).AllowEmpty != nil {
-			v1alpha1SyncPolicyAutomated.AllowEmpty = *(*source).AllowEmpty
+			xbool3 := *(*source).AllowEmpty
+			v1alpha1SyncPolicyAutomated.AllowEmpty = &xbool3
+		}
+		if (*source).Enabled != nil {
+			xbool4 := *(*source).Enabled
+			v1alpha1SyncPolicyAutomated.Enabled = &xbool4
 		}
 		pV1alpha1SyncPolicyAutomated = &v1alpha1SyncPolicyAutomated
 	}
@@ -2017,7 +2065,7 @@ func (c *ConverterImpl) v1alpha1ApplicationSetApplicationStatusToV1alpha1Applica
 	v1alpha1ApplicationSetApplicationStatus.Application = source.Application
 	v1alpha1ApplicationSetApplicationStatus.LastTransitionTime = c.pV1TimeToPV1Time(source.LastTransitionTime)
 	v1alpha1ApplicationSetApplicationStatus.Message = source.Message
-	v1alpha1ApplicationSetApplicationStatus.Status = source.Status
+	v1alpha1ApplicationSetApplicationStatus.Status = string(source.Status)
 	v1alpha1ApplicationSetApplicationStatus.Step = source.Step
 	if source.TargetRevisions != nil {
 		v1alpha1ApplicationSetApplicationStatus.TargetRevisions = make([]string, len(source.TargetRevisions))
@@ -2032,7 +2080,7 @@ func (c *ConverterImpl) v1alpha1ApplicationSetApplicationStatusToV1alpha1Applica
 	v1alpha1ApplicationSetApplicationStatus.Application = source.Application
 	v1alpha1ApplicationSetApplicationStatus.LastTransitionTime = c.pV1TimeToPV1Time(source.LastTransitionTime)
 	v1alpha1ApplicationSetApplicationStatus.Message = source.Message
-	v1alpha1ApplicationSetApplicationStatus.Status = source.Status
+	v1alpha1ApplicationSetApplicationStatus.Status = v1alpha1.ProgressiveSyncStatusCode(source.Status)
 	v1alpha1ApplicationSetApplicationStatus.Step = source.Step
 	if source.TargetRevisions != nil {
 		v1alpha1ApplicationSetApplicationStatus.TargetRevisions = make([]string, len(source.TargetRevisions))
@@ -2358,6 +2406,7 @@ func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource(sou
 	v1alpha1ApplicationSource.Ref = &pString4
 	pString5 := source.Name
 	v1alpha1ApplicationSource.Name = &pString5
+	v1alpha1ApplicationSource.TagPrefix = source.TagPrefix
 	return v1alpha1ApplicationSource
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource2(source v1alpha11.ApplicationSource) v1alpha1.ApplicationSource {
@@ -2382,6 +2431,7 @@ func (c *ConverterImpl) v1alpha1ApplicationSourceToV1alpha1ApplicationSource2(so
 	if source.Name != nil {
 		v1alpha1ApplicationSource.Name = *source.Name
 	}
+	v1alpha1ApplicationSource.TagPrefix = source.TagPrefix
 	return v1alpha1ApplicationSource
 }
 func (c *ConverterImpl) v1alpha1ApplicationSourcesToV1alpha1ApplicationSources(source v1alpha1.ApplicationSources) v1alpha11.ApplicationSources {
@@ -2451,6 +2501,10 @@ func (c *ConverterImpl) v1alpha1DrySourceToV1alpha1DrySource(source v1alpha1.Dry
 	v1alpha1DrySource.RepoURL = source.RepoURL
 	v1alpha1DrySource.TargetRevision = source.TargetRevision
 	v1alpha1DrySource.Path = source.Path
+	v1alpha1DrySource.Helm = c.pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSourceHelm(source.Helm)
+	v1alpha1DrySource.Kustomize = c.pV1alpha1ApplicationSourceKustomizeToPV1alpha1ApplicationSourceKustomize(source.Kustomize)
+	v1alpha1DrySource.Directory = c.pV1alpha1ApplicationSourceDirectoryToPV1alpha1ApplicationSourceDirectory(source.Directory)
+	v1alpha1DrySource.Plugin = c.pV1alpha1ApplicationSourcePluginToPV1alpha1ApplicationSourcePlugin(source.Plugin)
 	return v1alpha1DrySource
 }
 func (c *ConverterImpl) v1alpha1DrySourceToV1alpha1DrySource2(source v1alpha11.DrySource) v1alpha1.DrySource {
@@ -2458,6 +2512,10 @@ func (c *ConverterImpl) v1alpha1DrySourceToV1alpha1DrySource2(source v1alpha11.D
 	v1alpha1DrySource.RepoURL = source.RepoURL
 	v1alpha1DrySource.TargetRevision = source.TargetRevision
 	v1alpha1DrySource.Path = source.Path
+	v1alpha1DrySource.Helm = c.pV1alpha1ApplicationSourceHelmToPV1alpha1ApplicationSourceHelm2(source.Helm)
+	v1alpha1DrySource.Kustomize = c.pV1alpha1ApplicationSourceKustomizeToPV1alpha1ApplicationSourceKustomize2(source.Kustomize)
+	v1alpha1DrySource.Directory = c.pV1alpha1ApplicationSourceDirectoryToPV1alpha1ApplicationSourceDirectory2(source.Directory)
+	v1alpha1DrySource.Plugin = c.pV1alpha1ApplicationSourcePluginToPV1alpha1ApplicationSourcePlugin2(source.Plugin)
 	return v1alpha1DrySource
 }
 func (c *ConverterImpl) v1alpha1EnvToV1alpha1Env(source v1alpha1.Env) v1alpha11.Env {
@@ -2495,12 +2553,28 @@ func (c *ConverterImpl) v1alpha1GitDirectoryGeneratorItemToV1alpha1GitDirectoryG
 func (c *ConverterImpl) v1alpha1GitFileGeneratorItemToV1alpha1GitFileGeneratorItem(source v1alpha1.GitFileGeneratorItem) v1alpha11.GitFileGeneratorItem {
 	var v1alpha1GitFileGeneratorItem v1alpha11.GitFileGeneratorItem
 	v1alpha1GitFileGeneratorItem.Path = source.Path
+	v1alpha1GitFileGeneratorItem.Exclude = source.Exclude
 	return v1alpha1GitFileGeneratorItem
 }
 func (c *ConverterImpl) v1alpha1GitFileGeneratorItemToV1alpha1GitFileGeneratorItem2(source v1alpha11.GitFileGeneratorItem) v1alpha1.GitFileGeneratorItem {
 	var v1alpha1GitFileGeneratorItem v1alpha1.GitFileGeneratorItem
 	v1alpha1GitFileGeneratorItem.Path = source.Path
+	v1alpha1GitFileGeneratorItem.Exclude = source.Exclude
 	return v1alpha1GitFileGeneratorItem
+}
+func (c *ConverterImpl) v1alpha1HealthStatusToV1alpha1HealthStatus(source v1alpha1.HealthStatus) v1alpha11.HealthStatus {
+	var v1alpha1HealthStatus v1alpha11.HealthStatus
+	v1alpha1HealthStatus.Status = string(source.Status)
+	v1alpha1HealthStatus.Message = source.Message
+	v1alpha1HealthStatus.LastTransitionTime = c.pV1TimeToPV1Time(source.LastTransitionTime)
+	return v1alpha1HealthStatus
+}
+func (c *ConverterImpl) v1alpha1HealthStatusToV1alpha1HealthStatus2(source v1alpha11.HealthStatus) v1alpha1.HealthStatus {
+	var v1alpha1HealthStatus v1alpha1.HealthStatus
+	v1alpha1HealthStatus.Status = health.HealthStatusCode(source.Status)
+	v1alpha1HealthStatus.Message = source.Message
+	v1alpha1HealthStatus.LastTransitionTime = c.pV1TimeToPV1Time(source.LastTransitionTime)
+	return v1alpha1HealthStatus
 }
 func (c *ConverterImpl) v1alpha1HelmFileParameterToV1alpha1HelmFileParameter(source v1alpha1.HelmFileParameter) v1alpha11.HelmFileParameter {
 	var v1alpha1HelmFileParameter v1alpha11.HelmFileParameter
@@ -2758,6 +2832,10 @@ func (c *ConverterImpl) v1alpha1PullRequestGeneratorFilterToV1alpha1PullRequestG
 		xstring2 := *source.TargetBranchMatch
 		v1alpha1PullRequestGeneratorFilter.TargetBranchMatch = &xstring2
 	}
+	if source.TitleMatch != nil {
+		xstring3 := *source.TitleMatch
+		v1alpha1PullRequestGeneratorFilter.TitleMatch = &xstring3
+	}
 	return v1alpha1PullRequestGeneratorFilter
 }
 func (c *ConverterImpl) v1alpha1PullRequestGeneratorFilterToV1alpha1PullRequestGeneratorFilter2(source v1alpha11.PullRequestGeneratorFilter) v1alpha1.PullRequestGeneratorFilter {
@@ -2769,6 +2847,10 @@ func (c *ConverterImpl) v1alpha1PullRequestGeneratorFilterToV1alpha1PullRequestG
 	if source.TargetBranchMatch != nil {
 		xstring2 := *source.TargetBranchMatch
 		v1alpha1PullRequestGeneratorFilter.TargetBranchMatch = &xstring2
+	}
+	if source.TitleMatch != nil {
+		xstring3 := *source.TitleMatch
+		v1alpha1PullRequestGeneratorFilter.TitleMatch = &xstring3
 	}
 	return v1alpha1PullRequestGeneratorFilter
 }
@@ -2944,11 +3026,13 @@ func (c *ConverterImpl) v1alpha1SyncSourceToV1alpha1SyncSource(source v1alpha1.S
 	var v1alpha1SyncSource v1alpha11.SyncSource
 	v1alpha1SyncSource.TargetBranch = source.TargetBranch
 	v1alpha1SyncSource.Path = source.Path
+	v1alpha1SyncSource.RepoURL = source.RepoURL
 	return v1alpha1SyncSource
 }
 func (c *ConverterImpl) v1alpha1SyncSourceToV1alpha1SyncSource2(source v1alpha11.SyncSource) v1alpha1.SyncSource {
 	var v1alpha1SyncSource v1alpha1.SyncSource
 	v1alpha1SyncSource.TargetBranch = source.TargetBranch
 	v1alpha1SyncSource.Path = source.Path
+	v1alpha1SyncSource.RepoURL = source.RepoURL
 	return v1alpha1SyncSource
 }

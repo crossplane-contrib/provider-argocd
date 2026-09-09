@@ -23,12 +23,12 @@ import (
 	"github.com/argoproj/argo-cd/v3/pkg/apiclient/applicationset"
 	argov1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	"github.com/argoproj/argo-cd/v3/util/io"
-	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	xpcontroller "github.com/crossplane/crossplane-runtime/v2/pkg/controller"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/event"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
+	xpv2 "github.com/crossplane/crossplane/apis/v2/core/v2"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -56,9 +56,9 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 }
 
 func SetupWithExternalConnector(mgr ctrl.Manager, o xpcontroller.Options, ec managed.ExternalConnecter) error {
-	name := managed.ControllerName(v1alpha1.ApplicationSetKind)
+	name := managed.ControllerName(v1alpha1.ApplicationSetKind + "/cluster")
 
-	opts := []managed.ReconcilerOption{
+	opts := append([]managed.ReconcilerOption{
 		managed.WithExternalConnecter(ec),
 		managed.WithPollInterval(o.PollInterval),
 		managed.WithReferenceResolver(managed.NewAPISimpleReferenceResolver(mgr.GetClient())),
@@ -67,9 +67,7 @@ func SetupWithExternalConnector(mgr ctrl.Manager, o xpcontroller.Options, ec man
 		managed.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name))),
 		managed.WithTimeout(5 * time.Minute),
 		managed.WithMetricRecorder(o.MetricOptions.MRMetrics),
-	}
-
-	opts = append(opts, (features.Opts(o))...)
+	}, (features.Opts(o))...)
 
 	if err := features.AddMRMetrics(mgr, o, &v1alpha1.ApplicationSetList{}); err != nil {
 		return err
@@ -152,7 +150,7 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	current := cr.Spec.ForProvider.DeepCopy()
 
 	cr.Status.AtProvider = generateApplicationObservation(appset)
-	cr.Status.SetConditions(xpv1.Available())
+	cr.Status.SetConditions(xpv2.Available())
 
 	return managed.ExternalObservation{
 		ResourceExists:          true,
