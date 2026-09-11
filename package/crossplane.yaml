@@ -18,3 +18,6 @@ metadata:
       the [crossplane-contrib/provider-argocd](https://github.com/crossplane-contrib/provider-argocd)
       repo.
     friendly-name.meta.crossplane.io: Provider Argo CD
+spec:
+  capabilities:
+  - safe-start
