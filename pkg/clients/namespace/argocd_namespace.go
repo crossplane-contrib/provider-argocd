@@ -44,7 +44,10 @@ func GetConfig(ctx context.Context, c client.Client, mg resource.ModernManaged) 
 // API by the argocd Go client
 func UseProviderConfig(ctx context.Context, c client.Client, mg resource.ModernManaged) (*argocd.ClientOptions, error) {
 	pc := &v1alpha1.ProviderConfig{}
-	if err := c.Get(ctx, types.NamespacedName{Name: mg.GetProviderConfigReference().Name}, pc); err != nil {
+	if err := c.Get(ctx, types.NamespacedName{
+		Namespace: mg.GetNamespace(),
+		Name:      mg.GetProviderConfigReference().Name,
+	}, pc); err != nil {
 		return nil, errors.Wrap(err, "cannot get referenced Provider")
 	}
 
