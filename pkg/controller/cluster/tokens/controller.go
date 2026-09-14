@@ -18,7 +18,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
-	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -86,11 +85,10 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create argocd client")
 	}
-	return &external{kube: c.kube, client: argocdClient, conn: conn}, nil
+	return &external{client: argocdClient, conn: conn}, nil
 }
 
 type external struct {
-	kube   client.Client
 	client projects.ProjectServiceClient
 	conn   io.Closer
 }
@@ -178,7 +176,11 @@ func (e *external) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	}
 	meta.SetExternalName(cr, claims.ID)
 
-	return managed.ExternalCreation{}, errors.Wrap(nil, errKubeUpdateFailed)
+	return managed.ExternalCreation{
+		ConnectionDetails: managed.ConnectionDetails{
+			"token": []byte(token),
+		},
+	}, nil
 }
 
 func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
@@ -204,12 +206,11 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalUpdate{}, errors.Wrap(err, errCreateTokenFailed)
 	}
 
-	err = e.upsertConnectionSecret(ctx, cr, []byte(res.GetToken()))
-	if err != nil {
-		return managed.ExternalUpdate{}, errors.Wrap(err, errCreateTokenFailed)
-	}
-
-	return managed.ExternalUpdate{}, nil
+	return managed.ExternalUpdate{
+		ConnectionDetails: managed.ConnectionDetails{
+			"token": []byte(res.GetToken()),
+		},
+	}, nil
 }
 
 func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
@@ -298,21 +299,6 @@ func parseDuration(durationStr *string) (int64, error) {
 		return 0, err
 	}
 	return int64(duration.Seconds()), nil
-}
-
-func (e *external) upsertConnectionSecret(ctx context.Context, token *v1alpha1.Token, data []byte) error {
-	if token.GetWriteConnectionSecretToReference() == nil {
-		return nil
-	}
-	secret := resource.ConnectionSecretFor(token, v1alpha1.TokenGroupVersionKind)
-	secret.Data["token"] = data
-	if err := e.kube.Create(ctx, secret); err != nil {
-		if kerrors.IsAlreadyExists(err) {
-			return errors.Wrapf(e.kube.Update(ctx, secret), "failed to update secret: %s", secret.Name)
-		}
-		return errors.Wrapf(err, "failed to create secret: %s", secret.Name)
-	}
-	return nil
 }
 
 func (e *external) Disconnect(ctx context.Context) error {

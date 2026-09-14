@@ -788,8 +788,12 @@ func TestCreate(t *testing.T) {
 						ExpiresIn: ptr.To("0"),
 					}),
 				),
-				result: managed.ExternalCreation{},
-				err:    nil,
+				result: managed.ExternalCreation{
+					ConnectionDetails: managed.ConnectionDetails{
+						"token": []byte(createTestJWTToken()),
+					},
+				},
+				err: nil,
 			},
 		},
 		"SuccessfulExpire": {
@@ -824,8 +828,12 @@ func TestCreate(t *testing.T) {
 						ExpiresIn: ptr.To("1m"),
 					}),
 				),
-				result: managed.ExternalCreation{},
-				err:    nil,
+				result: managed.ExternalCreation{
+					ConnectionDetails: managed.ConnectionDetails{
+						"token": []byte(createTestJWTToken()),
+					},
+				},
+				err: nil,
 			},
 		},
 		"CreateError": {
@@ -932,8 +940,12 @@ func TestUpdate(t *testing.T) {
 						ID: &testTokenExternalName,
 					}),
 				),
-				result: managed.ExternalUpdate{},
-				err:    nil,
+				result: managed.ExternalUpdate{
+					ConnectionDetails: managed.ConnectionDetails{
+						"token": []byte(createTestJWTToken()),
+					},
+				},
+				err: nil,
 			},
 		},
 		"DeleteError": {
