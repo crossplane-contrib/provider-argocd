@@ -1,8 +1,8 @@
 module github.com/crossplane-contrib/provider-argocd
 
-go 1.26.5
+go 1.27.1
 
-// Argo's versionig is fucked and the gitops-engine cannot be installed using the pinned version.
+// Argo's versioning is fucked and the gitops-engine cannot be installed using the pinned version.
 replace github.com/argoproj/argo-cd/gitops-engine v0.7.1-0.20250908182407-97ad5b59a627 => github.com/argoproj/argo-cd/gitops-engine v0.0.0-20260617163728-0b95bbc14bc8
 
 require (
