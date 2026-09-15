@@ -98,30 +98,6 @@ type ProviderConfigUsageList struct {
 	Items           []ProviderConfigUsage `json:"items"`
 }
 
-// +kubebuilder:object:root=true
-
-// A ClusterProviderConfigUsage indicates that a resource is using a ClusterProviderConfig.
-// +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp"
-// +kubebuilder:printcolumn:name="CONFIG-NAME",type="string",JSONPath=".providerConfigRef.name"
-// +kubebuilder:printcolumn:name="RESOURCE-KIND",type="string",JSONPath=".resourceRef.kind"
-// +kubebuilder:printcolumn:name="RESOURCE-NAME",type="string",JSONPath=".resourceRef.name"
-// +kubebuilder:resource:scope=Cluster,categories={crossplane,provider,argocd}
-type ClusterProviderConfigUsage struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	xpv2.TypedProviderConfigUsage `json:",inline"`
-}
-
-// +kubebuilder:object:root=true
-
-// ClusterProviderConfigUsageList contains a list of ClusterProviderConfigUsage.
-type ClusterProviderConfigUsageList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ClusterProviderConfigUsage `json:"items"`
-}
-
 // Provider type metadata.
 var (
 	ProviderConfigKind             = reflect.TypeOf(ProviderConfig{}).Name()
@@ -146,21 +122,10 @@ var (
 	ProviderConfigUsageListGroupKind        = schema.GroupKind{Group: Group, Kind: ProviderConfigUsageListKind}.String()
 	ProviderConfigUsageListKindAPIVersion   = ProviderConfigUsageListKind + "." + SchemeGroupVersion.String()
 	ProviderConfigUsageListGroupVersionKind = SchemeGroupVersion.WithKind(ProviderConfigUsageListKind)
-
-	ClusterProviderConfigUsageKind             = reflect.TypeOf(ClusterProviderConfigUsage{}).Name()
-	ClusterProviderConfigUsageGroupKind        = schema.GroupKind{Group: Group, Kind: ClusterProviderConfigUsageKind}.String()
-	ClusterProviderConfigUsageKindAPIVersion   = ClusterProviderConfigUsageKind + "." + SchemeGroupVersion.String()
-	ClusterProviderConfigUsageGroupVersionKind = SchemeGroupVersion.WithKind(ClusterProviderConfigUsageKind)
-
-	ClusterProviderConfigUsageListKind             = reflect.TypeOf(ClusterProviderConfigUsageList{}).Name()
-	ClusterProviderConfigUsageListGroupKind        = schema.GroupKind{Group: Group, Kind: ClusterProviderConfigUsageListKind}.String()
-	ClusterProviderConfigUsageListKindAPIVersion   = ClusterProviderConfigUsageListKind + "." + SchemeGroupVersion.String()
-	ClusterProviderConfigUsageListGroupVersionKind = SchemeGroupVersion.WithKind(ClusterProviderConfigUsageListKind)
 )
 
 func init() {
 	SchemeBuilder.Register(&ProviderConfig{}, &ProviderConfigList{})
 	SchemeBuilder.Register(&ClusterProviderConfig{}, &ClusterProviderConfigList{})
 	SchemeBuilder.Register(&ProviderConfigUsage{}, &ProviderConfigUsageList{})
-	SchemeBuilder.Register(&ClusterProviderConfigUsage{}, &ClusterProviderConfigUsageList{})
 }
