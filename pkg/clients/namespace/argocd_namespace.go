@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	clusterapis "github.com/crossplane-contrib/provider-argocd/apis/cluster/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/apis/namespace/v1alpha1"
 	clusterclients "github.com/crossplane-contrib/provider-argocd/pkg/clients/cluster"
 )
@@ -40,20 +41,39 @@ func GetConfig(ctx context.Context, c client.Client, mg resource.ModernManaged) 
 	}
 }
 
-// UseProviderConfigV2 to produce a config that can be used to authenticate to argocd
+// UseProviderConfig to produce a config that can be used to authenticate to argocd
 // API by the argocd Go client
 func UseProviderConfig(ctx context.Context, c client.Client, mg resource.ModernManaged) (*argocd.ClientOptions, error) {
-	pc := &v1alpha1.ProviderConfig{}
-	if err := c.Get(ctx, types.NamespacedName{
-		Namespace: mg.GetNamespace(),
-		Name:      mg.GetProviderConfigReference().Name,
-	}, pc); err != nil {
-		return nil, errors.Wrap(err, "cannot get referenced Provider")
+	ref := mg.GetProviderConfigReference()
+	var spec *clusterapis.ProviderConfigSpec
+	var usage resource.TypedProviderConfigUsage
+
+	switch ref.Kind {
+	case "", v1alpha1.ProviderConfigKind:
+		pc := &v1alpha1.ProviderConfig{}
+		if err := c.Get(ctx, types.NamespacedName{
+			Namespace: mg.GetNamespace(),
+			Name:      ref.Name,
+		}, pc); err != nil {
+			return nil, errors.Wrap(err, "cannot get referenced Provider")
+		}
+		spec = &pc.Spec
+		usage = &v1alpha1.ProviderConfigUsage{}
+
+	case v1alpha1.ClusterProviderConfigKind:
+		pc := &v1alpha1.ClusterProviderConfig{}
+		if err := c.Get(ctx, types.NamespacedName{Name: ref.Name}, pc); err != nil {
+			return nil, errors.Wrap(err, "cannot get referenced ClusterProviderConfig")
+		}
+		spec = &pc.Spec
+		usage = &v1alpha1.ClusterProviderConfigUsage{}
+	default:
+		return nil, errors.Errorf("unsupported providerConfigRef kind %q", ref.Kind)
 	}
 
-	t := resource.NewProviderConfigUsageTracker(c, &v1alpha1.ProviderConfigUsage{})
+	t := resource.NewProviderConfigUsageTracker(c, usage)
 	if err := t.Track(ctx, mg); err != nil {
 		return nil, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
-	return clusterclients.GetClientOptions(ctx, c, &pc.Spec)
+	return clusterclients.GetClientOptions(ctx, c, spec)
 }

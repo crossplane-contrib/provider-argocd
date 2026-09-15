@@ -26,9 +26,16 @@ import (
 	"github.com/crossplane-contrib/provider-argocd/apis/namespace/v1alpha1"
 )
 
-// Setup adds a controller that reconciles ProviderConfigs by accounting for
-// their current usage.
+// Setup adds controllers that reconcile ProviderConfigs and ClusterProviderConfigs
+// by accounting for their current usage.
 func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
+	if err := setupProviderConfig(mgr, o); err != nil {
+		return err
+	}
+	return setupClusterProviderConfig(mgr, o)
+}
+
+func setupProviderConfig(mgr ctrl.Manager, o xpcontroller.Options) error {
 	name := providerconfig.ControllerName(v1alpha1.ProviderConfigGroupKind + "/namespaced")
 
 	of := resource.ProviderConfigKinds{
@@ -42,6 +49,25 @@ func Setup(mgr ctrl.Manager, o xpcontroller.Options) error {
 		WithOptions(o.ForControllerRuntime()).
 		For(&v1alpha1.ProviderConfig{}).
 		Watches(&v1alpha1.ProviderConfigUsage{}, &resource.EnqueueRequestForProviderConfig{}).
+		Complete(providerconfig.NewReconciler(mgr, of,
+			providerconfig.WithLogger(o.Logger.WithValues("controller", name)),
+			providerconfig.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))
+}
+
+func setupClusterProviderConfig(mgr ctrl.Manager, o xpcontroller.Options) error {
+	name := providerconfig.ControllerName(v1alpha1.ClusterProviderConfigGroupKind + "/cluster")
+
+	of := resource.ProviderConfigKinds{
+		Config:    v1alpha1.ClusterProviderConfigGroupVersionKind,
+		Usage:     v1alpha1.ClusterProviderConfigUsageGroupVersionKind,
+		UsageList: v1alpha1.ClusterProviderConfigUsageListGroupVersionKind,
+	}
+
+	return ctrl.NewControllerManagedBy(mgr).
+		Named(name).
+		WithOptions(o.ForControllerRuntime()).
+		For(&v1alpha1.ClusterProviderConfig{}).
+		Watches(&v1alpha1.ClusterProviderConfigUsage{}, &resource.EnqueueRequestForProviderConfig{}).
 		Complete(providerconfig.NewReconciler(mgr, of,
 			providerconfig.WithLogger(o.Logger.WithValues("controller", name)),
 			providerconfig.WithRecorder(event.NewAPIRecorder(mgr.GetEventRecorderFor(name)))))

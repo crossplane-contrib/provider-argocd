@@ -38,8 +38,9 @@ func TestAddToSchemeRegistersNamespaceTypes(t *testing.T) {
 	}
 
 	gvks := map[string]schema.GroupVersionKind{
-		"cluster ProviderConfig":   clusterv1alpha1.ProviderConfigGroupVersionKind,
-		"namespace ProviderConfig": namespacev1alpha1.ProviderConfigGroupVersionKind,
+		"cluster ProviderConfig":          clusterv1alpha1.ProviderConfigGroupVersionKind,
+		"namespace ProviderConfig":        namespacev1alpha1.ProviderConfigGroupVersionKind,
+		"namespace ClusterProviderConfig": namespacev1alpha1.ClusterProviderConfigGroupVersionKind,
 	}
 
 	for name, gvk := range gvks {
@@ -66,5 +67,8 @@ func TestAddToSchemeRegistersNamespaceProviderConfigUsage(t *testing.T) {
 
 	if !s.Recognizes(namespacev1alpha1.ProviderConfigUsageGroupVersionKind) {
 		t.Fatalf("scheme does not recognize %s after AddToScheme()", namespacev1alpha1.ProviderConfigUsageGroupVersionKind)
+	}
+	if !s.Recognizes(namespacev1alpha1.ClusterProviderConfigUsageGroupVersionKind) {
+		t.Fatalf("scheme does not recognize %s after AddToScheme()", namespacev1alpha1.ClusterProviderConfigUsageGroupVersionKind)
 	}
 }
