@@ -1,0 +1,3 @@
+PR: Fix namespace Repository scope
+
+This PR fixes issue #377 by changing the Repository resource scope from Cluster to Namespaced in the namespace-scoped API.

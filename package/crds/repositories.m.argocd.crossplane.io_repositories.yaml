@@ -16,7 +16,7 @@ spec:
     listKind: RepositoryList
     plural: repositories
     singular: repository
-  scope: Cluster
+  scope: Namespaced
   versions:
   - additionalPrinterColumns:
     - jsonPath: .status.conditions[?(@.type=='Ready')].status
