@@ -66,7 +66,7 @@ func UseProviderConfig(ctx context.Context, c client.Client, mg resource.ModernM
 			return nil, errors.Wrap(err, "cannot get referenced ClusterProviderConfig")
 		}
 		spec = &pc.Spec
-		usage = &v1alpha1.ClusterProviderConfigUsage{}
+		usage = &v1alpha1.ProviderConfigUsage{}
 	default:
 		return nil, errors.Errorf("unsupported providerConfigRef kind %q", ref.Kind)
 	}
