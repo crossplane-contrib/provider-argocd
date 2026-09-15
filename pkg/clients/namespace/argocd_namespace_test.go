@@ -57,28 +57,15 @@ func testUseProviderConfig(t *testing.T, kind string) {
 		t.Fatalf("AuthToken = %q, want %q", got.AuthToken, "token")
 	}
 
-	var usage client.Object
-	switch kind {
-	case namespaceapis.ProviderConfigKind:
-		usage = &namespaceapis.ProviderConfigUsage{}
-	case namespaceapis.ClusterProviderConfigKind:
-		usage = &namespaceapis.ClusterProviderConfigUsage{}
-	}
+	usage := &namespaceapis.ProviderConfigUsage{}
 	if err := c.Get(context.Background(), types.NamespacedName{
 		Namespace: managed.Namespace,
 		Name:      string(managed.UID),
 	}, usage); err != nil {
 		t.Fatalf("Get ProviderConfigUsage(): %v", err)
 	}
-	var usageKind string
-	switch usage := usage.(type) {
-	case *namespaceapis.ProviderConfigUsage:
-		usageKind = usage.ProviderConfigReference.Kind
-	case *namespaceapis.ClusterProviderConfigUsage:
-		usageKind = usage.ProviderConfigReference.Kind
-	}
-	if usageKind != kind {
-		t.Fatalf("ProviderConfigUsage kind = %q, want %q", usageKind, kind)
+	if usage.ProviderConfigReference.Kind != kind {
+		t.Fatalf("ProviderConfigUsage kind = %q, want %q", usage.ProviderConfigReference.Kind, kind)
 	}
 }
 
