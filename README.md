@@ -16,7 +16,7 @@ following new functionality:
 
 ## Getting Started and Documentation
 
-Follow the [official docs](https://crossplane.io/docs/master/getting-started/install-configure.html#install-crossplane) to install crossplane, then these steps to get started with `provider-argocd`.
+Follow the [official docs](https://docs.crossplane.io/latest/get-started/install/) to install crossplane, then these steps to get started with `provider-argocd`.
 
 ### Add the Crossplane Helm Repository
 
@@ -91,7 +91,7 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 ```
 ### Create a new Argo CD user
 
-Follow the steps in the [official documentation](https://argoproj.github.io/argo-cd/operator-manual/user-management/) to create a new user `provider-argcod`:
+Follow the steps in the [official documentation](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/) to create a new user `provider-argcod`:
 
 ```bash
 kubectl patch configmap/argocd-cm \
