@@ -6,7 +6,7 @@ go 1.27.1
 replace github.com/argoproj/argo-cd/gitops-engine v0.7.1-0.20250908182407-97ad5b59a627 => github.com/argoproj/argo-cd/gitops-engine v0.0.0-20260617163728-0b95bbc14bc8
 
 require (
-	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.1
+	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.2
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.1
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/argoproj/argo-cd/gitops-engine v0.7.1-0.20250908182407-97ad5b59a627
