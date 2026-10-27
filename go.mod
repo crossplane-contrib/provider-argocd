@@ -1,6 +1,6 @@
 module github.com/crossplane-contrib/provider-argocd
 
-go 1.27.1
+go 1.27.3
 
 // Argo's versioning is fucked and the gitops-engine cannot be installed using the pinned version.
 replace github.com/argoproj/argo-cd/gitops-engine v0.7.1-0.20250908182407-97ad5b59a627 => github.com/argoproj/argo-cd/gitops-engine v0.0.0-20260617163728-0b95bbc14bc8
@@ -10,7 +10,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.14.1
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/argoproj/argo-cd/gitops-engine v0.7.1-0.20250908182407-97ad5b59a627
-	github.com/argoproj/argo-cd/v3 v3.5.3
+	github.com/argoproj/argo-cd/v3 v3.5.4
 	github.com/argoproj/pkg v0.13.7-0.20250305113207-cbc37dc61de5
 	github.com/crossplane/crossplane-runtime/v2 v2.4.0
 	github.com/crossplane/crossplane/apis/v2 v2.4.1
@@ -71,7 +71,7 @@ require (
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.9.0 // indirect
-	github.com/go-git/go-git/v5 v5.19.1 // indirect
+	github.com/go-git/go-git/v5 v5.19.2 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -165,14 +165,14 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/mod v0.40.0 // indirect
-	golang.org/x/net v0.58.0 // indirect
+	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/term v0.45.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/term v0.46.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	golang.org/x/tools v0.49.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
@@ -199,7 +199,7 @@ require (
 	k8s.io/kubelet v0.36.3 // indirect
 	k8s.io/kubernetes v1.36.1 // indirect
 	k8s.io/streaming v0.36.3 // indirect
-	oras.land/oras-go/v2 v2.6.1 // indirect
+	oras.land/oras-go/v2 v2.6.2 // indirect
 	sigs.k8s.io/controller-tools v0.20.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/kustomize/api v0.21.1 // indirect
