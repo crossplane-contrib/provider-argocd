@@ -18,6 +18,7 @@ package cluster
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	argocdCluster "github.com/argoproj/argo-cd/v3/pkg/apiclient/cluster"
@@ -87,11 +88,48 @@ func withConditions(c ...xpv2.Condition) ClusterModifier {
 	return func(r *v1alpha1.Cluster) { r.Status.ConditionedStatus.Conditions = c }
 }
 
+// configHash mirrors how ArgoCD >= v3.6 computes the ConfigHash of a stored cluster.
+func configHash(server, name string, config argocdv1alpha1.ClusterConfig) *uint64 {
+	c := argocdv1alpha1.Cluster{Server: server, Name: name, Config: config}
+	return ptr.To(c.HashIdentity(0))
+}
+
 func TestObserve(t *testing.T) {
 	type want struct {
 		cr     *v1alpha1.Cluster
 		result managed.ExternalObservation
 		err    error
+	}
+
+	execProviderSpec := v1alpha1.ClusterParameters{
+		Server: ptr.To(testClusterServer),
+		Name:   ptr.To(testClusterExternalName),
+		Config: v1alpha1.ClusterConfig{
+			ExecProviderConfig: &v1alpha1.ExecProviderConfig{
+				Command:    ptr.To("argocd-k8s-auth"),
+				Args:       []string{"azure"},
+				APIVersion: ptr.To("client.authentication.k8s.io/v1beta1"),
+			},
+		},
+	}
+	execProviderConfig := argocdv1alpha1.ClusterConfig{
+		ExecProviderConfig: &argocdv1alpha1.ExecProviderConfig{
+			Command:    "argocd-k8s-auth",
+			Args:       []string{"azure"},
+			APIVersion: "client.authentication.k8s.io/v1beta1",
+		},
+	}
+	// ArgoCD trims the trailing slash of the server URL before hashing.
+	storedServer := strings.TrimRight(testClusterServer, "/")
+	emptyObservation := v1alpha1.ClusterObservation{
+		ClusterInfo: v1alpha1.ClusterInfo{
+			ConnectionState: &v1alpha1.ConnectionState{},
+			ServerVersion:   new(string),
+			CacheInfo: &v1alpha1.ClusterCacheInfo{
+				ResourcesCount: new(int64),
+				APIsCount:      new(int64),
+			},
+		},
 	}
 
 	cases := map[string]struct {
@@ -298,6 +336,111 @@ func TestObserve(t *testing.T) {
 					ResourceLateInitialized: false,
 				},
 				err: nil,
+			},
+		},
+		"ConfigHashUpToDate": {
+			// ArgoCD redacts the exec provider config, but its ConfigHash matches the desired config.
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Get(
+						context.Background(),
+						&argocdCluster.ClusterQuery{
+							Name:   testClusterExternalName,
+							Server: testClusterServer,
+						},
+					).Return(
+						&argocdv1alpha1.Cluster{
+							Server:     testClusterServer,
+							Name:       testClusterExternalName,
+							ConfigHash: configHash(storedServer, testClusterExternalName, execProviderConfig),
+						}, nil)
+				}),
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withSpec(*execProviderSpec.DeepCopy()),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withSpec(*execProviderSpec.DeepCopy()),
+					withConditions(xpv2.Available()),
+					withObservation(emptyObservation),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:   true,
+					ResourceUpToDate: true,
+				},
+			},
+		},
+		"ConfigHashNotUpToDate": {
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Get(
+						context.Background(),
+						&argocdCluster.ClusterQuery{
+							Name:   testClusterExternalName,
+							Server: testClusterServer,
+						},
+					).Return(
+						&argocdv1alpha1.Cluster{
+							Server:     testClusterServer,
+							Name:       testClusterExternalName,
+							ConfigHash: configHash(storedServer, testClusterExternalName, argocdv1alpha1.ClusterConfig{}),
+						}, nil)
+				}),
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withSpec(*execProviderSpec.DeepCopy()),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withSpec(*execProviderSpec.DeepCopy()),
+					withConditions(xpv2.Available()),
+					withObservation(emptyObservation),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:   true,
+					ResourceUpToDate: false,
+				},
+			},
+		},
+		"ConfigHashUpToDateLabelsNotUpToDate": {
+			// The ConfigHash doesn't cover labels, so they must still be compared.
+			args: args{
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Get(
+						context.Background(),
+						&argocdCluster.ClusterQuery{
+							Name:   testClusterExternalName,
+							Server: testClusterServer,
+						},
+					).Return(
+						&argocdv1alpha1.Cluster{
+							Server:     testClusterServer,
+							Name:       testClusterExternalName,
+							Labels:     map[string]string{"stale": "label"},
+							ConfigHash: configHash(storedServer, testClusterExternalName, execProviderConfig),
+						}, nil)
+				}),
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withSpec(*execProviderSpec.DeepCopy()),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withSpec(*execProviderSpec.DeepCopy()),
+					withConditions(xpv2.Available()),
+					withObservation(emptyObservation),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:   true,
+					ResourceUpToDate: false,
+				},
 			},
 		},
 		"GetClusterFailed": {

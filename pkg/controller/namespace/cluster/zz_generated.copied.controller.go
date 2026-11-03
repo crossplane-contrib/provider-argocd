@@ -21,6 +21,7 @@ package cluster
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	argocdcluster "github.com/argoproj/argo-cd/v3/pkg/apiclient/cluster"
@@ -125,7 +126,7 @@ type external struct {
 	conn   io.Closer
 }
 
-func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) { //nolint:gocyclo // handles argocd errors and up-to-date checks
 	cr, ok := mg.(*v1alpha1.Cluster)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotCluster)
@@ -182,9 +183,14 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	cr.Status.AtProvider = generateClusterObservation(observedCluster, kubeconfigSecretResourceVersion)
 	cr.Status.SetConditions(xpv2.Available())
 
+	upToDate, err := e.isClusterUpToDate(ctx, cr, currentStatusAtProvider, observedCluster)
+	if err != nil {
+		return managed.ExternalObservation{}, err
+	}
+
 	return managed.ExternalObservation{
 		ResourceExists:          true,
-		ResourceUpToDate:        isClusterUpToDate(cr, currentStatusAtProvider, observedCluster),
+		ResourceUpToDate:        upToDate,
 		ResourceLateInitialized: !cmp.Equal(currentSpec, &cr.Spec.ForProvider),
 	}, nil
 }
@@ -396,22 +402,46 @@ func (e *external) generateUpdateClusterOptions(ctx context.Context, p *v1alpha1
 	return o, err
 }
 
-func isClusterUpToDate(cr *v1alpha1.Cluster, o *v1alpha1.ClusterObservation, r *argocdv1alpha1.Cluster) bool {
+func (e *external) isClusterUpToDate(ctx context.Context, cr *v1alpha1.Cluster, o *v1alpha1.ClusterObservation, r *argocdv1alpha1.Cluster) (bool, error) {
 	p := cr.Spec.ForProvider
+	// ArgoCD >= v3.6 returns a hash of the stored cluster config, including the sensitive fields its API redacts.
+	// Older versions don't, so fall back to comparing the redacted config.
+	if r.ConfigHash != nil {
+		upToDate, err := e.isConfigHashUpToDate(ctx, &p, *r.ConfigHash)
+		if err != nil || !upToDate {
+			return false, err
+		}
+	} else if !isEqualConfig(&p.Config, &r.Config) {
+		return false, nil
+	}
 	if (p.Project != nil && !cmp.Equal(*p.Project, r.Project)) || (p.Project == nil && r.Project != "") {
-		return false
+		return false, nil
 	}
 	switch {
-	case !isEqualConfig(&p.Config, &r.Config),
-		!cmp.Equal(p.Namespaces, r.Namespaces),
+	case !cmp.Equal(p.Namespaces, r.Namespaces),
 		!cmp.Equal(p.Shard, r.Shard),
 		!cmp.Equal(p.Labels, r.Labels),
 		!cmp.Equal(p.Annotations, r.Annotations),
 		!cmp.Equal(cr.Status.AtProvider.Kubeconfig, o.Kubeconfig):
-		return false
+		return false, nil
 	}
 
-	return true
+	return true, nil
+}
+
+// isConfigHashUpToDate reports whether the desired cluster matches the ConfigHash returned by ArgoCD.
+// The hash only covers the server, name and config of the cluster.
+func (e *external) isConfigHashUpToDate(ctx context.Context, p *v1alpha1.ClusterParameters, observedHash uint64) (bool, error) {
+	// convertClusterTypes mutates its input while resolving references.
+	desired, err := e.convertClusterTypes(ctx, p.DeepCopy())
+	if err != nil {
+		return false, err
+	}
+	// ArgoCD trims trailing slashes from the server URL when storing a cluster.
+	desired.Server = strings.TrimRight(desired.Server, "/")
+
+	// Should hashing fail, use a default that never matches to trigger an update.
+	return desired.HashIdentity(^observedHash) == observedHash, nil
 }
 
 func isEqualConfig(p *v1alpha1.ClusterConfig, r *argocdv1alpha1.ClusterConfig) bool {

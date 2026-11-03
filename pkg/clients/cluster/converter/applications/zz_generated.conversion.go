@@ -4,7 +4,7 @@
 package converter
 
 import (
-	common "github.com/argoproj/argo-cd/gitops-engine/pkg/sync/common"
+	common "github.com/argoproj/argo-cd/gitops-engine/v3/pkg/sync/common"
 	v1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/cluster/applications/v1alpha1"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -61,6 +61,20 @@ func (c *ConverterImpl) FromArgoDestination(source v1alpha1.ApplicationDestinati
 	pString3 := source.Name
 	v1alpha1ApplicationDestination.Name = &pString3
 	return v1alpha1ApplicationDestination
+}
+func (c *ConverterImpl) ToArgoApplicationSourceDirectory(source v1alpha11.ApplicationSourceDirectory) v1alpha1.ApplicationSourceDirectory {
+	var v1alpha1ApplicationSourceDirectory v1alpha1.ApplicationSourceDirectory
+	if source.Recurse != nil {
+		v1alpha1ApplicationSourceDirectory.Recurse = *source.Recurse
+	}
+	v1alpha1ApplicationSourceDirectory.Jsonnet = c.v1alpha1ApplicationSourceJsonnetToV1alpha1ApplicationSourceJsonnet2(source.Jsonnet)
+	if source.Exclude != nil {
+		v1alpha1ApplicationSourceDirectory.Exclude = *source.Exclude
+	}
+	if source.Include != nil {
+		v1alpha1ApplicationSourceDirectory.Include = *source.Include
+	}
+	return v1alpha1ApplicationSourceDirectory
 }
 func (c *ConverterImpl) ToArgoApplicationSpec(source *v1alpha11.ApplicationParameters) *v1alpha1.ApplicationSpec {
 	var pV1alpha1ApplicationSpec *v1alpha1.ApplicationSpec
@@ -166,17 +180,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceDirectoryToPV1alpha1Applicatio
 func (c *ConverterImpl) pV1alpha1ApplicationSourceDirectoryToPV1alpha1ApplicationSourceDirectory2(source *v1alpha11.ApplicationSourceDirectory) *v1alpha1.ApplicationSourceDirectory {
 	var pV1alpha1ApplicationSourceDirectory *v1alpha1.ApplicationSourceDirectory
 	if source != nil {
-		var v1alpha1ApplicationSourceDirectory v1alpha1.ApplicationSourceDirectory
-		if (*source).Recurse != nil {
-			v1alpha1ApplicationSourceDirectory.Recurse = *(*source).Recurse
-		}
-		v1alpha1ApplicationSourceDirectory.Jsonnet = c.v1alpha1ApplicationSourceJsonnetToV1alpha1ApplicationSourceJsonnet2((*source).Jsonnet)
-		if (*source).Exclude != nil {
-			v1alpha1ApplicationSourceDirectory.Exclude = *(*source).Exclude
-		}
-		if (*source).Include != nil {
-			v1alpha1ApplicationSourceDirectory.Include = *(*source).Include
-		}
+		v1alpha1ApplicationSourceDirectory := c.ToArgoApplicationSourceDirectory((*source))
 		pV1alpha1ApplicationSourceDirectory = &v1alpha1ApplicationSourceDirectory
 	}
 	return pV1alpha1ApplicationSourceDirectory

@@ -4,7 +4,7 @@
 package applicationsets
 
 import (
-	health "github.com/argoproj/argo-cd/gitops-engine/pkg/health"
+	health "github.com/argoproj/argo-cd/gitops-engine/v3/pkg/health"
 	v1alpha1 "github.com/argoproj/argo-cd/v3/pkg/apis/application/v1alpha1"
 	v1alpha11 "github.com/crossplane-contrib/provider-argocd/apis/namespace/applicationsets/v1alpha1"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -86,6 +86,34 @@ func (c *ConverterImpl) FromArgoDestination(source v1alpha1.ApplicationDestinati
 	v1alpha1ApplicationDestination.Name = &pString3
 	return v1alpha1ApplicationDestination
 }
+func (c *ConverterImpl) ToArgoApplicationSetGenerator(source v1alpha11.ApplicationSetGenerator) v1alpha1.ApplicationSetGenerator {
+	var v1alpha1ApplicationSetGenerator v1alpha1.ApplicationSetGenerator
+	v1alpha1ApplicationSetGenerator.List = c.pV1alpha1ListGeneratorToPV1alpha1ListGenerator2(source.List)
+	v1alpha1ApplicationSetGenerator.Clusters = c.pV1alpha1ClusterGeneratorToPV1alpha1ClusterGenerator2(source.Clusters)
+	v1alpha1ApplicationSetGenerator.Git = c.pV1alpha1GitGeneratorToPV1alpha1GitGenerator2(source.Git)
+	v1alpha1ApplicationSetGenerator.SCMProvider = c.pV1alpha1SCMProviderGeneratorToPV1alpha1SCMProviderGenerator2(source.SCMProvider)
+	v1alpha1ApplicationSetGenerator.ClusterDecisionResource = c.pV1alpha1DuckTypeGeneratorToPV1alpha1DuckTypeGenerator2(source.ClusterDecisionResource)
+	v1alpha1ApplicationSetGenerator.PullRequest = c.pV1alpha1PullRequestGeneratorToPV1alpha1PullRequestGenerator2(source.PullRequest)
+	v1alpha1ApplicationSetGenerator.Matrix = c.pV1alpha1MatrixGeneratorToPV1alpha1MatrixGenerator2(source.Matrix)
+	v1alpha1ApplicationSetGenerator.Merge = c.pV1alpha1MergeGeneratorToPV1alpha1MergeGenerator2(source.Merge)
+	v1alpha1ApplicationSetGenerator.Selector = c.pV1LabelSelectorToPV1LabelSelector(source.Selector)
+	v1alpha1ApplicationSetGenerator.Plugin = c.pV1alpha1PluginGeneratorToPV1alpha1PluginGenerator2(source.Plugin)
+	return v1alpha1ApplicationSetGenerator
+}
+func (c *ConverterImpl) ToArgoApplicationSetNestedGenerator(source v1alpha11.ApplicationSetNestedGenerator) v1alpha1.ApplicationSetNestedGenerator {
+	var v1alpha1ApplicationSetNestedGenerator v1alpha1.ApplicationSetNestedGenerator
+	v1alpha1ApplicationSetNestedGenerator.List = c.pV1alpha1ListGeneratorToPV1alpha1ListGenerator2(source.List)
+	v1alpha1ApplicationSetNestedGenerator.Clusters = c.pV1alpha1ClusterGeneratorToPV1alpha1ClusterGenerator2(source.Clusters)
+	v1alpha1ApplicationSetNestedGenerator.Git = c.pV1alpha1GitGeneratorToPV1alpha1GitGenerator2(source.Git)
+	v1alpha1ApplicationSetNestedGenerator.SCMProvider = c.pV1alpha1SCMProviderGeneratorToPV1alpha1SCMProviderGenerator2(source.SCMProvider)
+	v1alpha1ApplicationSetNestedGenerator.ClusterDecisionResource = c.pV1alpha1DuckTypeGeneratorToPV1alpha1DuckTypeGenerator2(source.ClusterDecisionResource)
+	v1alpha1ApplicationSetNestedGenerator.PullRequest = c.pV1alpha1PullRequestGeneratorToPV1alpha1PullRequestGenerator2(source.PullRequest)
+	v1alpha1ApplicationSetNestedGenerator.Matrix = c.pV1JSONToPV1JSON(source.Matrix)
+	v1alpha1ApplicationSetNestedGenerator.Merge = c.pV1JSONToPV1JSON(source.Merge)
+	v1alpha1ApplicationSetNestedGenerator.Selector = c.pV1LabelSelectorToPV1LabelSelector(source.Selector)
+	v1alpha1ApplicationSetNestedGenerator.Plugin = c.pV1alpha1PluginGeneratorToPV1alpha1PluginGenerator2(source.Plugin)
+	return v1alpha1ApplicationSetNestedGenerator
+}
 func (c *ConverterImpl) ToArgoApplicationSetSpec(source *v1alpha11.ApplicationSetParameters) *v1alpha1.ApplicationSetSpec {
 	var pV1alpha1ApplicationSetSpec *v1alpha1.ApplicationSetSpec
 	if source != nil {
@@ -94,7 +122,7 @@ func (c *ConverterImpl) ToArgoApplicationSetSpec(source *v1alpha11.ApplicationSe
 		if (*source).Generators != nil {
 			v1alpha1ApplicationSetSpec.Generators = make([]v1alpha1.ApplicationSetGenerator, len((*source).Generators))
 			for i := 0; i < len((*source).Generators); i++ {
-				v1alpha1ApplicationSetSpec.Generators[i] = c.v1alpha1ApplicationSetGeneratorToV1alpha1ApplicationSetGenerator2((*source).Generators[i])
+				v1alpha1ApplicationSetSpec.Generators[i] = c.ToArgoApplicationSetGenerator((*source).Generators[i])
 			}
 		}
 		v1alpha1ApplicationSetSpec.Template = c.v1alpha1ApplicationSetTemplateToV1alpha1ApplicationSetTemplate2((*source).Template)
@@ -144,6 +172,20 @@ func (c *ConverterImpl) ToArgoApplicationSetStatus(source *v1alpha11.ArgoApplica
 		pV1alpha1ApplicationSetStatus = &v1alpha1ApplicationSetStatus
 	}
 	return pV1alpha1ApplicationSetStatus
+}
+func (c *ConverterImpl) ToArgoApplicationSourceDirectory(source v1alpha11.ApplicationSourceDirectory) v1alpha1.ApplicationSourceDirectory {
+	var v1alpha1ApplicationSourceDirectory v1alpha1.ApplicationSourceDirectory
+	if source.Recurse != nil {
+		v1alpha1ApplicationSourceDirectory.Recurse = *source.Recurse
+	}
+	v1alpha1ApplicationSourceDirectory.Jsonnet = c.v1alpha1ApplicationSourceJsonnetToV1alpha1ApplicationSourceJsonnet2(source.Jsonnet)
+	if source.Exclude != nil {
+		v1alpha1ApplicationSourceDirectory.Exclude = *source.Exclude
+	}
+	if source.Include != nil {
+		v1alpha1ApplicationSourceDirectory.Include = *source.Include
+	}
+	return v1alpha1ApplicationSourceDirectory
 }
 func (c *ConverterImpl) ToArgoDestination(source v1alpha11.ApplicationDestination) v1alpha1.ApplicationDestination {
 	var v1alpha1ApplicationDestination v1alpha1.ApplicationDestination
@@ -355,17 +397,7 @@ func (c *ConverterImpl) pV1alpha1ApplicationSourceDirectoryToPV1alpha1Applicatio
 func (c *ConverterImpl) pV1alpha1ApplicationSourceDirectoryToPV1alpha1ApplicationSourceDirectory2(source *v1alpha11.ApplicationSourceDirectory) *v1alpha1.ApplicationSourceDirectory {
 	var pV1alpha1ApplicationSourceDirectory *v1alpha1.ApplicationSourceDirectory
 	if source != nil {
-		var v1alpha1ApplicationSourceDirectory v1alpha1.ApplicationSourceDirectory
-		if (*source).Recurse != nil {
-			v1alpha1ApplicationSourceDirectory.Recurse = *(*source).Recurse
-		}
-		v1alpha1ApplicationSourceDirectory.Jsonnet = c.v1alpha1ApplicationSourceJsonnetToV1alpha1ApplicationSourceJsonnet2((*source).Jsonnet)
-		if (*source).Exclude != nil {
-			v1alpha1ApplicationSourceDirectory.Exclude = *(*source).Exclude
-		}
-		if (*source).Include != nil {
-			v1alpha1ApplicationSourceDirectory.Include = *(*source).Include
-		}
+		v1alpha1ApplicationSourceDirectory := c.ToArgoApplicationSourceDirectory((*source))
 		pV1alpha1ApplicationSourceDirectory = &v1alpha1ApplicationSourceDirectory
 	}
 	return pV1alpha1ApplicationSourceDirectory
@@ -1098,7 +1130,7 @@ func (c *ConverterImpl) pV1alpha1MatrixGeneratorToPV1alpha1MatrixGenerator2(sour
 		if (*source).Generators != nil {
 			v1alpha1MatrixGenerator.Generators = make([]v1alpha1.ApplicationSetNestedGenerator, len((*source).Generators))
 			for i := 0; i < len((*source).Generators); i++ {
-				v1alpha1MatrixGenerator.Generators[i] = c.v1alpha1ApplicationSetNestedGeneratorToV1alpha1ApplicationSetNestedGenerator2((*source).Generators[i])
+				v1alpha1MatrixGenerator.Generators[i] = c.ToArgoApplicationSetNestedGenerator((*source).Generators[i])
 			}
 		}
 		v1alpha1MatrixGenerator.Template = c.v1alpha1ApplicationSetTemplateToV1alpha1ApplicationSetTemplate2((*source).Template)
@@ -1134,7 +1166,7 @@ func (c *ConverterImpl) pV1alpha1MergeGeneratorToPV1alpha1MergeGenerator2(source
 		if (*source).Generators != nil {
 			v1alpha1MergeGenerator.Generators = make([]v1alpha1.ApplicationSetNestedGenerator, len((*source).Generators))
 			for i := 0; i < len((*source).Generators); i++ {
-				v1alpha1MergeGenerator.Generators[i] = c.v1alpha1ApplicationSetNestedGeneratorToV1alpha1ApplicationSetNestedGenerator2((*source).Generators[i])
+				v1alpha1MergeGenerator.Generators[i] = c.ToArgoApplicationSetNestedGenerator((*source).Generators[i])
 			}
 		}
 		if (*source).MergeKeys != nil {
@@ -2122,20 +2154,6 @@ func (c *ConverterImpl) v1alpha1ApplicationSetGeneratorToV1alpha1ApplicationSetG
 	v1alpha1ApplicationSetGenerator.Plugin = c.pV1alpha1PluginGeneratorToPV1alpha1PluginGenerator(source.Plugin)
 	return v1alpha1ApplicationSetGenerator
 }
-func (c *ConverterImpl) v1alpha1ApplicationSetGeneratorToV1alpha1ApplicationSetGenerator2(source v1alpha11.ApplicationSetGenerator) v1alpha1.ApplicationSetGenerator {
-	var v1alpha1ApplicationSetGenerator v1alpha1.ApplicationSetGenerator
-	v1alpha1ApplicationSetGenerator.List = c.pV1alpha1ListGeneratorToPV1alpha1ListGenerator2(source.List)
-	v1alpha1ApplicationSetGenerator.Clusters = c.pV1alpha1ClusterGeneratorToPV1alpha1ClusterGenerator2(source.Clusters)
-	v1alpha1ApplicationSetGenerator.Git = c.pV1alpha1GitGeneratorToPV1alpha1GitGenerator2(source.Git)
-	v1alpha1ApplicationSetGenerator.SCMProvider = c.pV1alpha1SCMProviderGeneratorToPV1alpha1SCMProviderGenerator2(source.SCMProvider)
-	v1alpha1ApplicationSetGenerator.ClusterDecisionResource = c.pV1alpha1DuckTypeGeneratorToPV1alpha1DuckTypeGenerator2(source.ClusterDecisionResource)
-	v1alpha1ApplicationSetGenerator.PullRequest = c.pV1alpha1PullRequestGeneratorToPV1alpha1PullRequestGenerator2(source.PullRequest)
-	v1alpha1ApplicationSetGenerator.Matrix = c.pV1alpha1MatrixGeneratorToPV1alpha1MatrixGenerator2(source.Matrix)
-	v1alpha1ApplicationSetGenerator.Merge = c.pV1alpha1MergeGeneratorToPV1alpha1MergeGenerator2(source.Merge)
-	v1alpha1ApplicationSetGenerator.Selector = c.pV1LabelSelectorToPV1LabelSelector(source.Selector)
-	v1alpha1ApplicationSetGenerator.Plugin = c.pV1alpha1PluginGeneratorToPV1alpha1PluginGenerator2(source.Plugin)
-	return v1alpha1ApplicationSetGenerator
-}
 func (c *ConverterImpl) v1alpha1ApplicationSetIgnoreDifferencesToV1alpha1ApplicationSetIgnoreDifferences(source v1alpha1.ApplicationSetIgnoreDifferences) v1alpha11.ApplicationSetIgnoreDifferences {
 	var v1alpha1ApplicationSetIgnoreDifferences v1alpha11.ApplicationSetIgnoreDifferences
 	if source != nil {
@@ -2168,20 +2186,6 @@ func (c *ConverterImpl) v1alpha1ApplicationSetNestedGeneratorToV1alpha1Applicati
 	v1alpha1ApplicationSetNestedGenerator.Merge = c.pV1JSONToPV1JSON(source.Merge)
 	v1alpha1ApplicationSetNestedGenerator.Selector = c.pV1LabelSelectorToPV1LabelSelector(source.Selector)
 	v1alpha1ApplicationSetNestedGenerator.Plugin = c.pV1alpha1PluginGeneratorToPV1alpha1PluginGenerator(source.Plugin)
-	return v1alpha1ApplicationSetNestedGenerator
-}
-func (c *ConverterImpl) v1alpha1ApplicationSetNestedGeneratorToV1alpha1ApplicationSetNestedGenerator2(source v1alpha11.ApplicationSetNestedGenerator) v1alpha1.ApplicationSetNestedGenerator {
-	var v1alpha1ApplicationSetNestedGenerator v1alpha1.ApplicationSetNestedGenerator
-	v1alpha1ApplicationSetNestedGenerator.List = c.pV1alpha1ListGeneratorToPV1alpha1ListGenerator2(source.List)
-	v1alpha1ApplicationSetNestedGenerator.Clusters = c.pV1alpha1ClusterGeneratorToPV1alpha1ClusterGenerator2(source.Clusters)
-	v1alpha1ApplicationSetNestedGenerator.Git = c.pV1alpha1GitGeneratorToPV1alpha1GitGenerator2(source.Git)
-	v1alpha1ApplicationSetNestedGenerator.SCMProvider = c.pV1alpha1SCMProviderGeneratorToPV1alpha1SCMProviderGenerator2(source.SCMProvider)
-	v1alpha1ApplicationSetNestedGenerator.ClusterDecisionResource = c.pV1alpha1DuckTypeGeneratorToPV1alpha1DuckTypeGenerator2(source.ClusterDecisionResource)
-	v1alpha1ApplicationSetNestedGenerator.PullRequest = c.pV1alpha1PullRequestGeneratorToPV1alpha1PullRequestGenerator2(source.PullRequest)
-	v1alpha1ApplicationSetNestedGenerator.Matrix = c.pV1JSONToPV1JSON(source.Matrix)
-	v1alpha1ApplicationSetNestedGenerator.Merge = c.pV1JSONToPV1JSON(source.Merge)
-	v1alpha1ApplicationSetNestedGenerator.Selector = c.pV1LabelSelectorToPV1LabelSelector(source.Selector)
-	v1alpha1ApplicationSetNestedGenerator.Plugin = c.pV1alpha1PluginGeneratorToPV1alpha1PluginGenerator2(source.Plugin)
 	return v1alpha1ApplicationSetNestedGenerator
 }
 func (c *ConverterImpl) v1alpha1ApplicationSetResourceIgnoreDifferencesToV1alpha1ApplicationSetResourceIgnoreDifferences(source v1alpha1.ApplicationSetResourceIgnoreDifferences) v1alpha11.ApplicationSetResourceIgnoreDifferences {
