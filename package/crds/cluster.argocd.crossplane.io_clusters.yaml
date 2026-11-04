@@ -459,6 +459,27 @@ spec:
                             type: string
                         type: object
                     type: object
+                  lastApplied:
+                    description: LastApplied records what was applied to ArgoCD by
+                      the last successful update
+                    properties:
+                      configHash:
+                        description: |-
+                          ConfigHash is the opaque config hash returned by ArgoCD >= v3.6 after the update.
+                          It is a string because it can exceed the int64 range of Kubernetes integers.
+                        type: string
+                      generation:
+                        description: Generation of the managed resource that was applied
+                        format: int64
+                        type: integer
+                      secretResourceVersions:
+                        additionalProperties:
+                          type: string
+                        description: |-
+                          SecretResourceVersions holds the resourceVersions of the referenced secrets that were applied,
+                          keyed by namespace/name
+                        type: object
+                    type: object
                 type: object
               conditions:
                 description: Conditions of the resource.

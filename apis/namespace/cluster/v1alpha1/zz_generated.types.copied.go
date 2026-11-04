@@ -134,6 +134,9 @@ type ClusterObservation struct {
 	// Kubeconfig tracks changes to a Kubeconfig secret
 	// +optional
 	Kubeconfig *KubeconfigObservation `json:"kubeconfig,omitempty"`
+	// LastApplied records what was applied to ArgoCD by the last successful update
+	// +optional
+	LastApplied *AppliedClusterObservation `json:"lastApplied,omitempty"`
 }
 
 // ClusterInfo holds information about cluster cache and state
@@ -154,6 +157,21 @@ type ClusterInfo struct {
 // KubeconfigObservation holds the status of a referenced Kubeconfig
 type KubeconfigObservation struct {
 	Secret SecretObservation `json:"secret,omitempty"`
+}
+
+// AppliedClusterObservation records what was applied to ArgoCD by an update.
+type AppliedClusterObservation struct {
+	// ConfigHash is the opaque config hash returned by ArgoCD >= v3.6 after the update.
+	// It is a string because it can exceed the int64 range of Kubernetes integers.
+	// +optional
+	ConfigHash string `json:"configHash,omitempty"`
+	// Generation of the managed resource that was applied
+	// +optional
+	Generation int64 `json:"generation,omitempty"`
+	// SecretResourceVersions holds the resourceVersions of the referenced secrets that were applied,
+	// keyed by namespace/name
+	// +optional
+	SecretResourceVersions map[string]string `json:"secretResourceVersions,omitempty"`
 }
 
 // ConnectionState contains information about the connection to the cluster
