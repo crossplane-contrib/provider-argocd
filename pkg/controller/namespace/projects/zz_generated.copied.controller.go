@@ -445,10 +445,10 @@ func generateProjectSpec(p *v1alpha1.ProjectParameters) argocdv1alpha1.AppProjec
 
 	}
 	if p.SyncWindows != nil {
-		projSpec.SyncWindows = make([]*argocdv1alpha1.SyncWindow, len(p.SyncWindows))
+		projSpec.SyncWindows = make([]*argocdv1alpha1.InlineSyncWindow, len(p.SyncWindows))
 
 		for i, r := range p.SyncWindows {
-			projSpec.SyncWindows[i] = &argocdv1alpha1.SyncWindow{
+			projSpec.SyncWindows[i] = &argocdv1alpha1.InlineSyncWindow{
 				Kind:         clients.StringValue(r.Kind),
 				Schedule:     clients.StringValue(r.Schedule),
 				Duration:     clients.StringValue(r.Duration),

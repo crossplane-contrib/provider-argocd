@@ -38,6 +38,13 @@ type Converter interface {
 	// goverter:ignore AppsetNamespace
 	FromArgoApplicationSetSpec(in *argocdv1alpha1.ApplicationSetSpec) *v1alpha1.ApplicationSetParameters
 
+	// goverter:ignore DisableExtensionFilter
+	ToArgoApplicationSourceDirectory(in v1alpha1.ApplicationSourceDirectory) argocdv1alpha1.ApplicationSourceDirectory
+	// goverter:ignore Oci
+	ToArgoApplicationSetGenerator(in v1alpha1.ApplicationSetGenerator) argocdv1alpha1.ApplicationSetGenerator
+	// goverter:ignore Oci
+	ToArgoApplicationSetNestedGenerator(in v1alpha1.ApplicationSetNestedGenerator) argocdv1alpha1.ApplicationSetNestedGenerator
+
 	FromArgoApplicationSetStatus(in *argocdv1alpha1.ApplicationSetStatus) *v1alpha1.ArgoApplicationSetStatus
 	ToArgoApplicationSetStatus(in *v1alpha1.ArgoApplicationSetStatus) *argocdv1alpha1.ApplicationSetStatus
 }

@@ -19,6 +19,7 @@ package cluster
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	argocdcluster "github.com/argoproj/argo-cd/v3/pkg/apiclient/cluster"
@@ -123,7 +124,7 @@ type external struct {
 	conn   io.Closer
 }
 
-func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) { //nolint:gocyclo // handles argocd errors and up-to-date checks
 	cr, ok := mg.(*v1alpha1.Cluster)
 	if !ok {
 		return managed.ExternalObservation{}, errors.New(errNotCluster)
@@ -178,11 +179,17 @@ func (e *external) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}
 	currentStatusAtProvider := cr.Status.AtProvider.DeepCopy()
 	cr.Status.AtProvider = generateClusterObservation(observedCluster, kubeconfigSecretResourceVersion)
+	cr.Status.AtProvider.LastApplied = currentStatusAtProvider.LastApplied
 	cr.Status.SetConditions(xpv2.Available())
+
+	upToDate, err := e.isClusterUpToDate(ctx, cr, currentStatusAtProvider, observedCluster)
+	if err != nil {
+		return managed.ExternalObservation{}, err
+	}
 
 	return managed.ExternalObservation{
 		ResourceExists:          true,
-		ResourceUpToDate:        isClusterUpToDate(cr, currentStatusAtProvider, observedCluster),
+		ResourceUpToDate:        upToDate,
 		ResourceLateInitialized: !cmp.Equal(currentSpec, &cr.Spec.ForProvider),
 	}, nil
 }
@@ -214,14 +221,32 @@ func (e *external) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalUpdate{}, errors.New(errNotCluster)
 	}
 
+	// Read the secret versions before resolving the secrets, so that a secret rotated in between
+	// is detected as a change on the next Observe.
+	secretResourceVersions, err := e.getSecretResourceVersions(ctx, &cr.Spec.ForProvider.Config)
+	if err != nil {
+		return managed.ExternalUpdate{}, err
+	}
+
 	clusterUpdateRequest, err := e.generateUpdateClusterOptions(ctx, cr)
 	if err != nil {
 		return managed.ExternalUpdate{}, err
 	}
 
-	_, err = e.client.Update(ctx, clusterUpdateRequest)
+	resp, err := e.client.Update(ctx, clusterUpdateRequest)
+	if err != nil {
+		return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateFailed)
+	}
 
-	return managed.ExternalUpdate{}, errors.Wrap(err, errUpdateFailed)
+	cr.Status.AtProvider.LastApplied = &v1alpha1.AppliedClusterObservation{
+		Generation:             cr.Generation,
+		SecretResourceVersions: secretResourceVersions,
+	}
+	if resp.ConfigHash != nil {
+		cr.Status.AtProvider.LastApplied.ConfigHash = strconv.FormatUint(*resp.ConfigHash, 10)
+	}
+
+	return managed.ExternalUpdate{}, nil
 }
 
 func (e *external) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
@@ -394,22 +419,46 @@ func (e *external) generateUpdateClusterOptions(ctx context.Context, p *v1alpha1
 	return o, err
 }
 
-func isClusterUpToDate(cr *v1alpha1.Cluster, o *v1alpha1.ClusterObservation, r *argocdv1alpha1.Cluster) bool {
+func (e *external) isClusterUpToDate(ctx context.Context, cr *v1alpha1.Cluster, o *v1alpha1.ClusterObservation, r *argocdv1alpha1.Cluster) (bool, error) {
 	p := cr.Spec.ForProvider
+	// ArgoCD >= v3.6 returns a hash of the stored cluster config, including the sensitive fields its API redacts.
+	// Older versions don't, so fall back to comparing the redacted config.
+	if r.ConfigHash != nil {
+		upToDate, err := e.isLastAppliedUpToDate(ctx, cr, o.LastApplied, *r.ConfigHash)
+		if err != nil || !upToDate {
+			return false, err
+		}
+	} else if !isEqualConfig(&p.Config, &r.Config) {
+		return false, nil
+	}
 	if (p.Project != nil && !cmp.Equal(*p.Project, r.Project)) || (p.Project == nil && r.Project != "") {
-		return false
+		return false, nil
 	}
 	switch {
-	case !isEqualConfig(&p.Config, &r.Config),
-		!cmp.Equal(p.Namespaces, r.Namespaces),
+	case !cmp.Equal(p.Namespaces, r.Namespaces),
 		!cmp.Equal(p.Shard, r.Shard),
 		!cmp.Equal(p.Labels, r.Labels),
 		!cmp.Equal(p.Annotations, r.Annotations),
 		!cmp.Equal(cr.Status.AtProvider.Kubeconfig, o.Kubeconfig):
-		return false
+		return false, nil
 	}
 
-	return true
+	return true, nil
+}
+
+// isLastAppliedUpToDate reports whether the cluster config applied by the last successful update is still current.
+// The ConfigHash is opaque, so it is only compared with the one ArgoCD returned for that update. This detects
+// changes on the ArgoCD side, while the generation and secret versions detect changes of the desired config.
+// Without a last applied config, e.g. after creation, the cluster is updated once to record it.
+func (e *external) isLastAppliedUpToDate(ctx context.Context, cr *v1alpha1.Cluster, l *v1alpha1.AppliedClusterObservation, configHash uint64) (bool, error) {
+	if l == nil || l.ConfigHash != strconv.FormatUint(configHash, 10) || l.Generation != cr.Generation {
+		return false, nil
+	}
+	secretResourceVersions, err := e.getSecretResourceVersions(ctx, &cr.Spec.ForProvider.Config)
+	if err != nil {
+		return false, err
+	}
+	return cmp.Equal(l.SecretResourceVersions, secretResourceVersions), nil
 }
 
 func isEqualConfig(p *v1alpha1.ClusterConfig, r *argocdv1alpha1.ClusterConfig) bool {
@@ -555,6 +604,29 @@ func (e *external) getSecretResourceVersion(ctx context.Context, ref *v1alpha1.S
 		return "", errors.Wrap(err, errGetSecretFailed)
 	}
 	return sc.GetResourceVersion(), nil
+}
+
+// getSecretResourceVersions returns the resource versions of all secrets referenced by the config, keyed by namespace/name.
+func (e *external) getSecretResourceVersions(ctx context.Context, c *v1alpha1.ClusterConfig) (map[string]string, error) {
+	refs := []*v1alpha1.SecretReference{c.PasswordSecretRef, c.BearerTokenSecretRef, c.KubeconfigSecretRef}
+	if c.TLSClientConfig != nil {
+		refs = append(refs, c.TLSClientConfig.CertDataSecretRef, c.TLSClientConfig.KeyDataSecretRef, c.TLSClientConfig.CADataSecretRef)
+	}
+	var versions map[string]string
+	for _, ref := range refs {
+		if ref == nil {
+			continue
+		}
+		v, err := e.getSecretResourceVersion(ctx, ref)
+		if err != nil {
+			return nil, err
+		}
+		if versions == nil {
+			versions = map[string]string{}
+		}
+		versions[types.NamespacedName{Namespace: ref.Namespace, Name: ref.Name}.String()] = v
+	}
+	return versions, nil
 }
 
 // fetch kubernetes secret payload

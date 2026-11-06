@@ -29,7 +29,9 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/pkg/errors"
 	"go.uber.org/mock/gomock"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/utils/ptr"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/crossplane-contrib/provider-argocd/apis/cluster/cluster/v1alpha1"
 	"github.com/crossplane-contrib/provider-argocd/pkg/clients/interface/cluster"
@@ -46,6 +48,7 @@ var (
 )
 
 type args struct {
+	kube   client.Client
 	client cluster.ServiceClient
 	cr     *v1alpha1.Cluster
 }
@@ -87,6 +90,10 @@ func withConditions(c ...xpv2.Condition) ClusterModifier {
 	return func(r *v1alpha1.Cluster) { r.Status.ConditionedStatus.Conditions = c }
 }
 
+func withGeneration(g int64) ClusterModifier {
+	return func(r *v1alpha1.Cluster) { r.Generation = g }
+}
+
 func TestObserve(t *testing.T) {
 	type want struct {
 		cr     *v1alpha1.Cluster
@@ -94,6 +101,49 @@ func TestObserve(t *testing.T) {
 		err    error
 	}
 
+	// ArgoCD redacts the bearer token, so only its ConfigHash tracks it.
+	secretRefSpec := v1alpha1.ClusterParameters{
+		Server: ptr.To(testClusterServer),
+		Name:   ptr.To(testClusterExternalName),
+		Config: v1alpha1.ClusterConfig{
+			BearerTokenSecretRef: &v1alpha1.SecretReference{Name: "token", Namespace: "default", Key: "token"},
+		},
+	}
+	withSecretResourceVersion := func(rv string) client.Client {
+		return &test.MockClient{MockGet: func(_ context.Context, _ client.ObjectKey, obj client.Object) error {
+			obj.SetResourceVersion(rv)
+			return nil
+		}}
+	}
+	withObservedCluster := func(c *argocdv1alpha1.Cluster) cluster.ServiceClient {
+		return withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+			mcs.EXPECT().Get(
+				context.Background(),
+				&argocdCluster.ClusterQuery{
+					Name:   testClusterExternalName,
+					Server: testClusterServer,
+				},
+			).Return(c, nil)
+		})
+	}
+	emptyObservation := func(l *v1alpha1.AppliedClusterObservation) v1alpha1.ClusterObservation {
+		return v1alpha1.ClusterObservation{
+			ClusterInfo: v1alpha1.ClusterInfo{
+				ConnectionState: &v1alpha1.ConnectionState{},
+				ServerVersion:   new(string),
+				CacheInfo: &v1alpha1.ClusterCacheInfo{
+					ResourcesCount: new(int64),
+					APIsCount:      new(int64),
+				},
+			},
+			LastApplied: l,
+		}
+	}
+	lastApplied := &v1alpha1.AppliedClusterObservation{
+		ConfigHash:             "42",
+		Generation:             1,
+		SecretResourceVersions: map[string]string{"default/token": "1"},
+	}
 	cases := map[string]struct {
 		args
 		want
@@ -300,6 +350,185 @@ func TestObserve(t *testing.T) {
 				err: nil,
 			},
 		},
+		"LastAppliedUpToDate": {
+			args: args{
+				kube: withSecretResourceVersion("1"),
+				client: withObservedCluster(&argocdv1alpha1.Cluster{
+					Server:     testClusterServer,
+					Name:       testClusterExternalName,
+					ConfigHash: ptr.To(uint64(42)),
+				}),
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withConditions(xpv2.Available()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:   true,
+					ResourceUpToDate: true,
+				},
+			},
+		},
+		"NoLastApplied": {
+			// Nothing was applied yet, e.g. after creation, so the cluster is updated once to record it.
+			args: args{
+				kube: withSecretResourceVersion("1"),
+				client: withObservedCluster(&argocdv1alpha1.Cluster{
+					Server:     testClusterServer,
+					Name:       testClusterExternalName,
+					ConfigHash: ptr.To(uint64(42)),
+				}),
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withObservation(emptyObservation(nil)),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withConditions(xpv2.Available()),
+					withObservation(emptyObservation(nil)),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:   true,
+					ResourceUpToDate: false,
+				},
+			},
+		},
+		"ConfigHashChanged": {
+			// The cluster was changed on the ArgoCD side.
+			args: args{
+				kube: withSecretResourceVersion("1"),
+				client: withObservedCluster(&argocdv1alpha1.Cluster{
+					Server:     testClusterServer,
+					Name:       testClusterExternalName,
+					ConfigHash: ptr.To(uint64(43)),
+				}),
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withConditions(xpv2.Available()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:   true,
+					ResourceUpToDate: false,
+				},
+			},
+		},
+		"GenerationChanged": {
+			// The spec was edited.
+			args: args{
+				kube: withSecretResourceVersion("1"),
+				client: withObservedCluster(&argocdv1alpha1.Cluster{
+					Server:     testClusterServer,
+					Name:       testClusterExternalName,
+					ConfigHash: ptr.To(uint64(42)),
+				}),
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(2),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(2),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withConditions(xpv2.Available()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:   true,
+					ResourceUpToDate: false,
+				},
+			},
+		},
+		"SecretRotated": {
+			args: args{
+				kube: withSecretResourceVersion("2"),
+				client: withObservedCluster(&argocdv1alpha1.Cluster{
+					Server:     testClusterServer,
+					Name:       testClusterExternalName,
+					ConfigHash: ptr.To(uint64(42)),
+				}),
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withConditions(xpv2.Available()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:   true,
+					ResourceUpToDate: false,
+				},
+			},
+		},
+		"LastAppliedUpToDateLabelsNotUpToDate": {
+			// The ConfigHash doesn't cover labels, so they must still be compared.
+			args: args{
+				kube: withSecretResourceVersion("1"),
+				client: withObservedCluster(&argocdv1alpha1.Cluster{
+					Server:     testClusterServer,
+					Name:       testClusterExternalName,
+					Labels:     map[string]string{"stale": "label"},
+					ConfigHash: ptr.To(uint64(42)),
+				}),
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withSpec(*secretRefSpec.DeepCopy()),
+					withConditions(xpv2.Available()),
+					withObservation(emptyObservation(lastApplied)),
+				),
+				result: managed.ExternalObservation{
+					ResourceExists:   true,
+					ResourceUpToDate: false,
+				},
+			},
+		},
 		"GetClusterFailed": {
 			args: args{
 				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
@@ -349,7 +578,7 @@ func TestObserve(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			e := &external{client: tc.client}
+			e := &external{kube: tc.kube, client: tc.client}
 			o, err := e.Observe(context.Background(), tc.args.cr)
 
 			if diff := cmp.Diff(tc.want.err, err, test.EquateErrors()); diff != "" {
@@ -534,6 +763,7 @@ func TestUpdate(t *testing.T) {
 						Namespaces: testNamespaces[:],
 					}),
 					withExternalName(testClusterExternalName),
+					withGeneration(1),
 				),
 			},
 			want: want{
@@ -544,9 +774,64 @@ func TestUpdate(t *testing.T) {
 						Namespaces: testNamespaces[:],
 					}),
 					withExternalName(testClusterExternalName),
+					withGeneration(1),
+					withObservation(v1alpha1.ClusterObservation{
+						LastApplied: &v1alpha1.AppliedClusterObservation{Generation: 1},
+					}),
 				),
 				result: managed.ExternalUpdate{},
 				err:    nil,
+			},
+		},
+		"SuccessfulRecordsLastApplied": {
+			args: args{
+				kube: &test.MockClient{MockGet: func(_ context.Context, _ client.ObjectKey, obj client.Object) error {
+					obj.SetResourceVersion("1")
+					obj.(*corev1.Secret).Data = map[string][]byte{"token": []byte("secret")}
+					return nil
+				}},
+				client: withMockClient(t, func(mcs *mockclient.MockServiceClient) {
+					mcs.EXPECT().Update(
+						context.Background(),
+						gomock.Any(), // FIXME cluster.ClusterUpdateRequest objects can't be matched by gomock
+					).Return(&argocdv1alpha1.Cluster{
+						Server:     testClusterServer,
+						Name:       testClusterExternalName,
+						ConfigHash: ptr.To(uint64(42)),
+					}, nil)
+				}),
+				cr: Cluster(
+					withSpec(v1alpha1.ClusterParameters{
+						Server: ptr.To(testClusterServer),
+						Name:   ptr.To(testClusterExternalName),
+						Config: v1alpha1.ClusterConfig{
+							BearerTokenSecretRef: &v1alpha1.SecretReference{Name: "token", Namespace: "default", Key: "token"},
+						},
+					}),
+					withExternalName(testClusterExternalName),
+					withGeneration(2),
+				),
+			},
+			want: want{
+				cr: Cluster(
+					withSpec(v1alpha1.ClusterParameters{
+						Server: ptr.To(testClusterServer),
+						Name:   ptr.To(testClusterExternalName),
+						Config: v1alpha1.ClusterConfig{
+							BearerTokenSecretRef: &v1alpha1.SecretReference{Name: "token", Namespace: "default", Key: "token"},
+						},
+					}),
+					withExternalName(testClusterExternalName),
+					withGeneration(2),
+					withObservation(v1alpha1.ClusterObservation{
+						LastApplied: &v1alpha1.AppliedClusterObservation{
+							ConfigHash:             "42",
+							Generation:             2,
+							SecretResourceVersions: map[string]string{"default/token": "1"},
+						},
+					}),
+				),
+				result: managed.ExternalUpdate{},
 			},
 		},
 		"UpdateClusterFailed": {
@@ -583,7 +868,7 @@ func TestUpdate(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			e := &external{client: tc.client}
+			e := &external{kube: tc.kube, client: tc.client}
 			u, err := e.Update(context.Background(), tc.args.cr)
 
 			if diff := cmp.Diff(tc.want.err, err, test.EquateErrors()); diff != "" {

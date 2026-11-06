@@ -36,6 +36,9 @@ type Converter interface {
 
 	ToArgoApplicationSpec(in *v1alpha1.ApplicationParameters) *argocdv1alpha1.ApplicationSpec
 
+	// goverter:ignore DisableExtensionFilter
+	ToArgoApplicationSourceDirectory(in v1alpha1.ApplicationSourceDirectory) argocdv1alpha1.ApplicationSourceDirectory
+
 	FromArgoApplicationStatus(in *argocdv1alpha1.ApplicationStatus) *v1alpha1.ArgoApplicationStatus
 }
 
