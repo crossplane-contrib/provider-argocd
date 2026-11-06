@@ -19,7 +19,7 @@ require (
 	google.golang.org/grpc v1.84.0
 	k8s.io/api v0.37.0
 	k8s.io/apiextensions-apiserver v0.37.0
-	k8s.io/apimachinery v0.37.0
+	k8s.io/apimachinery v0.37.2
 	k8s.io/client-go v0.37.0
 	k8s.io/utils v0.0.0-20260626114624-be93311217bd
 	sigs.k8s.io/controller-runtime v0.24.1
@@ -195,7 +195,7 @@ require (
 	k8s.io/kubectl v0.37.0 // indirect
 	k8s.io/kubelet v0.36.3 // indirect
 	k8s.io/kubernetes v1.37.0 // indirect
-	k8s.io/streaming v0.37.0 // indirect
+	k8s.io/streaming v0.37.2 // indirect
 	oras.land/oras-go/v2 v2.6.2 // indirect
 	sigs.k8s.io/controller-tools v0.20.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
